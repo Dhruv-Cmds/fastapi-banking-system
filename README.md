@@ -54,8 +54,8 @@ fastapi-banking-system/
 ### 1. Clone the repository
 
 ```bash
-git clone <your-repo-url>
-cd FAST_API
+git clone https://github.com/Dhruv-Cmds/fastapi-banking-system.git
+cd fastapi-banking-system
 ```
 
 ---
