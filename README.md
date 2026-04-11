@@ -5,6 +5,11 @@ This project demonstrates core backend concepts including account creation, depo
 
 ---
 
+## 🖼️ UI Preview
+
+![UI Preview](screenshots/ui_1.png)
+![UI Preview](screenshots/ui_2.png)
+
 ## 🚀 Features
 
 * Create bank accounts
