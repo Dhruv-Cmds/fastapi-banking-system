@@ -79,6 +79,7 @@ def withdraw(id: int, data: Amount, db: Session = Depends(get_db)):
 @router.post("/transfer")
 def transfer(data: Transfer, db: Session = Depends(get_db)):
 
+
     from_acc = db.query(Account).filter(Account.id == data.from_account_id).first()
     to_acc = db.query(Account).filter(Account.id == data.to_account_id).first()
 
