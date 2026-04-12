@@ -3,12 +3,12 @@ from pydantic import BaseModel
 class AccountCreate(BaseModel):
 
     acc_no: str
-    balance: int
+    balance: float
     user_id: int
 
 class Amount(BaseModel):
 
-    amount: int
+    amount: float
 
 class Transfer(BaseModel):
 
