@@ -15,9 +15,4 @@ class Transfer(BaseModel):
     from_account_id: int
     to_account_id: int
     amount: int
-
-class UserCreate(BaseModel):
-
-    username: str
-    name: str
-    password: str    
+   

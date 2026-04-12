@@ -1,7 +1,6 @@
-from fastapi import APIRouter, Depends
-import models as models
-from fastapi import HTTPException
-from db import SessionLocal
+from fastapi import APIRouter, Depends, HTTPException
+from models import User, Account
+from db.database import SessionLocal
 from schemas import AccountCreate, Amount, Transfer, UserCreate
 from sqlalchemy.orm import Session
 
@@ -14,18 +13,19 @@ def get_db():
     finally:
         db.close()
 
-@router.post("/accounts")
-def create_account(account: AccountCreate, db:Session = Depends(get_db)):
 
-    user = db.query(models.User).filter(models.User.id == account.user_id).first()
+@router.post("/accounts")
+def create_account(account: AccountCreate, db: Session = Depends(get_db)):
+
+    user = db.query(User).filter(User.id == account.user_id).first()
 
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    new_acc = models.Account (
-        acc_no = account.acc_no,
-        balance = account.balance,
-        user_id = account.user_id
+    new_acc = Account(
+        acc_no=account.acc_no,
+        balance=account.balance,
+        user_id=account.user_id
     )
 
     db.add(new_acc)
@@ -35,65 +35,65 @@ def create_account(account: AccountCreate, db:Session = Depends(get_db)):
 
 @router.get("/accounts")
 def get_account(db: Session = Depends(get_db)):
-    return db.query(models.Account).all()
+    return db.query(Account).all()
 
 @router.post("/accounts/{id}/deposit")
-def deposit (id: int, data: Amount, db: Session = Depends(get_db)):
+def deposit(id: int, data: Amount, db: Session = Depends(get_db)):
 
-    account = db.query(models.Account).filter(models.Account.id == id).first()
+    acc = db.query(Account).filter(Account.id == id).first()
 
-    if not account:
-        raise HTTPException (status_code=404, detail="Account not found")
-    
-    if data.amount < 0:
-        raise HTTPException (status_code=400, detail= "Amount must be greater than zero")
-    
-    account.balance += data.amount
-
-    db.commit()
-    db.refresh(account)
-
-    return account
-
-@router.post("/accounts/{id}/withdraw")
-def withdraw (id: int, data: Amount, db: Session = Depends(get_db)):
-
-    account = db.query(models.Account).filter(models.Account.id == id).first()
-
-    if not account:
-        raise HTTPException(status_code=404, detail="Acoount not found")
+    if not acc:
+        raise HTTPException(status_code=404, detail="Account not found")
 
     if data.amount <= 0:
         raise HTTPException(status_code=400, detail="Amount must be greater than zero")
-    
-    if data.amount > account.balance:
-        raise HTTPException(status_code=400, detail="Insufficient balance")
-    
-    account.balance -= data.amount
+
+    acc.balance += data.amount
 
     db.commit()
-    db.refresh(account)
+    db.refresh(acc)
 
-    return account
+    return acc
+
+@router.post("/accounts/{id}/withdraw")
+def withdraw(id: int, data: Amount, db: Session = Depends(get_db)):
+
+    acc = db.query(Account).filter(Account.id == id).first()
+
+    if not acc:
+        raise HTTPException(status_code=404, detail="Account not found")
+
+    if data.amount <= 0:
+        raise HTTPException(status_code=400, detail="Amount must be greater than zero")
+
+    if data.amount > acc.balance:
+        raise HTTPException(status_code=400, detail="Insufficient balance")
+
+    acc.balance -= data.amount
+
+    db.commit()
+    db.refresh(acc)
+
+    return acc
 
 @router.post("/transfer")
 def transfer(data: Transfer, db: Session = Depends(get_db)):
 
-    from_acc = db.query(models.Account).filter(models.Account.id == data.from_account_id).first()
-    to_acc = db.query(models.Account).filter(models.Account.id == data.to_account_id).first()
+    from_acc = db.query(Account).filter(Account.id == data.from_account_id).first()
+    to_acc = db.query(Account).filter(Account.id == data.to_account_id).first()
 
     if not from_acc or not to_acc:
-        raise HTTPException (status_code=404, detail= "Account not found")
-    
+        raise HTTPException(status_code=404, detail="Account not found")
+
     if from_acc.id == to_acc.id:
-        raise HTTPException(status_code=404, detail="Cannot transfer to same account")
-    
+        raise HTTPException(status_code=400, detail="Cannot transfer to same account")
+
     if data.amount <= 0:
         raise HTTPException(status_code=400, detail="Amount must be greater than zero")
-    
+
     if from_acc.balance < data.amount:
         raise HTTPException(status_code=400, detail="Insufficient balance")
-    
+
     from_acc.balance -= data.amount
     to_acc.balance += data.amount
 
@@ -108,11 +108,11 @@ def transfer(data: Transfer, db: Session = Depends(get_db)):
     }
 
 @router.post("/test-user")
-def test_user(user:UserCreate, db: Session = Depends(get_db)):
+def test_user(user: UserCreate, db: Session = Depends(get_db)):
 
-    new_user = models.User(
+    new_user = User(
         username=user.username,
-        name= user.name,
+        name=user.name,
         password=user.password
     )
 
@@ -120,4 +120,4 @@ def test_user(user:UserCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_user)
 
-    return {"message": "user created"}
+    return {"message": "User created"}
