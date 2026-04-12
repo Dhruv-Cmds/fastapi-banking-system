@@ -1,7 +1,6 @@
 from fastapi import FastAPI
 from routes import account
 from db.database import engine, Base
-from routes import account 
 from models import User, Account
 
 

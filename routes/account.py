@@ -79,9 +79,26 @@ def withdraw(id: int, data: Amount, db: Session = Depends(get_db)):
 @router.post("/transfer")
 def transfer(data: Transfer, db: Session = Depends(get_db)):
 
+    # enter your user id to send money to any other user this will fix letter.
+    #  right now it only check db id and send money to any acocunt no checking form which user_id send money.
 
-    from_acc = db.query(Account).filter(Account.id == data.from_account_id).first()
-    to_acc = db.query(Account).filter(Account.id == data.to_account_id).first()
+    # -------------------------------------------------------------------------------------------------------------------------
+
+    # with_for_update() = "I'm reading this row and nobody else can touch it until I'm done."
+
+    # Request 1                          Request 2
+    # ─────────────────────────────────────────────────────
+    # reads + LOCKS balance = 1000       tries to read...
+    # checks: 1000 >= 800 ✅             🔒 WAITING for lock
+    # balance -= 800 → writes 200        
+    # db.commit() → lock released        reads balance = 200
+    #                                 checks: 200 >= 800 ❌
+    #                                 returns "Insufficient balance"
+
+    # -------------------------------------------------------------------------------------------------------------------------
+
+    from_acc = db.query(Account).filter(Account.id == data.from_account_id).with_for_update().first()
+    to_acc = db.query(Account).filter(Account.id == data.to_account_id).with_for_update().first()
 
     if not from_acc or not to_acc:
         raise HTTPException(status_code=404, detail="Account not found")
@@ -108,6 +125,8 @@ def transfer(data: Transfer, db: Session = Depends(get_db)):
         "to_account_balance": to_acc.balance
     }
 
+# --------------------------------------------------------------------------------------------
+#                               THIS ONE IS FOR TESING PURPOS WILL REMOVE SOON 
 @router.post("/test-user")
 def test_user(user: UserCreate, db: Session = Depends(get_db)):
 
