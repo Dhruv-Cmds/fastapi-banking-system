@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 import models as models
 from fastapi import HTTPException
 from db import SessionLocal
-from schemas import AccountCreate, Amount, Transfer
+from schemas import AccountCreate, Amount, Transfer, UserCreate
 from sqlalchemy.orm import Session
 
 router = APIRouter()
@@ -17,10 +17,15 @@ def get_db():
 @router.post("/accounts")
 def create_account(account: AccountCreate, db:Session = Depends(get_db)):
 
+    user = db.query(models.User).filter(models.User.id == account.user_id).first()
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
     new_acc = models.Account (
-        name = account.name,
         acc_no = account.acc_no,
-        balance = account.balance
+        balance = account.balance,
+        user_id = account.user_id
     )
 
     db.add(new_acc)
@@ -101,3 +106,18 @@ def transfer(data: Transfer, db: Session = Depends(get_db)):
         "from_account_balance": from_acc.balance,
         "to_account_balance": to_acc.balance
     }
+
+@router.post("/test-user")
+def test_user(user:UserCreate, db: Session = Depends(get_db)):
+
+    new_user = models.User(
+        username=user.username,
+        name= user.name,
+        password=user.password
+    )
+
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+
+    return {"message": "user created"}
