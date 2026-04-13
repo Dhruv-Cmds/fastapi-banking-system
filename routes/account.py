@@ -4,15 +4,9 @@ from db.database import SessionLocal
 from schemas import AccountCreate, Amount, Transfer, UserCreate
 from sqlalchemy.orm import Session
 from dependencies.auth import get_current_user
+from db.database import get_db
 
 router = APIRouter()
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 
 @router.post("/accounts")
@@ -35,13 +29,16 @@ def create_account(account: AccountCreate, db: Session = Depends(get_db), curren
     return new_acc
 
 @router.get("/accounts")
-def get_account(db: Session = Depends(get_db)):
-    return db.query(Account).all()
+def get_account(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    return db.query(Account).filter(Account.user_id == current_user.id).all()
 
 @router.post("/accounts/{id}/deposit")
-def deposit(id: int, data: Amount, db: Session = Depends(get_db)):
+def deposit(id: int, data: Amount, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
 
     acc = db.query(Account).filter(Account.id == id).first()
+
+    if acc.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized")
 
     if not acc:
         raise HTTPException(status_code=404, detail="Account not found")
@@ -57,9 +54,12 @@ def deposit(id: int, data: Amount, db: Session = Depends(get_db)):
     return acc
 
 @router.post("/accounts/{id}/withdraw")
-def withdraw(id: int, data: Amount, db: Session = Depends(get_db)):
+def withdraw(id: int, data: Amount, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
 
     acc = db.query(Account).filter(Account.id == id).first()
+
+    if acc.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized")
 
     if not acc:
         raise HTTPException(status_code=404, detail="Account not found")

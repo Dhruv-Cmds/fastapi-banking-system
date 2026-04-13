@@ -4,7 +4,6 @@ class AccountCreate(BaseModel):
 
     acc_no: str
     balance: float
-    user_id: int
 
 class Amount(BaseModel):
 

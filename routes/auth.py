@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from routes.account import get_db
+from db.database import get_db
 from models.user import User
 from schemas.user import UserCreate, UserLogin
 from core.security import hash_password, verify_password, create_access_token
@@ -15,7 +15,7 @@ def signup(user: UserCreate, db: Session = Depends(get_db)):
     new_user = User(
         username=user.username,
         name=user.name,
-        password=user.password
+        password=user.hashed_pw
     )
 
     db.add(new_user)
