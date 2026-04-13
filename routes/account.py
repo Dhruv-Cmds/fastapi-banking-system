@@ -124,20 +124,3 @@ def transfer(data: Transfer, db: Session = Depends(get_db)):
         "from_account_balance": from_acc.balance,
         "to_account_balance": to_acc.balance
     }
-
-# --------------------------------------------------------------------------------------------
-#                               THIS ONE IS FOR TESING PURPOS WILL REMOVE SOON 
-@router.post("/test-user")
-def test_user(user: UserCreate, db: Session = Depends(get_db)):
-
-    new_user = User(
-        username=user.username,
-        name=user.name,
-        password=user.password
-    )
-
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
-
-    return {"message": "User created"}
