@@ -3,6 +3,7 @@ from models import User, Account
 from db.database import SessionLocal
 from schemas import AccountCreate, Amount, Transfer, UserCreate
 from sqlalchemy.orm import Session
+from dependencies.auth import get_current_user
 
 router = APIRouter()
 
@@ -15,7 +16,7 @@ def get_db():
 
 
 @router.post("/accounts")
-def create_account(account: AccountCreate, db: Session = Depends(get_db)):
+def create_account(account: AccountCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
 
     user = db.query(User).filter(User.id == account.user_id).first()
 
@@ -25,7 +26,7 @@ def create_account(account: AccountCreate, db: Session = Depends(get_db)):
     new_acc = Account(
         acc_no=account.acc_no,
         balance=account.balance,
-        user_id=account.user_id
+        user_id= current_user.id
     )
 
     db.add(new_acc)
