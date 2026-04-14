@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from db.database import engine, Base
-from models import User, Account
+from models import user, account
 from routes import account, auth
 
 
