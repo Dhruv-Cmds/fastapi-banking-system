@@ -75,11 +75,6 @@ def withdraw(id: int, data: Amount, db: Session = Depends(get_db), current_user:
 @router.post("/transfer")
 def transfer(data: Transfer, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
 
-    # enter your user id to send money to any other user this will fix letter.
-    #  right now it only check db id and send money to any acocunt no checking form which user_id send money.
-
-    # -------------------------------------------------------------------------------------------------------------------------
-
     # with_for_update() = "I'm reading this row and nobody else can touch it until I'm done."
 
     # Request 1                          Request 2

@@ -4,7 +4,6 @@ from db.database import get_db
 from models.user import User
 from schemas.user import UserCreate, UserLogin
 from core.security import hash_password, verify_password, create_access_token
-from fastapi.security import OAuth2PasswordRequestForm
 
 router = APIRouter()
 
@@ -26,10 +25,11 @@ def signup(user: UserCreate, db: Session = Depends(get_db)):
 
     return {"message": "User created"}
 
-@router.post("/login")
-def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
 
-    db_user = db.query(User).filter(User.username == form_data.username).first()
+@router.post("/login")
+def login(user: UserLogin, db: Session = Depends(get_db)):
+
+    db_user = db.query(User).filter(User.username == user.username).first()
 
     if not db_user:
         raise HTTPException(status_code=400, detail="User not found")
@@ -37,10 +37,15 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
     ''' we area passing user.passwrod which is plain and db_user.password which are hashed in data base 
         and sending to verify_paaswrod function at core.security to verify is password form database
         and user passed password both are correct or not.'''
-    
-    if not verify_password(form_data.password, db_user.password):
+
+    if not verify_password(user.password, db_user.password):
         raise HTTPException(status_code=400, detail="Wrong password")
+    
+    token = create_access_token({
+        "sub": str(db_user.id)   # important
+    })
 
-    token = create_access_token({"sub": str(db_user.id)})
-
-    return {"access_token": token, "token_type": "bearer"}
+    return {
+        "access_token": token,
+        "token_type": "bearer"
+    }
