@@ -27,10 +27,10 @@ def create_access_token(data: dict):
     #  decide when to expire user token
     expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
 
-    #  this gives you user expire time 
+    #  user expire time 
     to_encode.update({"exp": expire})
 
-    # this conver your password into secure string
+    # conver your password into secure string
     token = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
     ''' SECRET_KEY = lock the data
