@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from models import User, Account
-from db.database import SessionLocal
-from schemas import AccountCreate, Amount, Transfer, UserCreate
+from schemas import AccountCreate, Amount, Transfer
 from sqlalchemy.orm import Session
 from dependencies.auth import get_current_user
 from db.database import get_db
@@ -10,12 +9,8 @@ router = APIRouter()
 
 
 @router.post("/accounts")
-def create_account(account: AccountCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def create_accounts (account: AccountCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
 
-    user = db.query(User).filter(User.id == account.user_id).first()
-
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
 
     new_acc = Account(
         acc_no=account.acc_no,
@@ -37,11 +32,11 @@ def deposit(id: int, data: Amount, db: Session = Depends(get_db), current_user: 
 
     acc = db.query(Account).filter(Account.id == id).first()
 
-    if acc.user_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Not authorized")
-
     if not acc:
         raise HTTPException(status_code=404, detail="Account not found")
+
+    if acc.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized")
 
     if data.amount <= 0:
         raise HTTPException(status_code=400, detail="Amount must be greater than zero")
@@ -58,11 +53,11 @@ def withdraw(id: int, data: Amount, db: Session = Depends(get_db), current_user:
 
     acc = db.query(Account).filter(Account.id == id).first()
 
-    if acc.user_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Not authorized")
-
     if not acc:
         raise HTTPException(status_code=404, detail="Account not found")
+
+    if acc.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized")
 
     if data.amount <= 0:
         raise HTTPException(status_code=400, detail="Amount must be greater than zero")
@@ -78,7 +73,7 @@ def withdraw(id: int, data: Amount, db: Session = Depends(get_db), current_user:
     return acc
 
 @router.post("/transfer")
-def transfer(data: Transfer, db: Session = Depends(get_db)):
+def transfer(data: Transfer, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
 
     # enter your user id to send money to any other user this will fix letter.
     #  right now it only check db id and send money to any acocunt no checking form which user_id send money.
@@ -104,6 +99,9 @@ def transfer(data: Transfer, db: Session = Depends(get_db)):
     if not from_acc or not to_acc:
         raise HTTPException(status_code=404, detail="Account not found")
 
+    if from_acc.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized")
+
     if from_acc.id == to_acc.id:
         raise HTTPException(status_code=400, detail="Cannot transfer to same account")
 
@@ -113,10 +111,15 @@ def transfer(data: Transfer, db: Session = Depends(get_db)):
     if from_acc.balance < data.amount:
         raise HTTPException(status_code=400, detail="Insufficient balance")
 
-    from_acc.balance -= data.amount
-    to_acc.balance += data.amount
+    try:
+        from_acc.balance -= data.amount
+        to_acc.balance += data.amount
+        db.commit()
 
-    db.commit()
+    except:
+        db.rollback()
+        raise HTTPException (status_code=500, detail="Transfer failed")
+
     db.refresh(from_acc)
     db.refresh(to_acc)
 
