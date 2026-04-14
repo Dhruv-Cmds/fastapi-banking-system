@@ -1,17 +1,18 @@
 from pydantic import BaseModel
+from decimal import Decimal
 
 class AccountCreate(BaseModel):
 
     acc_no: str
-    balance: float
+    balance: Decimal
 
 class Amount(BaseModel):
 
-    amount: float
+    amount: Decimal
 
 class Transfer(BaseModel):
 
     from_account_id: int
     to_account_id: int
-    amount: float
+    amount: Decimal
    
