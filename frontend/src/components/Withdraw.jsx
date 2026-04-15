@@ -4,40 +4,38 @@ import "./panel.css";
 
 const QUICK = [500, 1000, 5000, 10000];
 
-export default function Transfer({ accountId, fromAccNo, onDone }) {
+export default function Withdraw({ accountId, onDone }) {
   const [amount, setAmount] = useState("");
-  const [toAccNo, setToAccNo] = useState("");
   const [msg, setMsg] = useState(null);
 
   async function submit() {
     setMsg(null);
 
-    const to = parseInt(toAccNo);
-    const from = parseInt(fromAccNo);
+    const amt = Number(amount);
 
-    if (!amount || !toAccNo) {
-      setMsg({ text: "Fill all fields", type: "err" });
-      return;
-    }
-
-    // ✅ FIXED SELF TRANSFER CHECK
-    if (to === from) {
-      setMsg({ text: "Cannot send to your own account", type: "err" });
+    if (!amt || amt <= 0) {
+      setMsg({ text: "Enter valid amount", type: "err" });
       return;
     }
 
     try {
-      await API.post("/transfer", {
-        from_account_id: accountId,
-        to_account_no: to,
-        amount: parseFloat(amount),
+      console.log("WITHDRAW:", accountId, amt);
+
+      await API.post(`/accounts/${accountId}/withdraw`, {
+        amount: amt,
       });
 
-      setMsg({ text: "Transfer successful!", type: "ok" });
-      setTimeout(onDone, 800);
+      setMsg({ text: "Withdrawal successful!", type: "ok" });
+
+      setTimeout(() => {
+        onDone();
+      }, 600);
+
     } catch (e) {
+      console.log("WITHDRAW ERROR:", e.response);
+
       setMsg({
-        text: e.response?.data?.detail || "Transfer failed",
+        text: e.response?.data?.detail || "Withdrawal failed",
         type: "err",
       });
     }
@@ -45,17 +43,7 @@ export default function Transfer({ accountId, fromAccNo, onDone }) {
 
   return (
     <div className="panel">
-      <p className="panelTitle">Send Money</p>
-
-      <div className="field">
-        <label>To Account</label>
-        <input
-          type="number"
-          placeholder="Enter account number"
-          value={toAccNo}
-          onChange={(e) => setToAccNo(e.target.value)}
-        />
-      </div>
+      <p className="panelTitle">Withdraw Cash</p>
 
       <div className="field">
         <label>Amount (₹)</label>
@@ -69,14 +57,18 @@ export default function Transfer({ accountId, fromAccNo, onDone }) {
 
       <div className="chips">
         {QUICK.map((q) => (
-          <button key={q} className="chip" onClick={() => setAmount(String(q))}>
+          <button
+            key={q}
+            className="chip"
+            onClick={() => setAmount(String(q))}
+          >
             ₹{q >= 1000 ? q / 1000 + "k" : q}
           </button>
         ))}
       </div>
 
-      <button className="btn btn-primary" onClick={submit}>
-        Send Money →
+      <button className="btn btn-accent" onClick={submit}>
+        Confirm Withdrawal →
       </button>
 
       {msg && <div className={`toast ${msg.type}`}>{msg.text}</div>}

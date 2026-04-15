@@ -1,188 +1,180 @@
 # 🏦 FastAPI Banking System API
 
-A clean and modular **Bank Account Management API** built using **FastAPI**, **SQLAlchemy**, and **MySQL**.
-This project demonstrates core backend concepts including account creation, deposits, withdrawals, and fund transfers with proper validation and database handling.
+A clean, modular, and production-style **Bank Account Management System** built using **FastAPI**, **SQLAlchemy**, and **MySQL**.
+
+This project demonstrates real-world backend architecture including authentication, account management, transactions, and proper validation.
 
 ---
 
 ## 🖼️ UI Preview
 
-![UI Preview](screenshots/ui_1.png)
+![UI Preview](screenshots/ui_1.png)  
 ![UI Preview](screenshots/ui_2.png)
+
+---
 
 ## 🚀 Features
 
-* Create bank accounts
-* View all accounts
-* Deposit money into an account
-* Withdraw money with balance validation
-* Transfer money between accounts
-* Environment-based configuration (`.env`)
-* SQLAlchemy ORM integration
-* Clean project structure
+### 🔐 Authentication
+- User Signup & Login (JWT-based)
+- Case-insensitive username handling
+- Secure password hashing
+
+### 🏦 Account Management
+- Create multiple bank accounts
+- Unique account number enforcement
+- View all user accounts
+
+### 💰 Transactions
+- Deposit funds
+- Withdraw funds with balance validation
+- Transfer money between accounts
+- Self-transfer prevention
+- Concurrency-safe transactions (DB locking)
+
+### 🧠 Validation & Logic
+- Amount must be greater than zero
+- Cannot withdraw more than balance
+- Cannot transfer to same account
+- Backend-driven validation
+
+### ⚙️ System Design
+- Environment-based configuration (`.env`)
+- Clean modular structure
+- SQLAlchemy ORM integration
 
 ---
 
 ## 🧱 Tech Stack
 
-* **FastAPI** – Web framework
-* **SQLAlchemy** – ORM for database interaction
-* **MySQL** – Relational database
-* **Pydantic** – Data validation
-* **python-dotenv** – Environment variable management
+- **FastAPI** – High-performance backend framework  
+- **SQLAlchemy** – ORM for database interaction  
+- **MySQL** – Relational database  
+- **Pydantic** – Data validation  
+- **python-dotenv** – Environment configuration  
+- **JWT (python-jose)** – Authentication  
 
 ---
 
 ## 📁 Project Structure
 
 ```
-
 fastapi-banking-system/
 │
-├── routes/
-│   └── account.py        # API routes
+├── app/
+│ ├── routes/ # API routes (auth + accounts)
+│ ├── models/ # SQLAlchemy models
+│ ├── schemas/ # Pydantic schemas
+│ ├── db/ # Database setup
+│ ├── core/ # Security (JWT, hashing)
+│ └── dependencies/ # Auth dependencies
 │
-├── db.py                 # Database connection & session
-├── models.py             # SQLAlchemy models (tables)
-├── schemas.py            # Pydantic schemas
-├── main.py               # App entry point
-├── requirements.txt      # Dependencies
-├── .env                  # Environment variables (not committed)
+├── main.py # App entry point
+├── requirements.txt # Dependencies
+├── .env # Environment variables (ignored)
 └── .gitignore
 
 ```
-
 ---
 
 ## ⚙️ Setup Instructions
 
-### 1. Clone the repository
+### 1️⃣ Clone the repository
 
 ```bash
 git clone https://github.com/Dhruv-Cmds/fastapi-banking-system.git
 cd fastapi-banking-system
 ```
 
----
+### 2️⃣ Create virtual environment
 
-### 2. Create virtual environment
-
-```bash
+```
 python -m venv .venv
 ```
 
-Activate it:
-
-* Windows:
-
-```bash
+Windows
+```
 .venv\Scripts\activate
 ```
 
-* Mac/Linux:
-
-```bash
+Mac/Linux
+```
 source .venv/bin/activate
 ```
 
----
-
-### 3. Install dependencies
-
-```bash
+3️⃣ Install dependencies
+```
 pip install -r requirements.txt
 ```
 
----
+4️⃣ Configure environment variables
 
-### 4. Configure environment variables
-
-Create a `.env` file:
-
-```
+Create a .env file:
 
 DB_USER=root
 DB_PASSWORD=your_password
 DB_HOST=localhost
 DB_NAME=bankaccountsystem
 
-```
+SECRET_KEY=your_secret_key
+ALGORITHM=HS256
 
----
+5️⃣ Run the application
 
-### 5. Run the application
-
-```bash
 uvicorn main:app --reload
-```
 
----
+🧠 Database Behavior
 
-## 🧠 Database Behavior
-
-* Tables are automatically created at startup using SQLAlchemy:
-
-```python
+Tables are automatically created at startup:
 models.Base.metadata.create_all(bind=engine)
-```
+Schema is derived from SQLAlchemy models.
 
-* The table structure is derived directly from the models defined in `models.py`.
+📌 API Endpoints
 
----
+🔐 Auth
 
-## 📌 API Endpoints
+POST /signup
+POST /login
 
-### ➕ Create Account
+🏦 Accounts
 
-```
 POST /accounts
-```
-
-### 📄 Get All Accounts
-
-```
-GET /accounts
-```
-
-### 💰 Deposit Money
-
-```
+GET  /accounts
+💰 Transactions
 POST /accounts/{id}/deposit
-```
-
-### 💸 Withdraw Money
-
-```
 POST /accounts/{id}/withdraw
-```
-
-### 🔄 Transfer Money
-
-```
 POST /transfer
-```
 
----
+⚠️ Validations Implemented
 
-## ⚠️ Validations Implemented
+Cannot transfer to the same account
+Amount must be greater than zero
+Cannot withdraw more than balance
+Unique account number enforced
+Case-insensitive usernames
+Secure transaction locking (prevents race conditions)
 
-* Cannot transfer to the same account
-* Amount must be greater than zero
-* Cannot withdraw more than available balance
-* Unique account number enforced
+🔐 Security
 
----
+JWT-based authentication
+Password hashing (bcrypt)
+.env excluded from Git
+Secure DB connection handling
 
-## 🔐 Security Note
+💎 Highlights
 
-* `.env` file is excluded from version control
-* Passwords are URL-encoded using `quote_plus` to prevent connection issues
+Clean architecture (modular FastAPI structure)
+Real-world banking logic implementation
+Proper separation of concerns
+Scalable backend design
 
----
+⭐ Conclusion
 
+This project demonstrates how to build a real-world backend system with:
 
-## ⭐ Conclusion
+Authentication
+Database design
+Transaction safety
+Clean architecture
 
-This project serves as a strong foundation for building scalable backend systems with clean architecture and proper database handling.
-
----
+It serves as a strong foundation for scaling into a full fintech application 🚀

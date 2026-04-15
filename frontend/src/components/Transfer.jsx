@@ -12,22 +12,29 @@ export default function Transfer({ accountId, fromAccNo, onDone }) {
   async function submit() {
     setMsg(null);
 
-    if (!amount || !toAccNo) {
-      setMsg({ text: "Fill all fields", type: "err" });
+    const to = Number(toAccNo);
+    const from = Number(fromAccNo);
+    const amt = Number(amount);
+
+    // ✅ VALIDATION
+    if (!amt || amt <= 0 || !to) {
+      setMsg({ text: "Enter valid details", type: "err" });
       return;
     }
 
-    // 🔥 SELF TRANSFER BLOCK
-    if (Number(toAccNo) === Number(fromAccNo)) {
+    // ✅ SELF TRANSFER BLOCK
+    if (to === from) {
       setMsg({ text: "Cannot send to your own account", type: "err" });
       return;
     }
 
     try {
+      console.log("Transfer:", accountId, to, amt);
+
       await API.post("/transfer", {
-        from_account_id: accountId,
-        to_account_no: parseInt(toAccNo),
-        amount: parseFloat(amount),
+        from_account_id: Number(accountId),   // ✅ ensure number
+        to_account_no: to,
+        amount: amt,                          // ✅ FIXED
       });
 
       setMsg({ text: "Transfer successful!", type: "ok" });
@@ -44,7 +51,6 @@ export default function Transfer({ accountId, fromAccNo, onDone }) {
     <div className="panel">
       <p className="panelTitle">Send Money</p>
 
-      {/* Account Input */}
       <div className="field">
         <label>To Account</label>
         <input
@@ -55,7 +61,6 @@ export default function Transfer({ accountId, fromAccNo, onDone }) {
         />
       </div>
 
-      {/* Amount */}
       <div className="field">
         <label>Amount (₹)</label>
         <input
@@ -66,7 +71,6 @@ export default function Transfer({ accountId, fromAccNo, onDone }) {
         />
       </div>
 
-      {/* Quick buttons */}
       <div className="chips">
         {QUICK.map((q) => (
           <button key={q} className="chip" onClick={() => setAmount(String(q))}>
@@ -75,12 +79,10 @@ export default function Transfer({ accountId, fromAccNo, onDone }) {
         ))}
       </div>
 
-      {/* Submit */}
       <button className="btn btn-primary" onClick={submit}>
         Send Money →
       </button>
 
-      {/* Message */}
       {msg && <div className={`toast ${msg.type}`}>{msg.text}</div>}
     </div>
   );
