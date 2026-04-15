@@ -1,0 +1,40 @@
+@import url('https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;700;800;900&family=JetBrains+Mono:wght@300;400;500&display=swap');
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #060608;
+  --surface: #0e0e12;
+  --surface2: #141418;
+  --surface3: #1c1c22;
+  --border: rgba(255,255,255,0.06);
+  --border-hover: rgba(255,255,255,0.14);
+
+  /* accents */
+  --accent: #a78bfa;       /* soft violet */
+  --accent2: #7c3aed;
+  --green: #4ade80;
+  --green-dim: rgba(74,222,128,0.12);
+  --purple-dim: rgba(167,139,250,0.1);
+  --white: #f4f3f8;
+  --muted: #52525e;
+  --muted2: #3a3a44;
+
+  --radius: 18px;
+  --radius-sm: 12px;
+}
+
+body {
+  background: var(--bg);
+  color: var(--white);
+  font-family: 'Cabinet Grotesk', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+button { cursor: pointer; font-family: inherit; }
+input, select { font-family: 'JetBrains Mono', monospace; }
+
+/* scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--muted2); border-radius: 4px; }

@@ -1,0 +1,108 @@
+.page-center {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: var(--bg);
+}
+
+.app-shell {
+  max-width: 430px;
+  margin: 0 auto;
+  padding: 24px 16px 60px;
+  min-height: 100vh;
+}
+
+/* shared card */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px;
+}
+
+/* shared field */
+.field { margin-bottom: 14px; }
+.field label {
+  display: block;
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-family: 'JetBrains Mono', monospace;
+  margin-bottom: 7px;
+}
+.field input, .field select {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  color: var(--white);
+  font-size: 13px;
+  outline: none;
+  transition: border-color .2s;
+}
+.field input:focus, .field select:focus { border-color: var(--accent); }
+.field select { appearance: none; }
+
+/* shared buttons */
+.btn {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-family: 'Cabinet Grotesk', sans-serif;
+  font-weight: 800;
+  font-size: 14px;
+  letter-spacing: .3px;
+  transition: all .2s;
+}
+.btn-primary {
+  background: var(--white);
+  color: var(--bg);
+}
+.btn-primary:hover { background: #e0dff0; transform: translateY(-1px); }
+
+.btn-ghost {
+  background: var(--surface3);
+  color: var(--muted);
+  border: 1px solid var(--border);
+}
+.btn-ghost:hover { border-color: var(--border-hover); color: var(--white); }
+
+.btn-accent {
+  background: var(--accent2);
+  color: var(--white);
+}
+.btn-accent:hover { background: var(--accent); }
+
+/* toast / msg */
+.toast {
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-family: 'JetBrains Mono', monospace;
+  margin-top: 12px;
+  text-align: center;
+}
+.toast.ok  { background: var(--green-dim); color: var(--green); border: 1px solid rgba(74,222,128,.2); }
+.toast.err { background: rgba(248,113,113,.1); color: #f87171; border: 1px solid rgba(248,113,113,.2); }
+
+/* section label */
+.section-label {
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  font-family: 'JetBrains Mono', monospace;
+  margin-bottom: 12px;
+}
+
+/* divider */
+.divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 20px 0;
+}

@@ -1,22 +1,28 @@
 from fastapi import Depends, HTTPException
-from fastapi.security import OAuth2PasswordBearer
 from jose import jwt
 from sqlalchemy.orm import Session
 from app.db import get_db
 from app.models import User
 from app.core import SECRET_KEY, ALGORITHM
+from fastapi import Header
 
 # ------------------------------------------------------------------------------------------------
-
-# FastApi automatically looks for token 
-# token = "eyJhbGciOiJIUzI1NiIs..." 
-
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
 # Depends(get_db) Opens data Base connection to read, write, delete, update
 
 # takes a token ---> verifies the token, finds the user in data base and return the user  
-def get_current_user(token: str = Depends(oauth2_scheme), db:Session = Depends(get_db)):
+def get_current_user(authorization: str = Header(None), db: Session = Depends(get_db)):
+
+    print("HEADER:", authorization)
+    
+    if not authorization:
+        raise HTTPException(status_code=401, detail="No token")
+
+    if not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Invalid format")
+
+    token = authorization.split(" ")[1]
+
 
     try:
         # verifies token is valid / checks signature using SECRET_KEY / reads hidden data inside
