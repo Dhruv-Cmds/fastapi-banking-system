@@ -106,19 +106,6 @@ export default function Login({ onLogin }) {
 
         </div>
 
-        {tab === "signup" && (
-
-          <div className="field">
-            <label>Email</label>
-            <input
-              placeholder="you@email.com"
-              value={form.email}
-              onChange={set("email")}
-            />
-
-          </div>
-        )}
-
         <div className="field">
 
           <label>Username</label>
@@ -148,17 +135,16 @@ export default function Login({ onLogin }) {
 
         {msg && <div className={`toast ${msg.type}`}>{msg.text}</div>}
 
-        <p className="switch">
+        <div className="auth-box">
 
-          {tab === "login"
-            ? "Don't have an account? "
-            : "Already have an account? "}
-            
-          <span onClick={() => setTab(tab === "login" ? "signup" : "login")}>
-            {tab === "login" ? "Sign up" : "Sign in"}
-          </span>
-          
-        </p>
+            <div className="switch">
+              Don't have an account?
+              <span onClick={() => setTab(tab === "login" ? "signup" : "login")}>
+                Sign up
+              </span>
+            </div>
+
+          </div>
 
       </div>
 

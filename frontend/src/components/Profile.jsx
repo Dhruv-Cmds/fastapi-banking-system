@@ -5,40 +5,61 @@ import "./panel.css";
 export default function Profile({ user, onLogout }) {
   const [name, setName] = useState("");
   const [msg, setMsg] = useState(null);
+  const [themeOpen, setThemeOpen] = useState(false);
+  const [dark, setDark] = useState(
+    localStorage.getItem("theme") !== "light"
+  );
 
   useEffect(() => {
-  const saved = localStorage.getItem("profile_name");
+    const saved = localStorage.getItem("profile_name");
 
     setTimeout(() => {
-        setName(saved || user);
+      setName(saved || user);
     }, 0);
+  }, [user]);
 
-    }, [user]);
+  // APPLY THEME
+  useEffect(() => {
+    document.body.classList.remove("dark", "light");
+    document.body.classList.add(dark ? "dark" : "light");
+  }, [dark]);
 
-async function save() {
-  try {
-    await API.put("/me", {
-      name: name,
-    });
+  async function save() {
+    try {
+      await API.put("/me", {
+        name: name,
+      });
 
-    setMsg("Saved!");
-    setTimeout(() => setMsg(null), 2000);
+      setMsg("Saved!");
+      setTimeout(() => setMsg(null), 2000);
 
-  } catch (e) {
-    console.log("PROFILE ERROR:", e.response); // 👈 IMPORTANT DEBUG
+    } catch (e) {
+      console.log("PROFILE ERROR:", e.response);
 
-    setMsg(
-      e.response?.data?.detail || "Update failed"
-    );
+      setMsg(
+        e.response?.data?.detail || "Update failed"
+      );
 
-    setTimeout(() => setMsg(null), 2000);
+      setTimeout(() => setMsg(null), 2000);
+    }
   }
-}
+
+    function setTheme(mode) {
+    const isDark = mode === "dark";
+
+    setDark(isDark);
+    localStorage.setItem("theme", mode);
+
+    document.body.classList.remove("dark", "light");
+    document.body.classList.add(mode);
+    
+    window.dispatchEvent(new Event("storage"));
+    }
 
   return (
     <div className="profile-container">
 
-      {/* Header */}
+      {/* TOP */}
       <div className="profile-header">
         <div className="profile-avatar">
           {name ? name[0].toUpperCase() : "U"}
@@ -50,10 +71,9 @@ async function save() {
         </div>
       </div>
 
-      {/* Divider */}
       <div className="divider" />
 
-      {/* Name Edit */}
+      {/* EDIT NAME */}
       <div className="field">
         <label>Name</label>
         <input
@@ -68,18 +88,53 @@ async function save() {
 
       {msg && <div className="toast ok">{msg}</div>}
 
-      {/* Divider */}
       <div className="divider" />
 
-      {/* Menu */}
+      {/* MENU */}
       <div className="profile-menu">
+
         <div className="menu-item">⚙ Settings</div>
-        <div className="menu-item">🎨 Appearance</div>
+
+        {/* APPEARANCE */}
+        <div
+          className="menu-item"
+          onClick={() => setThemeOpen(!themeOpen)}
+        >
+          🎨 Appearance
+        </div>
+
+        {themeOpen && (
+          <div className="theme-box">
+
+            <div className="theme-row">
+              <span>🌙 Dark Mode</span>
+              <div
+                className={`switch ${dark ? "active" : ""}`}
+                onClick={() => setTheme("dark")}
+              >
+                <div className="switch-circle" />
+              </div>
+            </div>
+
+            <div className="theme-row">
+              <span>☀️ Light Mode</span>
+              <div
+                className={`switch ${!dark ? "active" : ""}`}
+                onClick={() => setTheme("light")}
+              >
+                <div className="switch-circle" />
+              </div>
+            </div>
+
+          </div>
+        )}
+
         <div className="menu-item">🔒 Security</div>
 
         <div className="menu-item" onClick={onLogout}>
           🚪 Sign out
         </div>
+
       </div>
 
     </div>

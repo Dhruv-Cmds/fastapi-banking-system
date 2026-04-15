@@ -20,7 +20,12 @@ export default function Dashboard({ user, onLogout }) {
   const [accounts, setAccounts] = useState([]);
   const [selected, setSelected] = useState(null);
   const [panel, setPanel] = useState(null);
-  const [dark, setDark] = useState(true);
+
+  // 🔥 FIXED THEME STATE
+  const [dark, setDark] = useState(
+    localStorage.getItem("theme") !== "light"
+  );
+
   const [showProfile, setShowProfile] = useState(false);
   const [tab, setTab] = useState("home");
 
@@ -57,43 +62,37 @@ export default function Dashboard({ user, onLogout }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // 🔥 SYNC THEME WHEN CHANGED FROM PROFILE
+  useEffect(() => {
+    function syncTheme() {
+      const saved = localStorage.getItem("theme") || "dark";
+      setDark(saved === "dark");
+    }
+
+    window.addEventListener("storage", syncTheme);
+
+    // run once
+    syncTheme();
+
+    return () => window.removeEventListener("storage", syncTheme);
+  }, []);
+
   return (
     <div className={`app-shell ${dark ? "dark" : "light"}`}>
       
       {/* Header */}
-      <header className="header">
-        <div className="header-left">
+      {tab !== "profile" && (
+        <header className="header">
           <div
             className="avatar clickable"
-            onClick={() => setShowProfile(true)}
+            onClick={() => setTab("profile")}
           >
             {user ? user[0].toUpperCase() : "U"}
           </div>
+        </header>
+      )}
 
-          <div>
-            <p className="greeting">Welcome Back</p>
-            <p className="username">{user}</p>
-          </div>
-        </div>
-
-        <button
-          className="theme-toggle"
-          onClick={() => setDark(!dark)}
-        >
-          <span className="icon">
-            {dark ? "☀️" : "🌙"}
-          </span>
-          <span className="label">
-            {dark ? "Light Mode" : "Dark Mode"}
-          </span>
-        </button>
-
-        <button className="logout-btn" onClick={onLogout}>
-          Sign out
-        </button>
-      </header>
-
-      {/* 🔥 HOME TAB */}
+      {/* HOME */}
       {tab === "home" && (
         <>
           <div className="hero">
@@ -132,7 +131,7 @@ export default function Dashboard({ user, onLogout }) {
         </>
       )}
 
-      {/* ⚡ ACTIONS TAB */}
+      {/* ACTIONS */}
       {tab === "actions" && (
         <div className="quick-actions">
           {[
@@ -148,12 +147,12 @@ export default function Dashboard({ user, onLogout }) {
         </div>
       )}
 
-      {/* 👤 PROFILE TAB */}
+      {/* PROFILE */}
       {tab === "profile" && (
         <Profile user={user} onLogout={onLogout} />
       )}
 
-      {/* Panels */}
+      {/* PANELS */}
       {panel === "deposit" && selected && (
         <Deposit accountId={selected} onDone={loadAccounts} />
       )}
@@ -174,7 +173,7 @@ export default function Dashboard({ user, onLogout }) {
         <CreateAccount onDone={loadAccounts} />
       )}
 
-      {/* 🔥 PROFILE DRAWER (still works) */}
+      {/* KEEP YOUR DRAWER (unchanged) */}
       {showProfile && (
         <>
           <div
@@ -188,7 +187,7 @@ export default function Dashboard({ user, onLogout }) {
         </>
       )}
 
-      {/* 🔥 BOTTOM NAV */}
+      {/* BOTTOM NAV */}
       <div className="bottom-nav">
         <button
           className={tab === "home" ? "active" : ""}
