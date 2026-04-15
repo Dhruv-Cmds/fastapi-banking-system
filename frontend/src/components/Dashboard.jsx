@@ -21,10 +21,9 @@ export default function Dashboard({ user, onLogout }) {
   const [selected, setSelected] = useState(null);
   const [panel, setPanel] = useState(null);
 
-  // 🔥 FIXED THEME STATE
-  const [dark, setDark] = useState(
-    localStorage.getItem("theme") !== "light"
-  );
+  const [dark, setDark] = useState(() => {
+    return localStorage.getItem("theme") === "dark";
+  });
 
   const [showProfile, setShowProfile] = useState(false);
   const [tab, setTab] = useState("home");
@@ -62,20 +61,20 @@ export default function Dashboard({ user, onLogout }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // 🔥 SYNC THEME WHEN CHANGED FROM PROFILE
   useEffect(() => {
-    function syncTheme() {
-      const saved = localStorage.getItem("theme") || "dark";
-      setDark(saved === "dark");
+    function updateTheme() {
+      const isDark = localStorage.getItem("theme") === "dark";
+      setDark(isDark);
+
+      // also update body (backup)
+      document.body.className = isDark ? "dark" : "light";
     }
 
-    window.addEventListener("storage", syncTheme);
+    window.addEventListener("themeChange", updateTheme);
 
-    // run once
-    syncTheme();
-
-    return () => window.removeEventListener("storage", syncTheme);
-  }, []);
+    return () =>
+      window.removeEventListener("themeChange", updateTheme);
+  }, []);;
 
   return (
     <div className={`app-shell ${dark ? "dark" : "light"}`}>
@@ -173,7 +172,7 @@ export default function Dashboard({ user, onLogout }) {
         <CreateAccount onDone={loadAccounts} />
       )}
 
-      {/* KEEP YOUR DRAWER (unchanged) */}
+      {/* DRAWER */}
       {showProfile && (
         <>
           <div

@@ -1,65 +1,47 @@
 import API from "../api/api";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import "./panel.css";
 
 export default function Profile({ user, onLogout }) {
-  const [name, setName] = useState("");
+  const [name, setName] = useState(() => {
+    return localStorage.getItem("profile_name") || user || "";
+  });
+
   const [msg, setMsg] = useState(null);
   const [themeOpen, setThemeOpen] = useState(false);
-  const [dark, setDark] = useState(
-    localStorage.getItem("theme") !== "light"
-  );
-
-  useEffect(() => {
-    const saved = localStorage.getItem("profile_name");
-
-    setTimeout(() => {
-      setName(saved || user);
-    }, 0);
-  }, [user]);
-
-  // APPLY THEME
-  useEffect(() => {
-    document.body.classList.remove("dark", "light");
-    document.body.classList.add(dark ? "dark" : "light");
-  }, [dark]);
 
   async function save() {
     try {
-      await API.put("/me", {
-        name: name,
-      });
+      await API.put("/me", { name });
+
+      localStorage.setItem("profile_name", name);
 
       setMsg("Saved!");
       setTimeout(() => setMsg(null), 2000);
-
     } catch (e) {
-      console.log("PROFILE ERROR:", e.response);
-
-      setMsg(
-        e.response?.data?.detail || "Update failed"
-      );
-
+      setMsg(e.response?.data?.detail || "Update failed");
       setTimeout(() => setMsg(null), 2000);
     }
   }
 
-    function setTheme(mode) {
-    const isDark = mode === "dark";
+  // ✅ THEME TOGGLE (WORKING)
+  function toggleTheme() {
+    const current = localStorage.getItem("theme") || "dark";
+    const next = current === "dark" ? "light" : "dark";
 
-    setDark(isDark);
-    localStorage.setItem("theme", mode);
+    localStorage.setItem("theme", next);
+    document.body.className = next;
 
-    document.body.classList.remove("dark", "light");
-    document.body.classList.add(mode);
-    
-    window.dispatchEvent(new Event("storage"));
-    }
+    // notify dashboard
+    window.dispatchEvent(new Event("themeChange"));
+  }
+
+  const isDark = localStorage.getItem("theme") !== "light";
 
   return (
     <div className="profile-container">
 
-      {/* TOP */}
+      {/* HEADER */}
       <div className="profile-header">
         <div className="profile-avatar">
           {name ? name[0].toUpperCase() : "U"}
@@ -73,7 +55,7 @@ export default function Profile({ user, onLogout }) {
 
       <div className="divider" />
 
-      {/* EDIT NAME */}
+      {/* NAME */}
       <div className="field">
         <label>Name</label>
         <input
@@ -104,26 +86,16 @@ export default function Profile({ user, onLogout }) {
         </div>
 
         {themeOpen && (
-          <div className="theme-box">
+          <div className="theme-toggle-box">
 
-            <div className="theme-row">
-              <span>🌙 Dark Mode</span>
-              <div
-                className={`switch ${dark ? "active" : ""}`}
-                onClick={() => setTheme("dark")}
-              >
-                <div className="switch-circle" />
-              </div>
-            </div>
+            <div
+              className={`toggle-pill ${isDark ? "dark" : "light"}`}
+              onClick={toggleTheme}
+            >
+              <div className="toggle-circle" />
 
-            <div className="theme-row">
-              <span>☀️ Light Mode</span>
-              <div
-                className={`switch ${!dark ? "active" : ""}`}
-                onClick={() => setTheme("light")}
-              >
-                <div className="switch-circle" />
-              </div>
+              <span className="toggle-label left">🌙</span>
+              <span className="toggle-label right">☀️</span>
             </div>
 
           </div>
