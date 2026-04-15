@@ -1,2 +1,2 @@
-from .user import UserCreate
+from .user import UserCreate, UserLogin
 from .account import AccountCreate, Amount, Transfer
