@@ -20,8 +20,11 @@ export default function AccountsList({ accounts, selected, onSelect }) {
 
         <div
           key={a.id}
-          className={`card ${selected === a.id ? "active" : ""}`}
-          onClick={() => onSelect(a.id)}
+          className={`card ${Number(selected) === Number(a.id) ? "active" : ""}`}
+          onClick={() => {
+            console.log("clicked:", a.id);
+            onSelect(a.id);
+          }}
         >
           <div className="left">
             <div className="icon">

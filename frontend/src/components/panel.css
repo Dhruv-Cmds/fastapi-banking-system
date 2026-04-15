@@ -297,3 +297,32 @@ body {
   background: #00c896;
   color: white;
 }
+
+.active {
+  border: 2px solid #6c5ce7;
+  background: #1e293b;
+}
+
+.panel {
+  position: relative;
+  z-index: 1;
+}
+
+.list {
+  position: relative;
+  z-index: 2;
+}
+
+.card {
+  position: relative;
+  z-index: 20;
+}
+
+.receiver-preview {
+  margin-bottom: 10px;
+  padding: 8px;
+  background: #1e293b;
+  border-radius: 6px;
+  font-size: 14px;
+}
+

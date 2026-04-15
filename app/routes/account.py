@@ -89,7 +89,7 @@ def transfer(data: Transfer, db: Session = Depends(get_db), current_user: User =
     # -------------------------------------------------------------------------------------------------------------------------
 
     from_acc = db.query(Account).filter(Account.id == data.from_account_id).with_for_update().first()
-    to_acc = db.query(Account).filter(Account.id == data.to_account_id).with_for_update().first()
+    to_acc = db.query(Account).filter(Account.acc_no == data.to_account_no).with_for_update().first()
 
     if not from_acc or not to_acc:
         raise HTTPException(status_code=404, detail="Account not found")

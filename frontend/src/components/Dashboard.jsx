@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo} from "react";
+import { useState, useEffect } from "react";
 import API from "../api/api";
 
 import AccountsList from "./AccountsList";
@@ -16,24 +16,17 @@ const fmt = (n) =>
   });
 
 export default function Dashboard({ user, onLogout }) {
-
   const [accounts, setAccounts] = useState([]);
   const [selected, setSelected] = useState(null);
   const [panel, setPanel] = useState(null);
 
-  const totalBal = useMemo(
-    () => accounts.reduce((s, a) => s + (a.balance || 0), 0),
-    [accounts]
+  const selAcc = accounts.find(
+    (a) => Number(a.id) === Number(selected)
   );
-
-  const selAcc = accounts.find((a) => a.id === selected);
-
-  <p>Active: {selAcc?.account_name}</p>
 
   const hasAccounts = accounts.length > 0;
 
   async function loadAccounts() {
-
     try {
       const r = await API.get("/accounts");
       const data = r.data;
@@ -48,54 +41,50 @@ export default function Dashboard({ user, onLogout }) {
       const exists = data.some((a) => a.id === selected);
 
       if (!selected || !exists) {
-        setSelected(data[0].id);
+        setSelected(Number(data[0].id));
       }
-
-    } 
-    
-    catch (err) {
+    } catch (err) {
       console.error("Failed to load accounts:", err);
     }
-    
   }
 
   useEffect(() => {
-  loadAccounts();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    loadAccounts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
     <div className="app-shell">
-      
       {/* Header */}
       <header className="header">
-
         <div className="header-left">
           <div className="avatar">
             {user ? user[0].toUpperCase() : "U"}
-          </div
-          >
+          </div>
           <div>
-            <p className="greeting">Good Morning</p>
+            <p className="greeting">Welcome Back</p>
             <p className="username">{user}</p>
           </div>
-
         </div>
 
         <button className="logout-btn" onClick={onLogout}>
           Sign out
         </button>
-
       </header>
 
       {/* Balance */}
       <div className="hero">
-
         <p className="hero-label">Cash Balance</p>
-        <p className="hero-amount">{fmt(totalBal)}</p>
+
+        <p style={{ opacity: 0.6 }}>
+          Account #{selAcc?.acc_no || "-"}
+        </p>
+
+        <p className="hero-amount">
+          {fmt(selAcc?.balance || 0)}
+        </p>
 
         <div className="hero-actions">
-
           <button disabled={!hasAccounts} onClick={() => setPanel("deposit")}>
             Add Cash
           </button>
@@ -103,9 +92,7 @@ export default function Dashboard({ user, onLogout }) {
           <button disabled={!hasAccounts} onClick={() => setPanel("transfer")}>
             Send Money
           </button>
-
         </div>
-
       </div>
 
       {/* Actions */}
@@ -116,7 +103,6 @@ export default function Dashboard({ user, onLogout }) {
           { label: "Transfer", action: "transfer" },
           { label: "New Acc", action: "new" },
         ].map(({ label, action }) => (
-
           <button
             key={action}
             onClick={() =>
@@ -124,11 +110,8 @@ export default function Dashboard({ user, onLogout }) {
             }
           >
             {label}
-
           </button>
-
         ))}
-
       </div>
 
       {/* Panels */}
@@ -141,7 +124,11 @@ export default function Dashboard({ user, onLogout }) {
       )}
 
       {panel === "transfer" && selected && (
-        <Transfer accountId={selected} onDone={loadAccounts} />
+        <Transfer
+          accountId={selected}
+          fromAccNo={selAcc?.acc_no}
+          onDone={loadAccounts}
+        />
       )}
 
       {panel === "new" && (
@@ -155,6 +142,5 @@ export default function Dashboard({ user, onLogout }) {
         onSelect={setSelected}
       />
     </div>
-
   );
 }

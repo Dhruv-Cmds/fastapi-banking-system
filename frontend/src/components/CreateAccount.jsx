@@ -48,7 +48,7 @@ export default function CreateAccount({ onDone }) {
 
         <label>Account Name</label>
         <input
-          placeholder="e.g. Emergency Fund"
+          placeholder="e.g. Enter Account number"
           value={form.account_name}
           onChange={set("account_name")}
         />
@@ -75,7 +75,7 @@ export default function CreateAccount({ onDone }) {
       </button>
 
       {msg && <div className={`toast ${msg.type}`}>{msg.text}</div>}
-      
+
     </div>
   );
 }
