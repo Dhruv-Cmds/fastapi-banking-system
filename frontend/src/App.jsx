@@ -8,10 +8,14 @@ export default function App() {
   const [user, setUser] = useState(null);
 
   function handleLogout() {
+
     localStorage.removeItem("token");
     setUser(null);
+
   }
 
   if (!user) return <Login onLogin={(u) => setUser(u)} />;
+
   return <Dashboard user={user} onLogout={handleLogout} />;
+  
 }

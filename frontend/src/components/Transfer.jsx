@@ -10,6 +10,7 @@ export default function Transfer({ accountId, onDone }) {
   const [msg, setMsg] = useState(null);
 
   async function submit() {
+
     if (!amount || !toId) return;
 
     try {
@@ -20,20 +21,28 @@ export default function Transfer({ accountId, onDone }) {
         });
 
       setMsg({ text: "Transfer successful!", type: "ok" });
+
       setTimeout(onDone, 900);
-    } catch (e) {
+
+    } 
+    
+    catch (e) {
       setMsg({
         text: e.response?.data?.detail || "Transfer failed.",
         type: "err",
       });
+
     }
+
   }
 
   return (
     <div className="panel">
+
       <p className="panelTitle">Send Money</p>
 
       <div className="field">
+
         <label>To Account ID</label>
         <input
           type="number"
@@ -55,14 +64,18 @@ export default function Transfer({ accountId, onDone }) {
 
       <div className="chips">
         {QUICK.map((q) => (
+
           <button
             key={q}
             className="chip"
             onClick={() => setAmount(String(q))}
           >
             ₹{q >= 1000 ? q / 1000 + "k" : q}
+
           </button>
+
         ))}
+
       </div>
 
       <button className="btn btn-primary" onClick={submit}>
@@ -70,6 +83,8 @@ export default function Transfer({ accountId, onDone }) {
       </button>
 
       {msg && <div className={`toast ${msg.type}`}>{msg.text}</div>}
+
     </div>
   );
+  
 }

@@ -7,13 +7,17 @@ const fmt = (n) =>
   });
 
 export default function AccountsList({ accounts, selected, onSelect }) {
+
   if (!accounts.length) {
     return <p className="empty">No accounts yet. Create one below.</p>;
   }
 
   return (
+
     <div className="list">
+
       {accounts.map((a) => (
+
         <div
           key={a.id}
           className={`card ${selected === a.id ? "active" : ""}`}
@@ -30,11 +34,15 @@ export default function AccountsList({ accounts, selected, onSelect }) {
                 {a.account_type} • #{a.id}
               </p>
             </div>
+
           </div>
 
           <div className="bal">{fmt(a.balance)}</div>
+
         </div>
+        
       ))}
+
     </div>
   );
 }

@@ -17,20 +17,30 @@ export default function Withdraw({ accountId, onDone }) {
       });
 
       setMsg({ text: "Withdrawal successful!", type: "ok" });
+
       setTimeout(onDone, 900);
-    } catch (e) {
+
+    } 
+
+    catch (e) {
+
       setMsg({
         text: e.response?.data?.detail || "Withdrawal failed.",
         type: "err",
       });
+
     }
+
   }
 
   return (
+
     <div className="panel">
+
       <p className="panelTitle">Withdraw Cash</p>
 
       <div className="field">
+
         <label>Amount (₹)</label>
         <input
           type="number"
@@ -41,6 +51,7 @@ export default function Withdraw({ accountId, onDone }) {
       </div>
 
       <div className="chips">
+        
         {QUICK.map((q) => (
           <button
             key={q}
@@ -48,8 +59,11 @@ export default function Withdraw({ accountId, onDone }) {
             onClick={() => setAmount(String(q))}
           >
             ₹{q >= 1000 ? q / 1000 + "k" : q}
+
           </button>
+
         ))}
+
       </div>
 
       <button className="btn btn-accent" onClick={submit}>
@@ -57,6 +71,7 @@ export default function Withdraw({ accountId, onDone }) {
       </button>
 
       {msg && <div className={`toast ${msg.type}`}>{msg.text}</div>}
+      
     </div>
   );
 }

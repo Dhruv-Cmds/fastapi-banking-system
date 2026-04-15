@@ -16,6 +16,7 @@ const fmt = (n) =>
   });
 
 export default function Dashboard({ user, onLogout }) {
+
   const [accounts, setAccounts] = useState([]);
   const [selected, setSelected] = useState(null);
   const [panel, setPanel] = useState(null);
@@ -26,10 +27,13 @@ export default function Dashboard({ user, onLogout }) {
   );
 
   const selAcc = accounts.find((a) => a.id === selected);
+
   <p>Active: {selAcc?.account_name}</p>
+
   const hasAccounts = accounts.length > 0;
 
   async function loadAccounts() {
+
     try {
       const r = await API.get("/accounts");
       const data = r.data;
@@ -46,41 +50,52 @@ export default function Dashboard({ user, onLogout }) {
       if (!selected || !exists) {
         setSelected(data[0].id);
       }
-    } catch (err) {
+
+    } 
+    
+    catch (err) {
       console.error("Failed to load accounts:", err);
     }
+    
   }
 
-    useEffect(() => {
-    loadAccounts();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+  useEffect(() => {
+  loadAccounts();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="app-shell">
+      
       {/* Header */}
       <header className="header">
+
         <div className="header-left">
           <div className="avatar">
             {user ? user[0].toUpperCase() : "U"}
-          </div>
+          </div
+          >
           <div>
             <p className="greeting">Good Morning</p>
             <p className="username">{user}</p>
           </div>
+
         </div>
 
         <button className="logout-btn" onClick={onLogout}>
           Sign out
         </button>
+
       </header>
 
       {/* Balance */}
       <div className="hero">
+
         <p className="hero-label">Cash Balance</p>
         <p className="hero-amount">{fmt(totalBal)}</p>
 
         <div className="hero-actions">
+
           <button disabled={!hasAccounts} onClick={() => setPanel("deposit")}>
             Add Cash
           </button>
@@ -88,7 +103,9 @@ export default function Dashboard({ user, onLogout }) {
           <button disabled={!hasAccounts} onClick={() => setPanel("transfer")}>
             Send Money
           </button>
+
         </div>
+
       </div>
 
       {/* Actions */}
@@ -99,6 +116,7 @@ export default function Dashboard({ user, onLogout }) {
           { label: "Transfer", action: "transfer" },
           { label: "New Acc", action: "new" },
         ].map(({ label, action }) => (
+
           <button
             key={action}
             onClick={() =>
@@ -106,8 +124,11 @@ export default function Dashboard({ user, onLogout }) {
             }
           >
             {label}
+
           </button>
+
         ))}
+
       </div>
 
       {/* Panels */}
@@ -134,5 +155,6 @@ export default function Dashboard({ user, onLogout }) {
         onSelect={setSelected}
       />
     </div>
+
   );
 }
