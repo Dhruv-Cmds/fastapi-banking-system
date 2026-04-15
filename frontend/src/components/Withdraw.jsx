@@ -7,9 +7,11 @@ const QUICK = [500, 1000, 5000, 10000];
 export default function Withdraw({ accountId, onDone }) {
   const [amount, setAmount] = useState("");
   const [msg, setMsg] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   async function submit() {
     setMsg(null);
+    setLoading(true);
 
     const amt = Number(amount);
 
@@ -27,17 +29,19 @@ export default function Withdraw({ accountId, onDone }) {
 
       setMsg({ text: "Withdrawal successful!", type: "ok" });
 
+      setTimeout(() => setMsg(null), 3000);
       setTimeout(() => {
         onDone();
       }, 600);
 
     } catch (e) {
-      console.log("WITHDRAW ERROR:", e.response);
-
+      setLoading(false);
       setMsg({
         text: e.response?.data?.detail || "Withdrawal failed",
         type: "err",
       });
+
+      setTimeout(() => setMsg(null), 3000);
     }
   }
 
@@ -67,8 +71,12 @@ export default function Withdraw({ accountId, onDone }) {
         ))}
       </div>
 
-      <button className="btn btn-accent" onClick={submit}>
-        Confirm Withdrawal →
+      <button
+        className="btn btn-accent"
+        onClick={submit}
+        disabled={loading}
+      >
+        {loading ? "Processing..." : "Confirm Withdrawal →"}
       </button>
 
       {msg && <div className={`toast ${msg.type}`}>{msg.text}</div>}

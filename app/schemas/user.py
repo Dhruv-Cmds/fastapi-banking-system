@@ -17,4 +17,6 @@ class UserLogin(BaseModel):
     username: str
     password: passwordStr
 
-    
+
+class UserUpdate(BaseModel):
+    name: str

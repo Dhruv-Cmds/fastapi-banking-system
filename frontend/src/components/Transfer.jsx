@@ -4,25 +4,27 @@ import "./panel.css";
 
 const QUICK = [500, 1000, 5000, 10000];
 
+
+
 export default function Transfer({ accountId, fromAccNo, onDone }) {
   const [amount, setAmount] = useState("");
   const [toAccNo, setToAccNo] = useState("");
   const [msg, setMsg] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   async function submit() {
     setMsg(null);
+    setLoading(true);
 
     const to = Number(toAccNo);
     const from = Number(fromAccNo);
     const amt = Number(amount);
 
-    // ✅ VALIDATION
     if (!amt || amt <= 0 || !to) {
       setMsg({ text: "Enter valid details", type: "err" });
       return;
     }
 
-    // ✅ SELF TRANSFER BLOCK
     if (to === from) {
       setMsg({ text: "Cannot send to your own account", type: "err" });
       return;
@@ -32,18 +34,25 @@ export default function Transfer({ accountId, fromAccNo, onDone }) {
       console.log("Transfer:", accountId, to, amt);
 
       await API.post("/transfer", {
-        from_account_id: Number(accountId),   // ✅ ensure number
+        from_account_id: Number(accountId),   
         to_account_no: to,
-        amount: amt,                          // ✅ FIXED
+        amount: amt,                         
       });
 
       setMsg({ text: "Transfer successful!", type: "ok" });
+
+      setTimeout(() => setMsg(null), 3000);
+      setLoading(false); 
       setTimeout(onDone, 800);
+
     } catch (e) {
+      setLoading(false);
       setMsg({
         text: e.response?.data?.detail || "Transfer failed",
         type: "err",
       });
+
+      setTimeout(() => setMsg(null), 3000);
     }
   }
 
@@ -79,8 +88,12 @@ export default function Transfer({ accountId, fromAccNo, onDone }) {
         ))}
       </div>
 
-      <button className="btn btn-primary" onClick={submit}>
-        Send Money →
+      <button
+        className="btn btn-primary"
+        onClick={submit}
+        disabled={loading}
+      >
+        {loading ? "Processing..." : "Send Money →"}
       </button>
 
       {msg && <div className={`toast ${msg.type}`}>{msg.text}</div>}

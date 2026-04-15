@@ -8,8 +8,12 @@ export default function Deposit({ accountId, onDone }) {
 
   const [amount, setAmount] = useState("");
   const [msg, setMsg] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   async function submit() {
+
+      setMsg(null);
+      setLoading(true);
 
     if (!amount) return;
 
@@ -20,16 +24,20 @@ export default function Deposit({ accountId, onDone }) {
       });
 
       setMsg({ text: "Deposit successful!", type: "ok" });
-
+      setTimeout(() => setMsg(null), 3000);
+      setLoading(false);
       setTimeout(onDone, 900);
 
     } 
 
     catch (e) {
+      setLoading(false);
       setMsg({
         text: e.response?.data?.detail || "Deposit failed.",
         type: "err",
       });
+
+      setTimeout(() => setMsg(null), 3000);
 
     }
 
@@ -70,8 +78,12 @@ export default function Deposit({ accountId, onDone }) {
 
       </div>
 
-      <button className="btn btn-primary" onClick={submit}>
-        Confirm Deposit →
+      <button
+        className="btn btn-primary"
+        onClick={submit}
+        disabled={loading}
+      >
+        {loading ? "Processing..." : "Confirm Deposit →"}
       </button>
 
       {msg && <div className={`toast ${msg.type}`}>{msg.text}</div>}
