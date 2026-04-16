@@ -1,6 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from app.models import User, Account
+from sqlalchemy.exc import SQLAlchemyError
+
+from app.models import User, Account, Transaction
 from app.schemas import AccountCreate, Amount, Transfer
 from app.dependencies import get_current_user
 from app.db import get_db
@@ -8,9 +10,17 @@ from app.db import get_db
 router = APIRouter()
 
 
-@router.post("/accounts")
-def create_accounts (account: AccountCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+@router.post("/accounts",)
+def create_accounts (
+                account: AccountCreate, 
+                db: Session = Depends(get_db), 
+                current_user: User = Depends(get_current_user)
+    ):
 
+    existing = db.query(Account).filter(Account.acc_no == account.acc_no).first()
+
+    if existing:
+        raise HTTPException(status_code=400, detail="Account number already exists")
 
     new_acc = Account(
         acc_no=account.acc_no,
@@ -24,56 +34,106 @@ def create_accounts (account: AccountCreate, db: Session = Depends(get_db), curr
     return new_acc
 
 @router.get("/accounts")
-def get_account(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def get_account(db: Session = Depends(get_db), 
+                current_user: User = Depends(get_current_user)):
+
     return db.query(Account).filter(Account.user_id == current_user.id).all()
 
 @router.post("/accounts/{id}/deposit")
-def deposit(id: int, data: Amount, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def deposit(
+            id: int, 
+            data: Amount, 
+            db: Session = Depends(get_db), 
+            current_user: User = Depends(get_current_user)
+    ):
 
-    acc = db.query(Account).filter(Account.id == id).first()
+    try:
 
-    if not acc:
-        raise HTTPException(status_code=404, detail="Account not found")
+        acc = db.query(Account)\
+            .filter(Account.id == id, Account.user_id == current_user.id)\
+            .with_for_update()\
+            .first()
 
-    if acc.user_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Not authorized")
+        if not acc:
+            raise HTTPException(status_code=404, detail="Account not found")
 
-    if data.amount <= 0:
-        raise HTTPException(status_code=400, detail="Amount must be greater than zero")
+        if data.amount <= 0:
+            raise HTTPException(status_code=400, detail="Amount must be greater than zero")
 
-    acc.balance += data.amount
+        acc.balance += data.amount
 
-    db.commit()
-    db.refresh(acc)
+        txn = Transaction(
+            from_account_id=None,
+            to_account_id=acc.id,
+            amount=data.amount
+        )
 
-    return acc
+        db.add(txn)
 
+        db.commit()
+        db.refresh(acc)
+
+        return acc
+    
+    except SQLAlchemyError:
+
+        db.rollback()
+        raise HTTPException (status_code=500, detail="Deposit failed")
+    
 @router.post("/accounts/{id}/withdraw")
-def withdraw(id: int, data: Amount, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def withdraw(
 
-    acc = db.query(Account).filter(Account.id == id).first()
+            id: int, 
+            data: Amount, 
+            db: Session = Depends(get_db), 
+            current_user: User = Depends(get_current_user)
+    ):
 
-    if not acc:
-        raise HTTPException(status_code=404, detail="Account not found")
+    try:
 
-    if acc.user_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Not authorized")
+        acc = db.query(Account)\
+            .filter(Account.id == id, Account.user_id == current_user.id)\
+            .with_for_update()\
+            .first()
+        
+        if not acc:
+            raise HTTPException(status_code=404, detail="Account not found")
 
-    if data.amount <= 0:
-        raise HTTPException(status_code=400, detail="Amount must be greater than zero")
+        if acc.user_id != current_user.id:
+            raise HTTPException(status_code=403, detail="Not authorized")
 
-    if data.amount > acc.balance:
-        raise HTTPException(status_code=400, detail="Insufficient balance")
+        if data.amount <= 0:
+            raise HTTPException(status_code=400, detail="Amount must be greater than zero")
 
-    acc.balance -= data.amount
+        if data.amount > acc.balance:
+            raise HTTPException(status_code=400, detail="Insufficient balance")
 
-    db.commit()
-    db.refresh(acc)
+        acc.balance -= data.amount
 
-    return acc
+        txn = Transaction(
+            from_account_id=acc.id,
+            to_account_id=None,
+            amount=data.amount
+        )
+
+        db.add(txn)
+
+        db.commit()
+        db.refresh(acc)
+
+        return acc
+    
+    except SQLAlchemyError:
+        
+        db.rollback()
+        raise HTTPException (status_code=500, detail="Withdrawn failed")
 
 @router.post("/transfer")
-def transfer(data: Transfer, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def transfer(
+        data: Transfer, 
+        db: Session = Depends(get_db), 
+        current_user: User = Depends(get_current_user)
+    ):
 
     # with_for_update() = "I'm reading this row and nobody else can touch it until I'm done."
 
@@ -87,39 +147,56 @@ def transfer(data: Transfer, db: Session = Depends(get_db), current_user: User =
     #                                 returns "Insufficient balance"
 
     # -------------------------------------------------------------------------------------------------------------------------
-
-    from_acc = db.query(Account).filter(Account.id == data.from_account_id).with_for_update().first()
-    to_acc = db.query(Account).filter(Account.acc_no == data.to_account_no).with_for_update().first()
-
-    if not from_acc or not to_acc:
-        raise HTTPException(status_code=404, detail="Account not found")
-
-    if from_acc.user_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Not authorized")
-
-    if from_acc.id == to_acc.id:
-        raise HTTPException(status_code=400, detail="Cannot transfer to same account")
-
-    if data.amount <= 0:
-        raise HTTPException(status_code=400, detail="Amount must be greater than zero")
-
-    if from_acc.balance < data.amount:
-        raise HTTPException(status_code=400, detail="Insufficient balance")
-
     try:
+
+        from_acc = db.query(Account)\
+            .filter(Account.id == data.from_account_id)\
+            .with_for_update()\
+            .first()
+        
+        to_acc = db.query(Account)\
+            .filter(Account.acc_no == data.to_account_no)\
+            .with_for_update()\
+            .first()
+
+        if not from_acc or not to_acc:
+            raise HTTPException(status_code=404, detail="Account not found")
+
+        if from_acc.user_id != current_user.id:
+            raise HTTPException(status_code=403, detail="Not authorized")
+
+        if from_acc.id == to_acc.id:
+            raise HTTPException(status_code=400, detail="Cannot transfer to same account")
+
+        if data.amount <= 0:
+            raise HTTPException(status_code=400, detail="Amount must be greater than zero")
+
+        if from_acc.balance < data.amount:
+            raise HTTPException(status_code=400, detail="Insufficient balance")
+
         from_acc.balance -= data.amount
         to_acc.balance += data.amount
+
+        txn = Transaction(
+                    from_account_id=from_acc.id,
+                    to_account_id=to_acc.id,
+                    amount=data.amount
+                )
+        
+        db.add(txn)
+
         db.commit()
 
-    except:
+        db.refresh(from_acc)
+        db.refresh(to_acc)
+
+        return {
+            "message": "Transfer successful",
+            "from_account_balance": from_acc.balance,
+            "to_account_balance": to_acc.balance
+        }
+    
+    except SQLAlchemyError:
+
         db.rollback()
         raise HTTPException (status_code=500, detail="Transfer failed")
-
-    db.refresh(from_acc)
-    db.refresh(to_acc)
-
-    return {
-        "message": "Transfer successful",
-        "from_account_balance": from_acc.balance,
-        "to_account_balance": to_acc.balance
-    }

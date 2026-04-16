@@ -44,10 +44,10 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
     ).first()
 
     if not db_user:
-        raise HTTPException(status_code=400, detail="User not found")
+        raise HTTPException(status_code=400, detail="Invalid credentials")
 
     if not verify_password(user.password, db_user.password):
-        raise HTTPException(status_code=400, detail="Wrong password")
+        raise HTTPException(status_code=400, detail="Invalid credentials")
 
     token = create_access_token({
         "sub": str(db_user.id)
