@@ -4,22 +4,37 @@ from datetime import datetime, timedelta
 import os
 from dotenv import load_dotenv
 
+from fastapi import HTTPException
+
+# Load environment variables
 load_dotenv()
 
 SECRET_KEY = os.getenv("SECRET_KEY")
-ALGORITHM = os.getenv("ALGORITHM")
+ALGORITHM = os.getenv("ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))
 
+
+# Safety check (VERY IMPORTANT)
+if not SECRET_KEY:
+    raise HTTPException(status_code="SECRET_KEY is not set in environment variable")
+
+    
+#  Password hashing context
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
+
+# hashed password
 def hash_password(password: str):
     return pwd_context.hash(password)
 
+
+# verify password
 def verify_password(plain, hashed):
     return pwd_context.verify(plain, hashed)
 
-# user info come in json (dict) formate
-def create_access_token(data: dict):
+
+# create access token (JWT)
+def create_access_token(data: dict): # user info come in json (dict) formate
 
     #  made copy so original data will stay safe
     to_encode = data.copy()
@@ -27,8 +42,8 @@ def create_access_token(data: dict):
     #  decide when to expire user token
     expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
 
-    #  user expire time 
-    to_encode.update({"exp": expire})
+    # Add standard JWT fields
+    to_encode.update({"exp": expire})  #  user expire time 
 
     # conver your password into secure string
     token = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
