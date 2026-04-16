@@ -12,24 +12,24 @@ load_dotenv()
 
 
 # Read DB credentials
-DB_USER = os.getenv("DB_USER")
-DB_PASSWORD = quote_plus(os.getenv("DB_PASSWORD"))
-DB_HOST = os.getenv("DB_HOST")
-DB_PORT = os.getenv("DB_PORT", "3306")
-DB_NAME = os.getenv("DB_NAME")
+# DB_USER = os.getenv("DB_USER")
+# DB_PASSWORD = quote_plus(os.getenv("DB_PASSWORD"))
+# DB_HOST = os.getenv("DB_HOST")
+# DB_PORT = os.getenv("DB_PORT", "3306")
+# DB_NAME = os.getenv("DB_NAME")
 
 
 # Safety checks (VERY IMPORTANT)
-if not all([DB_USER, DB_PASSWORD, DB_HOST, DB_NAME]):
-    raise ValueError("Database environment variables are not properly set")
-
-
-DATABASE_URL = os.getenv("MYSQL_PUBLIC_URL")
+# if not all([DB_USER, DB_PASSWORD, DB_HOST, DB_NAME]):
+#     raise ValueError("Database environment variables are not properly set")
 
 # Build database URL
 # DATABASE_URL = f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}/{DB_NAME}"
-# DATABASE_URL = f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
+DATABASE_URL = os.getenv("MYSQL_PUBLIC_URL")
+
+if not DATABASE_URL:
+    raise ValueError("MYSQL_PUBLIC_URL is not set")
 
 #  Create engine with production-safe settings
 engine = create_engine(
