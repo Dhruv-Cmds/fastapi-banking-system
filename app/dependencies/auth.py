@@ -1,26 +1,37 @@
 from fastapi import Depends, HTTPException
-from jose import jwt
+from jose import jwt, JWSError
 from sqlalchemy.orm import Session
 from app.db import get_db
 from app.models import User
 from app.core import SECRET_KEY, ALGORITHM
 from fastapi import Header
 
-# ------------------------------------------------------------------------------------------------
 
 # Depends(get_db) Opens data Base connection to read, write, delete, update
 
 # takes a token ---> verifies the token, finds the user in data base and return the user  
-def get_current_user(authorization: str = Header(None), db: Session = Depends(get_db)):
+def get_current_user(
+        authorization: str = Header(None), 
+        db: Session = Depends(get_db)
+    ):
 
-    print("HEADER:", authorization)
+    """
+    Extracts and verifies JWT token
+    Returns authenticated user
+    """
     
+
+    #  No token provided
     if not authorization:
         raise HTTPException(status_code=401, detail="No token")
 
+
+    #  Wrong format
     if not authorization.startswith("Bearer "):
         raise HTTPException(status_code=401, detail="Invalid format")
 
+
+    # Extract token
     token = authorization.split(" ")[1]
 
 
@@ -28,11 +39,15 @@ def get_current_user(authorization: str = Header(None), db: Session = Depends(ge
         # verifies token is valid / checks signature using SECRET_KEY / reads hidden data inside
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
 
+        #  Extract user ID
         user_id = int(payload.get("sub"))
 
-    except:
+    except JWSError:
+
+        # Invalid / expired / tampered token
         raise HTTPException(status_code=401, detail="Invalid token")
     
+    # Fetch user from DB
     user = db.query(User).filter(User.id == user_id).first()
 
     if user is None:
