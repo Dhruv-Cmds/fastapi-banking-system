@@ -1,58 +1,62 @@
-# 🏦 FastAPI Banking System API
+# 🏦 FastAPI Banking System
 
-A clean, modular, and production-style **Bank Account Management System** built using **FastAPI**, **SQLAlchemy**, and **MySQL**.
+A production-style **Bank Account Management API** built with **FastAPI**, **SQLAlchemy**, and **MySQL**.
 
-This project demonstrates real-world backend architecture including authentication, account management, transactions, and proper validation.
+Designed to simulate real-world fintech backend systems with secure authentication, transactional integrity, and clean architecture.
 
 ---
 
 ## 🖼️ UI Preview
 
-![UI Preview](screenshots/ui_1.png)  
-![UI Preview](screenshots/ui_2.png)
+![Dashboard](screenshots/ui_1.png)  
+![Transactions](screenshots/ui_2.png)
 
 ---
 
-## 🚀 Features
+## 🚀 Key Features
 
 ### 🔐 Authentication
-- User Signup & Login (JWT-based)
+- JWT-based authentication
+- Secure password hashing (bcrypt)
 - Case-insensitive username handling
-- Secure password hashing
+
+---
 
 ### 🏦 Account Management
-- Create multiple bank accounts
+- Create and manage multiple accounts
 - Unique account number enforcement
-- View all user accounts
+- Fetch all accounts for a user
 
-### 💰 Transactions
+---
+
+### 💸 Transactions
 - Deposit funds
 - Withdraw funds with balance validation
 - Transfer money between accounts
-- Self-transfer prevention
-- Concurrency-safe transactions (DB locking)
+- Prevent self-transfers
+- Concurrency-safe operations using DB row locking
 
-### 🧠 Validation & Logic
+---
+
+### 🧠 Validation & Business Logic
 - Amount must be greater than zero
-- Cannot withdraw more than balance
-- Cannot transfer to same account
-- Backend-driven validation
-
-### ⚙️ System Design
-- Environment-based configuration (`.env`)
-- Clean modular structure
-- SQLAlchemy ORM integration
+- Cannot withdraw beyond balance
+- Prevent duplicate account numbers
+- Backend-driven validation (no trust in frontend)
 
 ---
 
 ## 🧱 Tech Stack
 
-- **FastAPI** – High-performance backend framework  
-- **SQLAlchemy** – ORM for database interaction  
-- **MySQL** – Relational database  
-- **Pydantic** – Data validation  
-- **python-dotenv** – Environment configuration  
-- **JWT (python-jose)** – Authentication  
+| Layer        | Technology |
+|-------------|-----------|
+| Backend      | FastAPI |
+| ORM          | SQLAlchemy |
+| Database     | MySQL |
+| Validation   | Pydantic |
+| Auth         | JWT (python-jose) |
+| Security     | Passlib (bcrypt) |
+| Config       | python-dotenv |
 
 ---
 
@@ -62,55 +66,59 @@ This project demonstrates real-world backend architecture including authenticati
 fastapi-banking-system/
 │
 ├── app/
-│ ├── routes/ # API routes (auth + accounts)
-│ ├── models/ # SQLAlchemy models
-│ ├── schemas/ # Pydantic schemas
-│ ├── db/ # Database setup
+│ ├── routes/ # API endpoints (auth, accounts)
+│ ├── models/ # Database models
+│ ├── schemas/ # Request/response validation
+│ ├── db/ # DB connection setup
 │ ├── core/ # Security (JWT, hashing)
-│ └── dependencies/ # Auth dependencies
+│ └── dependencies/ # Auth middleware
 │
-├── main.py # App entry point
-├── requirements.txt # Dependencies
-├── .env # Environment variables (ignored)
+├── main.py # Application entry point
+├── requirements.txt
+├── .env # Environment variables (excluded)
 └── .gitignore
-
 ```
----
 
-## ⚙️ Setup Instructions
+# ⚙️ Setup Guide
 
-### 1️⃣ Clone the repository
+## 1️⃣ Clone Repository
 
 ```bash
 git clone https://github.com/Dhruv-Cmds/fastapi-banking-system.git
 cd fastapi-banking-system
 ```
 
-### 2️⃣ Create virtual environment
+## 2️⃣ Create Virtual Environment
 
-```
+```bash
 python -m venv .venv
 ```
 
-Windows
-```
+### Activate:
+
+**Windows**
+
+```bash
 .venv\Scripts\activate
 ```
 
-Mac/Linux
-```
+**Mac/Linux**
+
+```bash
 source .venv/bin/activate
 ```
 
-3️⃣ Install dependencies
-```
+## 3️⃣ Install Dependencies
+
+```bash
 pip install -r requirements.txt
 ```
 
-4️⃣ Configure environment variables
+## 4️⃣ Configure Environment
 
-Create a .env file:
+Create a `.env` file:
 
+```env
 DB_USER=root
 DB_PASSWORD=your_password
 DB_HOST=localhost
@@ -118,63 +126,82 @@ DB_NAME=bankaccountsystem
 
 SECRET_KEY=your_secret_key
 ALGORITHM=HS256
+```
 
-5️⃣ Run the application
+## 5️⃣ Run Server
 
+```bash
 uvicorn main:app --reload
+```
 
-🧠 Database Behavior
+---
 
-Tables are automatically created at startup:
-models.Base.metadata.create_all(bind=engine)
-Schema is derived from SQLAlchemy models.
+# 📌 API Endpoints
 
-📌 API Endpoints
+## 🔐 Auth
 
-🔐 Auth
+* `POST /signup`
+* `POST /login`
 
-POST /signup
-POST /login
+## 🏦 Accounts
 
-🏦 Accounts
+* `POST /accounts`
+* `GET  /accounts`
 
-POST /accounts
-GET  /accounts
-💰 Transactions
-POST /accounts/{id}/deposit
-POST /accounts/{id}/withdraw
-POST /transfer
+## 💰 Transactions
 
-⚠️ Validations Implemented
+* `POST /accounts/{id}/deposit`
+* `POST /accounts/{id}/withdraw`
+* `POST /transfer`
 
-Cannot transfer to the same account
-Amount must be greater than zero
-Cannot withdraw more than balance
-Unique account number enforced
-Case-insensitive usernames
-Secure transaction locking (prevents race conditions)
+---
 
-🔐 Security
+# 🧠 System Behavior
 
-JWT-based authentication
-Password hashing (bcrypt)
-.env excluded from Git
-Secure DB connection handling
+* Tables auto-created at startup:
 
-💎 Highlights
+  ```python
+  Base.metadata.create_all(bind=engine)
+  ```
+* Schema driven by SQLAlchemy models
+* Fully RESTful API design
 
-Clean architecture (modular FastAPI structure)
-Real-world banking logic implementation
-Proper separation of concerns
-Scalable backend design
+---
 
-⭐ Conclusion
+# 🔐 Security Highlights
+
+* JWT authentication
+* Password hashing (bcrypt)
+* Environment-based secrets
+* Protected routes with dependency injection
+* Safe transaction handling using DB locks
+
+---
+
+# 💎 Highlights
+
+* Clean, modular architecture
+* Real-world banking logic implementation
+* Transaction safety (race-condition prevention)
+* Scalable backend design
+* Production-ready structure
+
+---
+
+# 🏁 Conclusion
 
 This project demonstrates how to build a real-world backend system with:
 
-Authentication
-Database design
-Transaction safety
-Clean architecture
+* Authentication & authorization
+* Database design & ORM usage
+* Transaction safety & concurrency handling
+* Clean architecture & scalability
 
-It serves as a strong foundation for scaling into a full fintech application 🚀
+It serves as a strong foundation for evolving into a full fintech platform 🚀
+
+---
+
+# ⭐ Author
+
+**Dhruv**
+Built with focus on backend engineering & system design.
