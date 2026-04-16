@@ -42,6 +42,9 @@ def get_current_user(
         #  Extract user ID
         user_id = int(payload.get("sub"))
 
+        if user_id is None:
+            raise HTTPException(status_code=401, detail="Invalid token payload")
+
     except JWSError:
 
         # Invalid / expired / tampered token
