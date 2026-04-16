@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import API from "../api/api";
 
 import AccountsList from "./AccountsList";
@@ -25,16 +25,10 @@ export default function Dashboard({ user, onLogout }) {
     return localStorage.getItem("theme") === "dark";
   });
 
-  const [showProfile, setShowProfile] = useState(false);
   const [tab, setTab] = useState("home");
 
-  const selAcc = accounts.find(
-    (a) => Number(a.id) === Number(selected)
-  );
-
-  const hasAccounts = accounts.length > 0;
-
-  async function loadAccounts() {
+  // 🔥 FIXED: useCallback to avoid React warning
+  const loadAccounts = useCallback(async () => {
     try {
       const r = await API.get("/accounts");
       const data = r.data;
@@ -46,27 +40,31 @@ export default function Dashboard({ user, onLogout }) {
         return;
       }
 
-      const exists = data.some((a) => a.id === selected);
+      const exists = data.some(
+        (a) => Number(a.id) === Number(selected)
+      );
 
       if (!selected || !exists) {
         setSelected(Number(data[0].id));
       }
+
     } catch (err) {
       console.error("Failed to load accounts:", err);
     }
-  }
+  }, [selected]);
 
   useEffect(() => {
-    loadAccounts();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    async function init() {
+      await loadAccounts();
+    }
+
+    init();
+  }, [loadAccounts]);
 
   useEffect(() => {
     function updateTheme() {
       const isDark = localStorage.getItem("theme") === "dark";
       setDark(isDark);
-
-      // also update body (backup)
       document.body.className = isDark ? "dark" : "light";
     }
 
@@ -74,12 +72,18 @@ export default function Dashboard({ user, onLogout }) {
 
     return () =>
       window.removeEventListener("themeChange", updateTheme);
-  }, []);;
+  }, []);
+
+  const selAcc = accounts.find(
+    (a) => Number(a.id) === Number(selected)
+  );
+
+  const hasAccounts = accounts.length > 0;
 
   return (
     <div className={`app-shell ${dark ? "dark" : "light"}`}>
-      
-      {/* Header */}
+
+      {/* HEADER */}
       {tab !== "profile" && (
         <header className="header">
           <div
@@ -98,7 +102,7 @@ export default function Dashboard({ user, onLogout }) {
             <p className="hero-label">Cash Balance</p>
 
             <p style={{ opacity: 0.6 }}>
-              {selAcc?.account_name || "Account"} • #{selAcc?.acc_no || "-"}
+              Account • #{selAcc?.acc_no || "-"}
             </p>
 
             <p className="hero-amount">
@@ -125,7 +129,7 @@ export default function Dashboard({ user, onLogout }) {
           <AccountsList
             accounts={accounts}
             selected={selected}
-            onSelect={setSelected}
+            onSelect={(id) => setSelected(Number(id))}
           />
         </>
       )}
@@ -153,16 +157,16 @@ export default function Dashboard({ user, onLogout }) {
 
       {/* PANELS */}
       {panel === "deposit" && selected && (
-        <Deposit accountId={selected} onDone={loadAccounts} />
+        <Deposit accountId={Number(selected)} onDone={loadAccounts} />
       )}
 
       {panel === "withdraw" && selected && (
-        <Withdraw accountId={selected} onDone={loadAccounts} />
+        <Withdraw accountId={Number(selected)} onDone={loadAccounts} />
       )}
 
       {panel === "transfer" && selected && (
         <Transfer
-          accountId={selected}
+          accountId={Number(selected)}
           fromAccNo={selAcc?.acc_no}
           onDone={loadAccounts}
         />
@@ -170,20 +174,6 @@ export default function Dashboard({ user, onLogout }) {
 
       {panel === "new" && (
         <CreateAccount onDone={loadAccounts} />
-      )}
-
-      {/* DRAWER */}
-      {showProfile && (
-        <>
-          <div
-            className="overlay"
-            onClick={() => setShowProfile(false)}
-          />
-
-          <div className={`profile-drawer ${showProfile ? "open" : ""}`}>
-            <Profile user={user} onLogout={onLogout} />
-          </div>
-        </>
       )}
 
       {/* BOTTOM NAV */}

@@ -10,9 +10,7 @@ export default function Withdraw({ accountId, onDone }) {
   const [loading, setLoading] = useState(false);
 
   async function submit() {
-    setMsg(null);
-    setLoading(true);
-
+    // 🔥 FIX: validate BEFORE loading
     const amt = Number(amount);
 
     if (!amt || amt <= 0) {
@@ -20,28 +18,33 @@ export default function Withdraw({ accountId, onDone }) {
       return;
     }
 
-    try {
-      console.log("WITHDRAW:", accountId, amt);
+    setMsg(null);
+    setLoading(true);
 
-      await API.post(`/accounts/${accountId}/withdraw`, {
+    try {
+      await API.post(`/accounts/${Number(accountId)}/withdraw`, {
         amount: amt,
       });
 
       setMsg({ text: "Withdrawal successful!", type: "ok" });
 
-      setTimeout(() => setMsg(null), 3000);
+      setAmount(""); // 🔥 clear input after success
+
       setTimeout(() => {
-        onDone();
-      }, 600);
+        setMsg(null);
+        onDone(); // 🔥 refresh accounts
+      }, 800);
 
     } catch (e) {
-      setLoading(false);
       setMsg({
         text: e.response?.data?.detail || "Withdrawal failed",
         type: "err",
       });
 
       setTimeout(() => setMsg(null), 3000);
+
+    } finally {
+      setLoading(false); // 🔥 always stop loading
     }
   }
 

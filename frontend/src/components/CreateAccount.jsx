@@ -3,9 +3,8 @@ import API from "../api/api";
 import "./panel.css";
 
 export default function CreateAccount({ onDone }) {
-
   const [form, setForm] = useState({
-    account_name: "",
+    account_number: "",   // 🔥 renamed for clarity
     account_type: "savings",
   });
 
@@ -15,59 +14,48 @@ export default function CreateAccount({ onDone }) {
     setForm((p) => ({ ...p, [k]: e.target.value }));
 
   async function submit() {
-
-    if (!form.account_name) return;
+    if (!form.account_number) return;
 
     try {
-        await API.post("/accounts", {
-            acc_no: form.account_name,
-            balance: 0,
+      await API.post("/accounts", {
+        acc_no: Number(form.account_number), // 🔥 FIX: convert to number
+        balance: 0,
       });
-        
-      onDone();
-    } 
-    
-    catch (e) {
 
+      setMsg({ text: "Account created!", type: "ok" });
+
+      onDone();
+    } catch (e) {
       setMsg({
         text: e.response?.data?.detail || "Failed to create.",
         type: "err",
       });
-
     }
-
   }
 
   return (
-
     <div className="panel">
-
       <p className="panelTitle">Open New Account</p>
 
       <div className="field">
-
-        <label>Account Name</label>
+        <label>Account Number</label>
         <input
-          placeholder="e.g. Enter Account number"
-          value={form.account_name}
-          onChange={set("account_name")}
+          placeholder="Enter account number"
+          value={form.account_number}
+          onChange={set("account_number")}
         />
-
       </div>
 
       <div className="field">
-
         <label>Account Type</label>
 
         <select
-            value={form.account_type}
-            onChange={set("account_type")}
-            >
-            <option value="savings">Savings</option>
-            <option value="checking">Checking</option>
-
+          value={form.account_type}
+          onChange={set("account_type")}
+        >
+          <option value="savings">Savings</option>
+          <option value="checking">Checking</option>
         </select>
-
       </div>
 
       <button className="btn btn-primary" onClick={submit}>
@@ -75,7 +63,6 @@ export default function CreateAccount({ onDone }) {
       </button>
 
       {msg && <div className={`toast ${msg.type}`}>{msg.text}</div>}
-
     </div>
   );
 }

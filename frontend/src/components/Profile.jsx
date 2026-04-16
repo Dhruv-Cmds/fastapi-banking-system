@@ -8,9 +8,18 @@ export default function Profile({ user, onLogout }) {
   });
 
   const [msg, setMsg] = useState(null);
+  const [loading, setLoading] = useState(false);
   const [themeOpen, setThemeOpen] = useState(false);
 
   async function save() {
+    // 🔥 FIX: validation
+    if (!name.trim()) {
+      setMsg("Name cannot be empty");
+      return;
+    }
+
+    setLoading(true);
+
     try {
       await API.put("/me", { name });
 
@@ -18,13 +27,17 @@ export default function Profile({ user, onLogout }) {
 
       setMsg("Saved!");
       setTimeout(() => setMsg(null), 2000);
+
     } catch (e) {
       setMsg(e.response?.data?.detail || "Update failed");
       setTimeout(() => setMsg(null), 2000);
+
+    } finally {
+      setLoading(false); // 🔥 always stop loading
     }
   }
 
-  // ✅ THEME TOGGLE (WORKING)
+  // ✅ THEME TOGGLE
   function toggleTheme() {
     const current = localStorage.getItem("theme") || "dark";
     const next = current === "dark" ? "light" : "dark";
@@ -32,7 +45,6 @@ export default function Profile({ user, onLogout }) {
     localStorage.setItem("theme", next);
     document.body.className = next;
 
-    // notify dashboard
     window.dispatchEvent(new Event("themeChange"));
   }
 
@@ -64,8 +76,12 @@ export default function Profile({ user, onLogout }) {
         />
       </div>
 
-      <button className="btn btn-primary" onClick={save}>
-        Save Changes
+      <button
+        className="btn btn-primary"
+        onClick={save}
+        disabled={loading}
+      >
+        {loading ? "Saving..." : "Save Changes"}
       </button>
 
       {msg && <div className="toast ok">{msg}</div>}
@@ -87,7 +103,6 @@ export default function Profile({ user, onLogout }) {
 
         {themeOpen && (
           <div className="theme-toggle-box">
-
             <div
               className={`toggle-pill ${isDark ? "dark" : "light"}`}
               onClick={toggleTheme}
@@ -97,13 +112,18 @@ export default function Profile({ user, onLogout }) {
               <span className="toggle-label left">🌙</span>
               <span className="toggle-label right">☀️</span>
             </div>
-
           </div>
         )}
 
         <div className="menu-item">🔒 Security</div>
 
-        <div className="menu-item" onClick={onLogout}>
+        <div
+          className="menu-item"
+          onClick={() => {
+            localStorage.removeItem("token"); // 🔥 FIX: ensure logout clears token
+            onLogout();
+          }}
+        >
           🚪 Sign out
         </div>
 

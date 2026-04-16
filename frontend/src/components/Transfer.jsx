@@ -4,8 +4,6 @@ import "./panel.css";
 
 const QUICK = [500, 1000, 5000, 10000];
 
-
-
 export default function Transfer({ accountId, fromAccNo, onDone }) {
   const [amount, setAmount] = useState("");
   const [toAccNo, setToAccNo] = useState("");
@@ -13,9 +11,7 @@ export default function Transfer({ accountId, fromAccNo, onDone }) {
   const [loading, setLoading] = useState(false);
 
   async function submit() {
-    setMsg(null);
-    setLoading(true);
-
+    // 🔥 FIX: validate BEFORE loading
     const to = Number(toAccNo);
     const from = Number(fromAccNo);
     const amt = Number(amount);
@@ -30,29 +26,36 @@ export default function Transfer({ accountId, fromAccNo, onDone }) {
       return;
     }
 
-    try {
-      console.log("Transfer:", accountId, to, amt);
+    setMsg(null);
+    setLoading(true);
 
+    try {
       await API.post("/transfer", {
-        from_account_id: Number(accountId),   
+        from_account_id: Number(accountId), // 🔥 ensure number
         to_account_no: to,
-        amount: amt,                         
+        amount: amt,
       });
 
       setMsg({ text: "Transfer successful!", type: "ok" });
 
-      setTimeout(() => setMsg(null), 3000);
-      setLoading(false); 
-      setTimeout(onDone, 800);
+      setAmount("");      // 🔥 clear inputs
+      setToAccNo("");
+
+      setTimeout(() => {
+        setMsg(null);
+        onDone();         // 🔥 refresh accounts AFTER success
+      }, 800);
 
     } catch (e) {
-      setLoading(false);
       setMsg({
         text: e.response?.data?.detail || "Transfer failed",
         type: "err",
       });
 
       setTimeout(() => setMsg(null), 3000);
+
+    } finally {
+      setLoading(false); // 🔥 always stop loading
     }
   }
 
@@ -82,7 +85,11 @@ export default function Transfer({ accountId, fromAccNo, onDone }) {
 
       <div className="chips">
         {QUICK.map((q) => (
-          <button key={q} className="chip" onClick={() => setAmount(String(q))}>
+          <button
+            key={q}
+            className="chip"
+            onClick={() => setAmount(String(q))}
+          >
             ₹{q >= 1000 ? q / 1000 + "k" : q}
           </button>
         ))}

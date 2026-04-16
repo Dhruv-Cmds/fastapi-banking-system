@@ -1,31 +1,24 @@
 from fastapi import FastAPI
-from app.db import engine, Base
-
-from app.models import account, user
-from app.routes import account, auth
 from fastapi.middleware.cors import CORSMiddleware
 
-# Create FastAPI app
-app = FastAPI()
+from app.db import engine, Base
 
-origins = [
-    "http://localhost:5173",     # frontend
-    "http://127.0.0.1:5173"      # backend
-]
+# IMPORTANT: rename imports to avoid conflict
+from app.routes import auth as auth_routes
+from app.routes import account as account_routes
+
+app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins, 
+    allow_origins=["http://localhost:5173"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-
-# Create DB tables (for development only)
 Base.metadata.create_all(bind=engine)
 
-
-# Register routes with prefixes (clean API structure)
-app.include_router(account.router)
-app.include_router(auth.router)
+# include routers properly
+app.include_router(auth_routes.router, prefix="/api")
+app.include_router(account_routes.router, prefix="/api")
