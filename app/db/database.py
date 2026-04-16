@@ -24,9 +24,11 @@ if not all([DB_USER, DB_PASSWORD, DB_HOST, DB_NAME]):
     raise ValueError("Database environment variables are not properly set")
 
 
+DATABASE_URL = os.getenv("MYSQL_PUBLIC_URL")
+
 # Build database URL
 # DATABASE_URL = f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}/{DB_NAME}"
-DATABASE_URL = f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+# DATABASE_URL = f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
 
 #  Create engine with production-safe settings
