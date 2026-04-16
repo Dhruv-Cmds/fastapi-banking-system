@@ -13,6 +13,12 @@ Designed to simulate real-world fintech backend systems with secure authenticati
 
 ---
 
+## 🌐 Live Demo
+
+- Frontend: https://fastapi-banking-system.vercel.app
+- Backend API: https://fastapi-banking-system.onrender.com
+- API Docs: https://fastapi-banking-system.onrender.com/docs
+
 ## 🚀 Key Features
 
 ### 🔐 Authentication
