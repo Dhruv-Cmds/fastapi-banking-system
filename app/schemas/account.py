@@ -1,20 +1,23 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from decimal import Decimal
 
+
+# CREATE ACCOUNT
 class AccountCreate(BaseModel):
 
-    acc_no: int
-    balance: Decimal
+    acc_no: int = Field(gt=0)              # must be > 0
+    balance: Decimal = Field(ge=0)         # must be >= 0
 
-# For deposit and withdraw
+
+# DEPOSIT / WITHDRAW
 class Amount(BaseModel):
 
-    amount: Decimal
+    amount: Decimal = Field(gt=0)          # must be > 0
 
-# For transfer 
+
+# TRANSFER
 class Transfer(BaseModel):
 
-    from_account_id: int
-    to_account_no: int
-    amount: Decimal
-   
+    from_account_id: int = Field(gt=0)
+    to_account_no: int = Field(gt=0)
+    amount: Decimal = Field(gt=0)
