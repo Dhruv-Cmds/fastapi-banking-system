@@ -10,6 +10,7 @@ from app.db import get_db
 router = APIRouter()
 
 
+# CREATE ACCOUNT
 @router.post("/accounts",)
 def create_accounts (
                 account: AccountCreate, 
@@ -17,28 +18,41 @@ def create_accounts (
                 current_user: User = Depends(get_current_user)
     ):
 
-    existing = db.query(Account).filter(Account.acc_no == account.acc_no).first()
+    try:
 
-    if existing:
-        raise HTTPException(status_code=400, detail="Account number already exists")
+         # Check duplicate account number   
+        existing = db.query(Account).filter(Account.acc_no == account.acc_no).first()
 
-    new_acc = Account(
-        acc_no=account.acc_no,
-        balance=account.balance,
-        user_id= current_user.id
-    )
+        if existing:
+            raise HTTPException(status_code=400, detail="Account number already exists")
 
-    db.add(new_acc)
-    db.commit()
-    db.refresh(new_acc)
-    return new_acc
+        new_acc = Account(
+            acc_no=account.acc_no,
+            balance=account.balance,
+            user_id= current_user.id
+        )
 
+        db.add(new_acc)
+        db.commit()
+        db.refresh(new_acc)
+        return new_acc
+
+    except SQLAlchemyError:
+        db.rollback()
+        raise HTTPException(status_code=500, detail="Account creation failed")
+
+
+#  GET USER ACCOUNTS
 @router.get("/accounts")
-def get_account(db: Session = Depends(get_db), 
-                current_user: User = Depends(get_current_user)):
+def get_account(
+    db: Session = Depends(get_db), 
+    current_user: User = Depends(get_current_user)
+    ):
 
     return db.query(Account).filter(Account.user_id == current_user.id).all()
 
+
+# DEPOSIT
 @router.post("/accounts/{id}/deposit")
 def deposit(
             id: int, 
@@ -49,6 +63,7 @@ def deposit(
 
     try:
 
+        #  Lock account row
         acc = db.query(Account)\
             .filter(Account.id == id, Account.user_id == current_user.id)\
             .with_for_update()\
@@ -57,11 +72,10 @@ def deposit(
         if not acc:
             raise HTTPException(status_code=404, detail="Account not found")
 
-        if data.amount <= 0:
-            raise HTTPException(status_code=400, detail="Amount must be greater than zero")
-
         acc.balance += data.amount
 
+
+        #  Audit log
         txn = Transaction(
             from_account_id=None,
             to_account_id=acc.id,
@@ -79,7 +93,9 @@ def deposit(
 
         db.rollback()
         raise HTTPException (status_code=500, detail="Deposit failed")
-    
+
+
+# WITHDRAW
 @router.post("/accounts/{id}/withdraw")
 def withdraw(
 
@@ -91,6 +107,7 @@ def withdraw(
 
     try:
 
+        #  Lock account row
         acc = db.query(Account)\
             .filter(Account.id == id, Account.user_id == current_user.id)\
             .with_for_update()\
@@ -99,17 +116,12 @@ def withdraw(
         if not acc:
             raise HTTPException(status_code=404, detail="Account not found")
 
-        if acc.user_id != current_user.id:
-            raise HTTPException(status_code=403, detail="Not authorized")
-
-        if data.amount <= 0:
-            raise HTTPException(status_code=400, detail="Amount must be greater than zero")
-
         if data.amount > acc.balance:
             raise HTTPException(status_code=400, detail="Insufficient balance")
 
         acc.balance -= data.amount
 
+        # Audit log
         txn = Transaction(
             from_account_id=acc.id,
             to_account_id=None,
@@ -128,6 +140,8 @@ def withdraw(
         db.rollback()
         raise HTTPException (status_code=500, detail="Withdrawn failed")
 
+
+# TRANSFER 
 @router.post("/transfer")
 def transfer(
         data: Transfer, 
@@ -148,12 +162,14 @@ def transfer(
 
     # -------------------------------------------------------------------------------------------------------------------------
     try:
-
+        
+        # Lock sender
         from_acc = db.query(Account)\
             .filter(Account.id == data.from_account_id)\
             .with_for_update()\
             .first()
         
+        # Lock receiver
         to_acc = db.query(Account)\
             .filter(Account.acc_no == data.to_account_no)\
             .with_for_update()\
@@ -161,22 +177,27 @@ def transfer(
 
         if not from_acc or not to_acc:
             raise HTTPException(status_code=404, detail="Account not found")
+        
 
         if from_acc.user_id != current_user.id:
             raise HTTPException(status_code=403, detail="Not authorized")
+        
 
         if from_acc.id == to_acc.id:
             raise HTTPException(status_code=400, detail="Cannot transfer to same account")
+        
 
-        if data.amount <= 0:
-            raise HTTPException(status_code=400, detail="Amount must be greater than zero")
 
         if from_acc.balance < data.amount:
             raise HTTPException(status_code=400, detail="Insufficient balance")
+        
 
+        # Perform transfer
         from_acc.balance -= data.amount
         to_acc.balance += data.amount
+        
 
+        # Audit log
         txn = Transaction(
                     from_account_id=from_acc.id,
                     to_account_id=to_acc.id,
