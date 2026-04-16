@@ -3,7 +3,7 @@ import axios from "axios";
 // 🌐 Base API instance
 const API = axios.create({
   // baseURL: "http://localhost:8000/api",
-  baseURL: "https://fastapi-banking-system.onrender.com",
+  baseURL: "https://fastapi-banking-system.onrender.com/api",
   timeout: 10000, 
 });
 
