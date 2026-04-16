@@ -2,8 +2,9 @@ import axios from "axios";
 
 // 🌐 Base API instance
 const API = axios.create({
-  baseURL: "http://localhost:8000/api", // ✅ match your backend prefix
-  timeout: 10000, // ⏱️ avoid hanging requests
+  // baseURL: "http://localhost:8000/api",
+  baseURL: "https://fastapi-banking-system.onrender.com",
+  timeout: 10000, 
 });
 
 
