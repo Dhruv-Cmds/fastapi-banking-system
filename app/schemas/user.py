@@ -5,12 +5,25 @@ from pydantic import BaseModel, StringConstraints
 # Annotated = Gives you extra conditions check the length of data
 from typing import Annotated
 
-passwordStr = Annotated[str, StringConstraints(min_length=4, max_length=72)]
+passwordStr = Annotated[str,
+                         StringConstraints(
+                             min_length=4, 
+                             max_length=72
+                             )
+                        ]
 
 class UserCreate(BaseModel):
 
-    username: str
-    name: str
+    username: Annotated[
+        str,
+        StringConstraints(min_length=3, max_length=30)
+    ]
+
+    name: Annotated[
+        str,
+        StringConstraints(min_length=1, max_length=50)
+    ]
+
     password: passwordStr
 
 class UserLogin(BaseModel):
@@ -19,4 +32,7 @@ class UserLogin(BaseModel):
 
 
 class UserUpdate(BaseModel):
-    name: str
+    name: Annotated[
+        str,
+        StringConstraints(min_length=1, max_length=50)
+    ]
