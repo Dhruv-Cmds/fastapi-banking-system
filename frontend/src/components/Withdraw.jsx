@@ -10,7 +10,7 @@ export default function Withdraw({ accountId, onDone }) {
   const [loading, setLoading] = useState(false);
 
   async function submit() {
-    // 🔥 FIX: validate BEFORE loading
+    
     const amt = Number(amount);
 
     if (!amt || amt <= 0) {
@@ -28,11 +28,11 @@ export default function Withdraw({ accountId, onDone }) {
 
       setMsg({ text: "Withdrawal successful!", type: "ok" });
 
-      setAmount(""); // 🔥 clear input after success
+      setAmount(""); 
 
       setTimeout(() => {
         setMsg(null);
-        onDone(); // 🔥 refresh accounts
+        onDone(); 
       }, 800);
 
     } catch (e) {

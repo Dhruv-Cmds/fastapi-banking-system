@@ -27,7 +27,6 @@ export default function Dashboard({ user, onLogout }) {
 
   const [tab, setTab] = useState("home");
 
-  // 🔥 FIXED: useCallback to avoid React warning
   const loadAccounts = useCallback(async () => {
     try {
       const r = await API.get("/accounts");

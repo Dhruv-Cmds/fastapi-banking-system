@@ -5,17 +5,29 @@ import "./index.css";
 import "./App.css";
 
 export default function App() {
-  const [user, setUser] = useState(null);
 
-  function handleLogout() {
+  const [user, setUser] = useState(() => {
+    const token = localStorage.getItem("token");
 
-    localStorage.removeItem("token");
-    setUser(null);
+    if (token) {
+      return localStorage.getItem("username") || "User";
+    }
 
+    return null;
+  });
+
+  function handleLogin(username) {
+    localStorage.setItem("username", username);
+    setUser(username);
   }
 
-  if (!user) return <Login onLogin={(u) => setUser(u)} />;
+  function handleLogout() {
+    localStorage.removeItem("token");
+    localStorage.removeItem("username");
+    setUser(null);
+  }
+
+  if (!user) return <Login onLogin={handleLogin} />;
 
   return <Dashboard user={user} onLogout={handleLogout} />;
-  
 }

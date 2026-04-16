@@ -17,7 +17,7 @@ export default function Login({ onLogin }) {
     setForm((p) => ({ ...p, [k]: e.target.value }));
 
   async function submit() {
-    // 🔥 FIX: validation first
+    
     if (!form.username || !form.password) {
       setMsg({ text: "Enter username & password", type: "err" });
       return;
@@ -37,14 +37,14 @@ export default function Login({ onLogin }) {
 
         onLogin(form.username);
       } else {
-        // ✅ signup
+        
         await API.post("/signup", {
           username: form.username,
           password: form.password,
           name: form.username,
         });
 
-        // 🔐 auto login
+       
         const r = await API.post("/login", {
           username: form.username,
           password: form.password,
@@ -64,7 +64,7 @@ export default function Login({ onLogin }) {
         type: "err",
       });
     } finally {
-      setLoading(false); // 🔥 always stop loading
+      setLoading(false); 
     }
   }
 

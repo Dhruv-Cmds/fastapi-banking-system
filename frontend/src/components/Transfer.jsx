@@ -11,7 +11,7 @@ export default function Transfer({ accountId, fromAccNo, onDone }) {
   const [loading, setLoading] = useState(false);
 
   async function submit() {
-    // 🔥 FIX: validate BEFORE loading
+    
     const to = Number(toAccNo);
     const from = Number(fromAccNo);
     const amt = Number(amount);
@@ -31,19 +31,19 @@ export default function Transfer({ accountId, fromAccNo, onDone }) {
 
     try {
       await API.post("/transfer", {
-        from_account_id: Number(accountId), // 🔥 ensure number
+        from_account_id: Number(accountId),
         to_account_no: to,
         amount: amt,
       });
 
       setMsg({ text: "Transfer successful!", type: "ok" });
 
-      setAmount("");      // 🔥 clear inputs
+      setAmount("");
       setToAccNo("");
 
       setTimeout(() => {
         setMsg(null);
-        onDone();         // 🔥 refresh accounts AFTER success
+        onDone();        
       }, 800);
 
     } catch (e) {
@@ -55,7 +55,7 @@ export default function Transfer({ accountId, fromAccNo, onDone }) {
       setTimeout(() => setMsg(null), 3000);
 
     } finally {
-      setLoading(false); // 🔥 always stop loading
+      setLoading(false); 
     }
   }
 

@@ -10,7 +10,7 @@ export default function Deposit({ accountId, onDone }) {
   const [loading, setLoading] = useState(false);
 
   async function submit() {
-    // 🔥 FIX: validate BEFORE loading
+    
     if (!amount || Number(amount) <= 0) {
       setMsg({ text: "Enter valid amount", type: "err" });
       return;
@@ -21,16 +21,16 @@ export default function Deposit({ accountId, onDone }) {
 
     try {
       await API.post(`/accounts/${Number(accountId)}/deposit`, {
-        amount: Number(amount), // 🔥 FIX: always send number
+        amount: Number(amount),
       });
 
       setMsg({ text: "Deposit successful!", type: "ok" });
 
-      setAmount(""); // 🔥 clear input after success
+      setAmount(""); 
 
       setTimeout(() => {
         setMsg(null);
-        onDone(); // 🔥 reload accounts AFTER success
+        onDone(); 
       }, 800);
 
     } catch (e) {
@@ -42,7 +42,7 @@ export default function Deposit({ accountId, onDone }) {
       setTimeout(() => setMsg(null), 3000);
 
     } finally {
-      setLoading(false); // 🔥 always stop loading
+      setLoading(false);
     }
   }
 

@@ -4,7 +4,7 @@ import "./panel.css";
 
 export default function CreateAccount({ onDone }) {
   const [form, setForm] = useState({
-    account_number: "",   // 🔥 renamed for clarity
+    account_number: "",  
     account_type: "savings",
   });
 
@@ -18,7 +18,7 @@ export default function CreateAccount({ onDone }) {
 
     try {
       await API.post("/accounts", {
-        acc_no: Number(form.account_number), // 🔥 FIX: convert to number
+        acc_no: Number(form.account_number), 
         balance: 0,
       });
 

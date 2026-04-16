@@ -12,7 +12,7 @@ export default function Profile({ user, onLogout }) {
   const [themeOpen, setThemeOpen] = useState(false);
 
   async function save() {
-    // 🔥 FIX: validation
+  
     if (!name.trim()) {
       setMsg("Name cannot be empty");
       return;
@@ -33,11 +33,10 @@ export default function Profile({ user, onLogout }) {
       setTimeout(() => setMsg(null), 2000);
 
     } finally {
-      setLoading(false); // 🔥 always stop loading
+      setLoading(false); 
     }
   }
 
-  // ✅ THEME TOGGLE
   function toggleTheme() {
     const current = localStorage.getItem("theme") || "dark";
     const next = current === "dark" ? "light" : "dark";
@@ -120,7 +119,7 @@ export default function Profile({ user, onLogout }) {
         <div
           className="menu-item"
           onClick={() => {
-            localStorage.removeItem("token"); // 🔥 FIX: ensure logout clears token
+            localStorage.removeItem("token"); 
             onLogout();
           }}
         >
