@@ -4,7 +4,7 @@ USE bankaccountsystem;
 -- DROP TABLE accounts;
 -- DROP TABLE transaction;
 
-
-SELECT * FROM users;
-SELECT * FROM accounts;
-SELECT * FROM transactions;
+ALTER TABLE transactions ADD COLUMN status VARCHAR(20) DEFAULT 'ACTIVE';
+-- SELECT * FROM users;
+-- SELECT * FROM accounts;
+-- SELECT * FROM transactions;
