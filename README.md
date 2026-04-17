@@ -41,6 +41,21 @@ Designed to simulate real-world fintech backend systems with **secure authentica
 
 ---
 
+## 🔄 Account Lifecycle (NEW)
+
+Accounts are not physically deleted. Instead, they are marked as:
+
+- `ACTIVE` → usable account  
+- `CLOSED` → hidden from UI and blocked from operations  
+
+This ensures:
+
+- Data integrity  
+- Transaction history preservation  
+- Real-world banking behavior  
+
+---
+
 ## 💸 Transactions (Core System)
 
 ### ✔ Supported Operations
@@ -51,10 +66,12 @@ Designed to simulate real-world fintech backend systems with **secure authentica
 
 ### ✔ Safety & Integrity
 
-* Prevent self-transfers
-* Prevent overdraft (no negative balance)
-* Concurrency-safe operations using **row-level locking (`with_for_update`)**
-* Atomic database transactions
+ Prevent overdraft (no negative balance)
+
+* Prevent overdraft (no negative balance)  
+* Prevent self-transfers  
+* Only ACTIVE accounts can perform operations  
+* Atomic database transactions using commit/rollback  
 
 ---
 
@@ -86,7 +103,8 @@ Designed to simulate real-world fintech backend systems with **secure authentica
 
 * Strong input validation using Pydantic schemas
 * Backend-driven validation (never trusting frontend)
-* Separation of:
+* Ownership-based authorization 
+* SClean separation of validation and business logic:
 
   * **Data validation (schemas)**
   * **Business logic (routes/services)**
@@ -215,6 +233,7 @@ npm run dev (frontend)
 
 * `POST /accounts`
 * `GET  /accounts`
+* `DELETE /accounts/{id} → closes account`
 
 ## 💰 Transactions
 
@@ -238,7 +257,8 @@ Base.metadata.create_all(bind=engine)
 Create account → balance = 0  
 Deposit → increases balance  
 Withdraw → decreases balance  
-Transfer → moves funds safely  
+Transfer → moves funds safely 
+Close account → status = CLOSED (not deleted) 
 ```
 
 ---
@@ -258,6 +278,7 @@ Transfer → moves funds safely
 
 * Clean, modular architecture
 * Real-world banking logic implementation
+* Soft-delete system (account lifecycle)
 * Transaction safety (race-condition prevention)
 * Rule-based financial system (limits + validation)
 * Scalable backend design
