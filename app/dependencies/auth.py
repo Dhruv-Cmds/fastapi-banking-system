@@ -5,10 +5,9 @@ from app.db import get_db
 from app.models import User
 from app.core import SECRET_KEY, ALGORITHM
 from fastapi import Header
-from fastapi.security import OAuth2PasswordBearer
+# from fastapi.security import OAuth2PasswordBearer
 
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/login")
 
 # Depends(get_db) Opens data Base connection to read, write, delete, update
 
@@ -61,6 +60,10 @@ def get_current_user(
         raise HTTPException(status_code=401, detail="User not found")
     
     return user
+
+
+# oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/login")
+
 
 # def get_current_user(
 #     token: str = Depends(oauth2_scheme),

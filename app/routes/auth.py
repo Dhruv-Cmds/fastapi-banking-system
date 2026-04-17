@@ -36,9 +36,12 @@ def signup(user: UserCreate, db: Session = Depends(get_db)):
             password=hashed_pw
         )
 
-        db.add(new_user)
-        db.commit()
-        db.refresh(new_user)
+        db.begin(
+
+            db.add(new_user),
+            db.commit(),
+            db.refresh(new_user)
+        )
 
         return {"message": "User created"}
 
@@ -92,8 +95,10 @@ def update_profile(
         #  Update only allowed fields
         current_user.name = data.name
 
-        db.commit()
-        db.refresh(current_user)
+        db.begin(
+            db.commit(),
+            db.refresh(current_user)
+        )
 
         return {"message": "Profile updated"}
     

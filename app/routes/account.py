@@ -32,9 +32,13 @@ def create_accounts (
             user_id= current_user.id
         )
 
-        db.add(new_acc)
-        db.commit()
-        db.refresh(new_acc)
+        db.begin(
+
+            db.add(new_acc),
+            db.commit(),
+            db.refresh(new_acc)
+        )
+
         return new_acc
 
     except SQLAlchemyError:
@@ -82,10 +86,13 @@ def deposit(
             amount=data.amount
         )
 
-        db.add(txn)
+        db.begin(
 
-        db.commit()
-        db.refresh(acc)
+            db.add(txn),
+
+            db.commit(),
+            db.refresh(acc),
+        )
 
         return acc
     
@@ -128,10 +135,14 @@ def withdraw(
             amount=data.amount
         )
 
-        db.add(txn)
+        db.begin(
 
-        db.commit()
-        db.refresh(acc)
+            db.add(txn),
+
+            db.commit(),
+            db.refresh(acc),
+
+        )
 
         return acc
     
@@ -187,7 +198,6 @@ def transfer(
             raise HTTPException(status_code=400, detail="Cannot transfer to same account")
         
 
-
         if from_acc.balance < data.amount:
             raise HTTPException(status_code=400, detail="Insufficient balance")
         
@@ -204,12 +214,16 @@ def transfer(
                     amount=data.amount
                 )
         
-        db.add(txn)
+        
+        db.begin(
 
-        db.commit()
+            db.add(txn),
 
-        db.refresh(from_acc)
-        db.refresh(to_acc)
+            db.commit(),
+
+            db.refresh(from_acc),
+            db.refresh(to_acc)
+        )
 
         return {
             "message": "Transfer successful",
@@ -221,3 +235,41 @@ def transfer(
 
         db.rollback()
         raise HTTPException (status_code=500, detail="Transfer failed")
+
+# DELETE   
+@router.delete("/accounts/{id}")
+def delete_account(
+    id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+    ):
+
+    try:
+    
+        acc = db.query(Account)\
+        .filter(Account.id == id)\
+        .with_for_update()\
+        .first()
+
+        if not acc:
+            raise HTTPException (status_code=404, detail="Account not found")
+        
+        if acc.user_id != current_user.id:
+            raise HTTPException (status_code=403, detail="Not authorize")
+        
+        if acc.balance != 0:
+            raise HTTPException (status_code=400, detail="Account balance must be zero")
+        
+        db.begin(
+
+            db.delete(acc),
+            db.commit()
+        )
+
+        return {"Message": "Account deleted"}
+    
+    except SQLAlchemyError:
+
+        db.rollback()
+        raise HTTPException (status_code=500, detail="Somethings went wrong")
+     
