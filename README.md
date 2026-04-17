@@ -2,88 +2,132 @@
 
 A production-style **Bank Account Management API** built with **FastAPI**, **SQLAlchemy**, and **MySQL**.
 
-Designed to simulate real-world fintech backend systems with secure authentication, transactional integrity, and clean architecture.
+Designed to simulate real-world fintech backend systems with **secure authentication, transactional integrity, and rule-based financial operations**.
 
 ---
 
 ## 🖼️ UI Preview
 
-![Dashboard](screenshots/ui_1.png)  
+![Dashboard](screenshots/ui_1.png)
 ![Transactions](screenshots/ui_2.png)
 
 ---
 
 ## 🌐 Live Demo
 
-- Frontend: https://fastapi-banking-system.vercel.app
-- Backend API: https://fastapi-banking-system.onrender.com
-- API Docs: https://fastapi-banking-system.onrender.com/docs
-
-## 🚀 Key Features
-
-### 🔐 Authentication
-- JWT-based authentication
-- Secure password hashing (bcrypt)
-- Case-insensitive username handling
+* Frontend: https://fastapi-banking-system.vercel.app
+* Backend API: https://fastapi-banking-system.onrender.com
+* API Docs: https://fastapi-banking-system.onrender.com/docs
 
 ---
 
-### 🏦 Account Management
-- Create and manage multiple accounts
-- Unique account number enforcement
-- Fetch all accounts for a user
+# 🚀 Key Features
+
+## 🔐 Authentication
+
+* JWT-based authentication
+* Secure password hashing (bcrypt)
+* Case-insensitive username handling
+* Protected routes using dependency injection
 
 ---
 
-### 💸 Transactions
-- Deposit funds
-- Withdraw funds with balance validation
-- Transfer money between accounts
-- Prevent self-transfers
-- Concurrency-safe operations using DB row locking
+## 🏦 Account Management
+
+* Create multiple accounts per user
+* Unique account number enforcement
+* Accounts initialized with **zero balance (system-controlled)**
+* Fetch all user accounts securely
 
 ---
 
-### 🧠 Validation & Business Logic
-- Amount must be greater than zero
-- Cannot withdraw beyond balance
-- Prevent duplicate account numbers
-- Backend-driven validation (no trust in frontend)
+## 💸 Transactions (Core System)
+
+### ✔ Supported Operations
+
+* Deposit funds
+* Withdraw funds with balance validation
+* Transfer money between accounts
+
+### ✔ Safety & Integrity
+
+* Prevent self-transfers
+* Prevent overdraft (no negative balance)
+* Concurrency-safe operations using **row-level locking (`with_for_update`)**
+* Atomic database transactions
 
 ---
 
-## 🧱 Tech Stack
+## 🧠 Business Rules & Financial Constraints
 
-| Layer        | Technology |
-|-------------|-----------|
-| Backend      | FastAPI |
-| ORM          | SQLAlchemy |
-| Database     | MySQL |
-| Validation   | Pydantic |
-| Auth         | JWT (python-jose) |
-| Security     | Passlib (bcrypt) |
-| Config       | python-dotenv |
+### 💰 Transaction Limits
+
+* Deposit limit per transaction
+* Withdraw limit per transaction
+* Transfer limit enforcement
+
+> Limits are centrally managed via a **config module**, making the system flexible and maintainable.
 
 ---
 
-## 📁 Project Structure
+### 🧾 Transaction Ledger
+
+* Every operation (deposit, withdraw, transfer) is recorded
+* Enables audit tracking and system transparency
+* Foundation for future features like:
+
+  * Statements
+  * Analytics
+  * Fraud detection
+
+---
+
+## 🧠 Validation Strategy
+
+* Strong input validation using Pydantic schemas
+* Backend-driven validation (never trusting frontend)
+* Separation of:
+
+  * **Data validation (schemas)**
+  * **Business logic (routes/services)**
+
+---
+
+# 🧱 Tech Stack
+
+| Layer      | Technology        |
+| ---------- | ----------------- |
+| Backend    | FastAPI           |
+| ORM        | SQLAlchemy        |
+| Database   | MySQL             |
+| Validation | Pydantic          |
+| Auth       | JWT (python-jose) |
+| Security   | Passlib (bcrypt)  |
+| Config     | python-dotenv     |
+
+---
+
+# 📁 Project Structure
 
 ```
 fastapi-banking-system/
 │
 ├── app/
-│ ├── routes/ # API endpoints (auth, accounts)
-│ ├── models/ # Database models
-│ ├── schemas/ # Request/response validation
-│ ├── db/ # DB connection setup
-│ ├── core/ # Security (JWT, hashing)
-│ └── dependencies/ # Auth middleware
+│   ├── routes/        # API endpoints    
+│       (auth, accounts, transactions)
+│   ├── models/        # Database models
+│   ├── schemas/       # Request/response validation
+│   ├── db/            # DB connection setup
+│   ├── core/          # Security, config (JWT, hashing, limits)
+│   └── dependencies/  # Auth middleware
 │
-├── main.py # Application entry point
+├── main.py
 ├── requirements.txt
-├── .env # Environment variables (excluded)
+├── .env
 └── .gitignore
 ```
+
+---
 
 # ⚙️ Setup Guide
 
@@ -93,6 +137,8 @@ fastapi-banking-system/
 git clone https://github.com/Dhruv-Cmds/fastapi-banking-system.git
 cd fastapi-banking-system
 ```
+
+---
 
 ## 2️⃣ Create Virtual Environment
 
@@ -114,11 +160,15 @@ python -m venv .venv
 source .venv/bin/activate
 ```
 
+---
+
 ## 3️⃣ Install Dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
+
+---
 
 ## 4️⃣ Configure Environment
 
@@ -132,12 +182,24 @@ DB_NAME=bankaccountsystem
 
 SECRET_KEY=your_secret_key
 ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES = your_time
+
+IF You Want to go live: 
+
+MYSQL_PUBLIC_URL = your_url
+
+SECRET_KEY=your_secret_key
+ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES = your_time
 ```
+
+---
 
 ## 5️⃣ Run Server
 
 ```bash
-uvicorn main:app --reload
+uvicorn main:app --reload (backend)
+npm run dev (frontend)
 ```
 
 ---
@@ -166,11 +228,18 @@ uvicorn main:app --reload
 
 * Tables auto-created at startup:
 
-  ```python
-  Base.metadata.create_all(bind=engine)
-  ```
-* Schema driven by SQLAlchemy models
-* Fully RESTful API design
+```python
+Base.metadata.create_all(bind=engine)
+```
+
+* Account lifecycle:
+
+```
+Create account → balance = 0  
+Deposit → increases balance  
+Withdraw → decreases balance  
+Transfer → moves funds safely  
+```
 
 ---
 
@@ -179,8 +248,9 @@ uvicorn main:app --reload
 * JWT authentication
 * Password hashing (bcrypt)
 * Environment-based secrets
-* Protected routes with dependency injection
+* Ownership-based authorization checks
 * Safe transaction handling using DB locks
+* Protection against race conditions
 
 ---
 
@@ -189,25 +259,26 @@ uvicorn main:app --reload
 * Clean, modular architecture
 * Real-world banking logic implementation
 * Transaction safety (race-condition prevention)
+* Rule-based financial system (limits + validation)
 * Scalable backend design
-* Production-ready structure
 
 ---
 
 # 🏁 Conclusion
 
-This project demonstrates how to build a real-world backend system with:
+This project demonstrates how to build a **real-world backend system** with:
 
 * Authentication & authorization
 * Database design & ORM usage
 * Transaction safety & concurrency handling
+* Business rule enforcement
 * Clean architecture & scalability
 
-It serves as a strong foundation for evolving into a full fintech platform 🚀
+It serves as a strong foundation for evolving into a **full fintech platform** 🚀
 
 ---
 
 # ⭐ Author
 
 **Dhruv**
-Built with focus on backend engineering & system design.
+Backend-focused developer building systems with strong fundamentals in **API design, data integrity, and system thinking**.
