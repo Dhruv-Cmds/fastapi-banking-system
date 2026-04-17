@@ -7,6 +7,8 @@ from app.schemas import AccountCreate, Amount, Transfer
 from app.dependencies import get_current_user
 from app.db import get_db
 
+from app.core import MAX_DEPOSIT, MAX_WITHDRAW, MAX_TRANSFER
+
 router = APIRouter()
 
 
@@ -65,8 +67,6 @@ def deposit(
 
     try:
 
-        MAX_DEPOSIT = 50000
-
         #  Lock account row
         acc = db.query(Account)\
             .filter(Account.id == id, Account.user_id == current_user.id)\
@@ -116,8 +116,6 @@ def withdraw(
     ):
 
     try:
-
-        MAX_WITHDRAW = 20000
 
         #  Lock account row
         acc = db.query(Account)\
@@ -181,8 +179,6 @@ def transfer(
 
     # -------------------------------------------------------------------------------------------------------------------------
     try:
-
-        MAX_TRANSFER = 100000
         
         # Lock sender
         from_acc = db.query(Account)\
