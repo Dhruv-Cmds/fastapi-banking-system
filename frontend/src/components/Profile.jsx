@@ -10,8 +10,14 @@ export default function Profile({ user, onLogout }) {
   const [msg, setMsg] = useState(null);
   const [loading, setLoading] = useState(false);
   const [themeOpen, setThemeOpen] = useState(false);
+  const [password, setPassword] = useState("");
 
   async function save() {
+
+    console.log("Sending:", {
+      name,
+      password
+    });
   
     if (!name.trim()) {
       setMsg("Name cannot be empty");
@@ -21,7 +27,10 @@ export default function Profile({ user, onLogout }) {
     setLoading(true);
 
     try {
-      await API.put("/me", { name });
+      await API.put("/me", {
+        name,
+        password: password || undefined
+      })
 
       localStorage.setItem("profile_name", name);
 
@@ -72,6 +81,16 @@ export default function Profile({ user, onLogout }) {
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
+        />
+      </div>
+
+      <div className="field">
+        <label>Password</label>
+        <input
+          type="password"
+          placeholder="New password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
         />
       </div>
 

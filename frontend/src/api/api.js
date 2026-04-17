@@ -1,6 +1,6 @@
 import axios from "axios";
 
-// 🌐 Base API instance
+//  Base API instance
 const API = axios.create({
   // baseURL: "http://localhost:8000/api",
   baseURL: "https://fastapi-banking-system.onrender.com/api",
@@ -8,7 +8,7 @@ const API = axios.create({
 });
 
 
-// 🔐 Attach JWT token automatically
+//  Attach JWT token automatically
 API.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
@@ -23,18 +23,18 @@ API.interceptors.request.use(
 );
 
 
-// 🚨 Handle responses globally
+//  Handle responses globally
 API.interceptors.response.use(
   (response) => response,
 
   (error) => {
-    // 🔐 If token expired or invalid → logout user
+    //  If token expired or invalid → logout user
     if (error.response && error.response.status === 401) {
       console.warn("Unauthorized! Logging out...");
 
       localStorage.removeItem("token");
 
-      // 👉 redirect to login page (adjust path if needed)
+      //  redirect to login page (adjust path if needed)
       window.location.href = "/login";
     }
 

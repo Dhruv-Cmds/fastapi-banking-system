@@ -3,7 +3,7 @@
 from pydantic import BaseModel, StringConstraints
 
 # Annotated = Gives you extra conditions check the length of data
-from typing import Annotated
+from typing import Annotated, Optional
 
 passwordStr = Annotated[str,
                          StringConstraints(
@@ -27,13 +27,19 @@ class UserCreate(BaseModel):
     password: passwordStr
 
 class UserLogin(BaseModel):
-    username: str
+    username: Annotated[
+        str,
+        StringConstraints(min_length=3, max_length=30)
+    ]
     password: passwordStr
 
 
 class UserUpdate(BaseModel):
-    name: Annotated[
-        str,
-        StringConstraints(min_length=1, max_length=50)
-    ]
-    password: passwordStr
+    name: Optional[
+        Annotated[
+            str,
+            StringConstraints(min_length=1, max_length=50)
+        ]
+    ] = None
+
+    password: Optional[passwordStr] = None

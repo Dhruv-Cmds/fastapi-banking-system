@@ -36,10 +36,12 @@ def signup(user: UserCreate, db: Session = Depends(get_db)):
             password=hashed_pw
         )
 
-        with db.begin():
 
-            db.add(new_user)
-            db.refresh(new_user)
+        db.add(new_user)
+        
+        db.commit()
+
+        db.refresh(new_user)
 
         return {"message": "User created"}
 
@@ -86,7 +88,7 @@ def update_profile(
     data: UserUpdate,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
-):
+    ):
     
     try:
 
@@ -97,13 +99,20 @@ def update_profile(
         if data.password:
             current_user.password = hash_password(data.password)
 
-        with db.begin():
 
-            db.refresh(current_user)
+        db.commit()
+        
+        db.refresh(current_user)
+
 
         return {"message": "Profile updated"}
     
-    except SQLAlchemyError:
 
-        db.rollback()
-        raise HTTPException(500, "Update failed")
+    except Exception as e:
+        print("ERROR:", e)
+        raise HTTPException(status_code=500, detail=str(e))
+    
+    # except SQLAlchemyError:
+
+    #     db.rollback()
+    #     raise HTTPException(500, "Update failed")

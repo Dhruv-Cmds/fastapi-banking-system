@@ -129,6 +129,7 @@ export default function Dashboard({ user, onLogout }) {
             accounts={accounts}
             selected={selected}
             onSelect={(id) => setSelected(Number(id))}
+            onRefresh={loadAccounts}
           />
         </>
       )}

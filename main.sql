@@ -7,4 +7,4 @@ USE bankaccountsystem;
 
 SELECT * FROM users;
 SELECT * FROM accounts;
-SELECT * FROM transaction;
+SELECT * FROM transactions;

@@ -34,10 +34,9 @@ def create_accounts (
             user_id= current_user.id
         )
 
-        with db.begin():
-
-            db.add(new_acc)
-            db.refresh(new_acc)
+        db.add(new_acc)
+        db.commit()
+        db.refresh(new_acc)
 
         return new_acc
 
@@ -69,7 +68,7 @@ def deposit(
 
         #  Lock account row
         acc = db.query(Account)\
-            .filter(Account.id == id, Account.user_id == current_user.id)\
+            .filter(Account.id == id, Account.user_id == current_user.id, Account.status == "ACTIVE")\
             .with_for_update()\
             .first()
 
@@ -91,11 +90,10 @@ def deposit(
             amount=data.amount
         )
 
-        with db.begin():
+        db.add(txn)
 
-            db.add(txn)
-
-            db.refresh(acc)
+        db.commit()
+        db.refresh(acc)
 
         return acc
     
@@ -119,7 +117,7 @@ def withdraw(
 
         #  Lock account row
         acc = db.query(Account)\
-            .filter(Account.id == id, Account.user_id == current_user.id)\
+            .filter(Account.id == id, Account.user_id == current_user.id, Account.status == "ACTIVE")\
             .with_for_update()\
             .first()
         
@@ -143,11 +141,10 @@ def withdraw(
             amount=data.amount
         )
 
-        with db.begin():
+        db.add(txn)
 
-            db.add(txn)
-
-            db.refresh(acc)
+        db.commit()
+        db.refresh(acc)
 
 
         return acc
@@ -182,13 +179,13 @@ def transfer(
         
         # Lock sender
         from_acc = db.query(Account)\
-            .filter(Account.id == data.from_account_id)\
+            .filter(Account.id == data.from_account_id, Account.status == "ACTIVE")\
             .with_for_update()\
             .first()
         
         # Lock receiver
         to_acc = db.query(Account)\
-            .filter(Account.acc_no == data.to_account_no)\
+            .filter(Account.acc_no == data.to_account_no, Account.status == "ACTIVE")\
             .with_for_update()\
             .first()
 
@@ -225,13 +222,13 @@ def transfer(
                     amount=data.amount
                 )
         
-        
-        with db.begin():
 
-            db.add(txn)
+        db.add(txn)
 
-            db.refresh(from_acc)
-            db.refresh(to_acc)
+        db.commit()
+
+        db.refresh(from_acc)
+        db.refresh(to_acc)
 
         return {
             "message": "Transfer successful",
@@ -239,9 +236,14 @@ def transfer(
             "to_account_balance": to_acc.balance
         }
     
+    except Exception as e:
+        db.rollback()
+        print("ERROR:", e)
+        raise HTTPException(status_code=500, detail=str(e))
+
     except SQLAlchemyError:
 
-        db.rollback()
+        # db.rollback()
         raise HTTPException (status_code=500, detail="Transfer failed")
 
 
@@ -251,31 +253,32 @@ def delete_account(
     id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
-    ):
+):
 
     try:
     
         acc = db.query(Account)\
-        .filter(Account.id == id)\
-        .with_for_update()\
-        .first()
+            .filter(Account.id == id)\
+            .first()
 
         if not acc:
-            raise HTTPException (status_code=404, detail="Account not found")
-        
+            raise HTTPException(status_code=404, detail="Account not found")
+
         if acc.user_id != current_user.id:
-            raise HTTPException (status_code=403, detail="Not authorized")
-        
+            raise HTTPException(status_code=403, detail="Not authorized")
+
+        if acc.status == "CLOSED":
+            raise HTTPException(status_code=400, detail="Account already closed")
+
         if acc.balance != 0:
-            raise HTTPException (status_code=400, detail="Account balance must be zero")
-        
-        with db.begin():
+            raise HTTPException(status_code=400, detail="Balance must be zero")
 
-            db.delete(acc)
+        acc.status = "CLOSED"
 
-        return {"Message": "Account deleted"}
+        db.commit()
+
+        return {"message": "Account closed successfully"}
     
     except SQLAlchemyError:
-
         db.rollback()
-        raise HTTPException (status_code=500, detail="Somethings went wrong")
+        raise HTTPException(status_code=500, detail="Something went wrong")

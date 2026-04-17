@@ -1,5 +1,5 @@
 from fastapi import Depends, HTTPException
-from jose import jwt, JWSError
+from jose import jwt, JWSError, ExpiredSignatureError
 from sqlalchemy.orm import Session
 from app.db import get_db
 from app.models import User
@@ -46,9 +46,12 @@ def get_current_user(
 
         if user_id is None:
             raise HTTPException(status_code=401, detail="Invalid token payload")
+        
+    
+    except ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token expired")
 
     except JWSError:
-
         # Invalid / expired / tampered token
         raise HTTPException(status_code=401, detail="Invalid token")
     
