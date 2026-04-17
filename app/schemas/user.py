@@ -36,3 +36,4 @@ class UserUpdate(BaseModel):
         str,
         StringConstraints(min_length=1, max_length=50)
     ]
+    password: passwordStr

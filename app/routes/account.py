@@ -28,16 +28,14 @@ def create_accounts (
 
         new_acc = Account(
             acc_no=account.acc_no,
-            balance=account.balance,
+            balance=0,
             user_id= current_user.id
         )
 
-        db.begin(
+        with db.begin():
 
-            db.add(new_acc),
-            db.commit(),
+            db.add(new_acc)
             db.refresh(new_acc)
-        )
 
         return new_acc
 
@@ -67,6 +65,8 @@ def deposit(
 
     try:
 
+        MAX_DEPOSIT = 50000
+
         #  Lock account row
         acc = db.query(Account)\
             .filter(Account.id == id, Account.user_id == current_user.id)\
@@ -75,6 +75,11 @@ def deposit(
 
         if not acc:
             raise HTTPException(status_code=404, detail="Account not found")
+        
+        # Removed duplicate amount <= 0 check (handled by schema)
+        
+        if data.amount > MAX_DEPOSIT:
+            raise HTTPException(status_code=400, detail="Deposit limit exceeded")
 
         acc.balance += data.amount
 
@@ -86,13 +91,11 @@ def deposit(
             amount=data.amount
         )
 
-        db.begin(
+        with db.begin():
 
-            db.add(txn),
+            db.add(txn)
 
-            db.commit(),
-            db.refresh(acc),
-        )
+            db.refresh(acc)
 
         return acc
     
@@ -114,6 +117,8 @@ def withdraw(
 
     try:
 
+        MAX_WITHDRAW = 20000
+
         #  Lock account row
         acc = db.query(Account)\
             .filter(Account.id == id, Account.user_id == current_user.id)\
@@ -122,6 +127,11 @@ def withdraw(
         
         if not acc:
             raise HTTPException(status_code=404, detail="Account not found")
+        
+        # Removed duplicate amount <= 0 check
+        
+        if data.amount > MAX_WITHDRAW:
+            raise HTTPException(status_code=400, detail="Withdraw limit exceeded")
 
         if data.amount > acc.balance:
             raise HTTPException(status_code=400, detail="Insufficient balance")
@@ -135,14 +145,12 @@ def withdraw(
             amount=data.amount
         )
 
-        db.begin(
+        with db.begin():
 
-            db.add(txn),
+            db.add(txn)
 
-            db.commit(),
-            db.refresh(acc),
+            db.refresh(acc)
 
-        )
 
         return acc
     
@@ -173,6 +181,8 @@ def transfer(
 
     # -------------------------------------------------------------------------------------------------------------------------
     try:
+
+        MAX_TRANSFER = 100000
         
         # Lock sender
         from_acc = db.query(Account)\
@@ -198,9 +208,14 @@ def transfer(
             raise HTTPException(status_code=400, detail="Cannot transfer to same account")
         
 
+        # FIXED: correct transfer limit logic
+        if data.amount > MAX_TRANSFER:
+            raise HTTPException(status_code=400, detail="Transfer limit exceeded")
+        
+
         if from_acc.balance < data.amount:
             raise HTTPException(status_code=400, detail="Insufficient balance")
-        
+ 
 
         # Perform transfer
         from_acc.balance -= data.amount
@@ -215,15 +230,12 @@ def transfer(
                 )
         
         
-        db.begin(
+        with db.begin():
 
-            db.add(txn),
+            db.add(txn)
 
-            db.commit(),
-
-            db.refresh(from_acc),
+            db.refresh(from_acc)
             db.refresh(to_acc)
-        )
 
         return {
             "message": "Transfer successful",
@@ -235,6 +247,7 @@ def transfer(
 
         db.rollback()
         raise HTTPException (status_code=500, detail="Transfer failed")
+
 
 # DELETE   
 @router.delete("/accounts/{id}")
@@ -255,16 +268,14 @@ def delete_account(
             raise HTTPException (status_code=404, detail="Account not found")
         
         if acc.user_id != current_user.id:
-            raise HTTPException (status_code=403, detail="Not authorize")
+            raise HTTPException (status_code=403, detail="Not authorized")
         
         if acc.balance != 0:
             raise HTTPException (status_code=400, detail="Account balance must be zero")
         
-        db.begin(
+        with db.begin():
 
-            db.delete(acc),
-            db.commit()
-        )
+            db.delete(acc)
 
         return {"Message": "Account deleted"}
     
@@ -272,4 +283,3 @@ def delete_account(
 
         db.rollback()
         raise HTTPException (status_code=500, detail="Somethings went wrong")
-     

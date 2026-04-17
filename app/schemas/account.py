@@ -6,7 +6,7 @@ from decimal import Decimal
 class AccountCreate(BaseModel):
 
     acc_no: int = Field(gt=0)              # must be > 0
-    balance: Decimal = Field(ge=0)         # must be >= 0
+    balance: Decimal = Field(default=0)    # must be = 0
 
 
 # DEPOSIT / WITHDRAW
