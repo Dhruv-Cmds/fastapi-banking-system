@@ -1,85 +1,93 @@
-/* ===== MOBILE + LAYOUT FIX (PATCH) ===== */
+/* =========================
+   BASE
+========================= */
 
-/* full height fix */
 html, body, #root {
   height: 100%;
 }
 
-/* fix app container layout */
+body {
+  margin: 0;
+  display: block !important;
+  background: #0b0f1a;
+  font-family: sans-serif;
+  color: white;
+}
+
+body.dark {
+  background-color: #111 !important;
+  color: #fff !important;
+}
+
+body.light {
+  background-color: #fff !important;
+  color: #000 !important;
+}
+
+/* =========================
+   APP SHELL
+========================= */
+
 .app-shell {
   min-height: 100vh !important;
   display: flex !important;
   flex-direction: column !important;
   overflow-y: auto !important;
-  padding-bottom: 90px !important; /* space for bottom nav */
+  padding-bottom: 90px !important;
+  max-width: 420px;
+  margin: auto;
+  padding: 16px;
 }
 
-/* fix centered tiny layout issue */
-body {
-  display: block !important;
+.app-shell > *:last-child {
+  margin-bottom: 20px;
 }
 
-/* ensure sections take full width */
+/* Light / Dark variants */
+.app-shell.light {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.app-shell.dark {
+  background: #020617;
+  color: #e2e8f0;
+}
+
+.app-shell.light .account-card,
+.app-shell.light .panel,
+.app-shell.light .hero {
+  background: #ffffff;
+  color: #0f172a;
+}
+
+/* Ensure key sections are full width */
 .hero,
 .quick-actions,
 .accounts-grid {
   width: 100% !important;
 }
 
-/* fix bottom nav positioning */
-.bottom-nav {
-  position: fixed !important;
-  bottom: 0 !important;
-  left: 50% !important;
-  transform: translateX(-50%) !important;
+/* =========================
+   HEADER
+========================= */
 
-  width: 100% !important;
-  max-width: 420px !important;
-
-  z-index: 9999 !important;
-}
-
-/* prevent content being hidden */
-.app-shell > *:last-child {
-  margin-bottom: 20px;
-}
-
-/* better mobile spacing */
-@media (max-width: 480px) {
-  .app-shell {
-    padding: 12px !important;
-  }
-
-  .hero-amount {
-    font-size: 22px !important;
-  }
-}
-
-
-
-body {
-  margin: 0;
-  background: #0b0f1a;
-  font-family: sans-serif;
-  color: white;
-}
-
-.app-shell {
-  padding: 20px;
-}
-
-/* HEADER */
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 10px;
 }
 
 .header-left {
   display: flex;
-  gap: 10px;
   align-items: center;
+  gap: 10px;
 }
+
+/* =========================
+   AVATAR
+========================= */
 
 .avatar {
   width: 40px;
@@ -92,6 +100,20 @@ body {
   font-weight: bold;
 }
 
+.avatar.clickable {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.avatar.clickable:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 10px rgba(124,58,237,0.5);
+}
+
+/* =========================
+   LOGOUT BUTTON
+========================= */
+
 .logout-btn {
   background: #ff4757;
   border: none;
@@ -101,47 +123,61 @@ body {
   cursor: pointer;
 }
 
-/* HERO */
+/* =========================
+   HERO
+========================= */
+
 .hero {
-  margin-top: 20px;
-  padding: 20px;
-  background: #121829;
-  border-radius: 12px;
+  background: linear-gradient(135deg, #1e293b, #0f172a);
+  padding: 16px;
+  border-radius: 16px;
+  margin-bottom: 20px;
 }
 
 .hero-label {
+  font-size: 14px;
   opacity: 0.7;
 }
 
 .hero-amount {
-  font-size: 28px;
+  font-size: 32px;
   font-weight: bold;
+  margin: 10px 0;
 }
 
 .hero-actions {
-  margin-top: 10px;
   display: flex;
   gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 10px;
 }
 
 .hero-actions button {
-  padding: 10px;
-  border: none;
-  background: #6c5ce7;
+  flex: 1;
+  background: #4f46e5;
   color: white;
-  border-radius: 6px;
-  cursor: pointer;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin-right: 10px;
 }
 
-/* ACTIONS */
+.hero-actions button:hover {
+  background: #4338ca;
+}
+
+/* =========================
+   QUICK ACTIONS
+========================= */
+
 .quick-actions {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: 10px;
   margin-top: 20px;
 }
 
 .quick-actions button {
-  flex: 1;
   padding: 10px;
   background: #1e293b;
   border: none;
@@ -150,9 +186,61 @@ body {
   cursor: pointer;
 }
 
-/* ACCOUNTS LIST */
+/* =========================
+   ACCOUNTS GRID
+========================= */
+
+.accounts-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.account-card {
+  background: linear-gradient(135deg, #1e293b, #0f172a);
+  padding: 16px;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.account-card:hover {
+  transform: translateY(-5px) scale(1.02);
+  border: 1px solid #4f46e5;
+  box-shadow: 0 10px 25px rgba(79,70,229,0.25);
+}
+
+.account-card.active {
+  border: 2px solid #4f46e5;
+  transform: scale(1.03);
+}
+
+.acc-name {
+  font-size: 14px;
+  opacity: 0.7;
+}
+
+.acc-balance {
+  font-size: 20px;
+  font-weight: bold;
+  margin: 8px 0;
+}
+
+.acc-number {
+  font-size: 12px;
+  opacity: 0.6;
+}
+
+/* =========================
+   LIST / OLD CARD LAYOUT
+========================= */
+
 .list {
   margin-top: 20px;
+  position: relative;
+  z-index: 2;
 }
 
 .card {
@@ -163,14 +251,12 @@ body {
   display: flex;
   justify-content: space-between;
   cursor: pointer;
+  position: relative;
+  z-index: 20;
 }
 
 .card:hover {
   background: #1e293b;
-}
-
-.active {
-  border: 2px solid #6c5ce7;
 }
 
 .left {
@@ -200,12 +286,31 @@ body {
   opacity: 0.7;
 }
 
-/* PANEL */
+/* =========================
+   ACTIVE STATE
+   (consolidated — last rule wins for background)
+========================= */
+
+.active {
+  border: 2px solid #6c5ce7;
+  background: #1e293b;
+}
+
+.bottom-nav button.active {
+  color: #7c3aed;
+}
+
+/* =========================
+   PANEL
+========================= */
+
 .panel {
   margin-top: 20px;
   padding: 20px;
   background: #121829;
   border-radius: 12px;
+  position: relative;
+  z-index: 1;
 }
 
 .panelTitle {
@@ -213,7 +318,10 @@ body {
   margin-bottom: 10px;
 }
 
-/* FORM */
+/* =========================
+   FORM FIELDS
+========================= */
+
 .field {
   margin-bottom: 10px;
   display: flex;
@@ -225,9 +333,31 @@ body {
   padding: 8px;
   border-radius: 6px;
   border: none;
+  width: 100%;
 }
 
-/* BUTTON */
+/* =========================
+   BUTTONS (GLOBAL)
+========================= */
+
+button {
+  transition: all 0.2s ease;
+}
+
+button:hover {
+  transform: translateY(-2px);
+}
+
+button:active {
+  transform: scale(0.96);
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
 .btn {
   padding: 10px;
   border-radius: 6px;
@@ -240,18 +370,43 @@ body {
   color: white;
 }
 
-/* TOAST */
+.btn-accent {
+  background: #00c896;
+  color: white;
+}
+
+/* =========================
+   TOAST
+========================= */
+
 .toast {
-  margin-top: 10px;
-  padding: 8px;
-  border-radius: 6px;
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-size: 14px;
+  color: white;
+  animation: slideIn 0.3s ease, fadeOut 0.5s ease 2.5s forwards;
+  z-index: 1000;
 }
 
-.toast.err {
-  background: #ff4757;
+.toast.ok  { background: #16a34a; }
+.toast.err { background: #dc2626; }
+
+@keyframes slideIn {
+  from { transform: translateY(30px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
 }
 
-/* QUICK CHIPS */
+@keyframes fadeOut {
+  to { opacity: 0; transform: translateY(20px); }
+}
+
+/* =========================
+   CHIPS
+========================= */
+
 .chips {
   display: flex;
   gap: 8px;
@@ -271,7 +426,22 @@ body {
   background: #6c5ce7;
 }
 
-/* LOGIN PAGE */
+/* =========================
+   RECEIVER PREVIEW
+========================= */
+
+.receiver-preview {
+  margin-bottom: 10px;
+  padding: 8px;
+  background: #1e293b;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+/* =========================
+   LOGIN PAGE
+========================= */
+
 .page-center {
   display: flex;
   justify-content: center;
@@ -279,7 +449,6 @@ body {
   height: 100vh;
 }
 
-/* CARD */
 .wrap {
   position: relative;
   background: #121829;
@@ -288,7 +457,6 @@ body {
   width: 320px;
 }
 
-/* GLOW */
 .orb {
   position: absolute;
   width: 120px;
@@ -299,7 +467,10 @@ body {
   left: -40px;
 }
 
-/* LOGO */
+/* =========================
+   LOGO
+========================= */
+
 .logo {
   display: flex;
   gap: 10px;
@@ -313,16 +484,17 @@ body {
   color: #6c5ce7;
 }
 
-.logoName {
-  margin: 0;
-}
+.logoName { margin: 0; }
 
 .tagline {
   font-size: 12px;
   opacity: 0.6;
 }
 
-/* TABS */
+/* =========================
+   TABS
+========================= */
+
 .tabs {
   display: flex;
   margin-bottom: 15px;
@@ -337,11 +509,10 @@ body {
   cursor: pointer;
 }
 
-.active {
-  background: #6c5ce7;
-}
+/* =========================
+   SWITCH LINK
+========================= */
 
-/* SWITCH */
 .switch {
   margin-top: 10px;
   font-size: 12px;
@@ -352,220 +523,9 @@ body {
   cursor: pointer;
 }
 
-.btn-accent {
-  background: #00c896;
-  color: white;
-}
-
-.active {
-  border: 2px solid #6c5ce7;
-  background: #1e293b;
-}
-
-.panel {
-  position: relative;
-  z-index: 1;
-}
-
-.list {
-  position: relative;
-  z-index: 2;
-}
-
-.card {
-  position: relative;
-  z-index: 20;
-}
-
-.receiver-preview {
-  margin-bottom: 10px;
-  padding: 8px;
-  background: #1e293b;
-  border-radius: 6px;
-  font-size: 14px;
-}
-
-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.hero {
-  background: linear-gradient(135deg, #1e293b, #0f172a);
-  padding: 20px;
-  border-radius: 16px;
-  margin-bottom: 20px;
-}
-
-.hero-label {
-  font-size: 14px;
-  opacity: 0.7;
-}
-
-.hero-amount {
-  font-size: 32px;
-  font-weight: bold;
-  margin: 10px 0;
-}
-
-.hero-actions button {
-  margin-right: 10px;
-}
-
-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.accounts-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 15px;
-  margin-top: 20px;
-}
-
-.account-card {
-  background: linear-gradient(135deg, #1e293b, #0f172a);
-  padding: 16px;
-  border-radius: 14px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  border: 1px solid transparent;
-}
-
-.account-card:hover {
-  transform: translateY(-4px);
-  border: 1px solid #4f46e5;
-}
-
-.account-card.active {
-  border: 2px solid #4f46e5;
-  transform: scale(1.03);
-}
-
-.acc-name {
-  font-size: 14px;
-  opacity: 0.7;
-}
-
-.acc-balance {
-  font-size: 20px;
-  font-weight: bold;
-  margin: 8px 0;
-}
-
-.acc-number {
-  font-size: 12px;
-  opacity: 0.6;
-}
-
-/* LIGHT MODE */
-.app-shell.light {
-  background: #f1f5f9;
-  color: #0f172a;
-}
-
-/* DARK MODE */
-.app-shell.dark {
-  background: #020617;
-  color: #e2e8f0;
-}
-
-/* CARD FIX FOR LIGHT */
-.app-shell.light .account-card,
-.app-shell.light .panel,
-.app-shell.light .hero {
-  background: #ffffff;
-  color: #0f172a;
-}
-
-/* Toast Base */
-.toast {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  padding: 12px 16px;
-  border-radius: 10px;
-  font-size: 14px;
-  color: white;
-  animation: slideIn 0.3s ease, fadeOut 0.5s ease 2.5s forwards;
-  z-index: 1000;
-}
-
-/* Success */
-.toast.ok {
-  background: #16a34a;
-}
-
-/* Error */
-.toast.err {
-  background: #dc2626;
-}
-
-/* Animation */
-@keyframes slideIn {
-  from {
-    transform: translateY(30px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-@keyframes fadeOut {
-  to {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-}
-
-
-/* Base button */
-button {
-  transition: all 0.2s ease;
-}
-
-/* Hover lift */
-button:hover {
-  transform: translateY(-2px);
-}
-
-/* Click press */
-button:active {
-  transform: scale(0.96);
-}
-
-/* Disabled */
-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.account-card:hover {
-  transform: translateY(-4px);
-  border: 1px solid #4f46e5;
-}
-
-.account-card:hover {
-  transform: translateY(-5px) scale(1.02);
-  border: 1px solid #4f46e5;
-  box-shadow: 0 10px 25px rgba(79, 70, 229, 0.25);
-}
-
-.hero-actions button {
-  background: #4f46e5;
-  color: white;
-  border: none;
-  padding: 10px 14px;
-  border-radius: 8px;
-}
-
-.hero-actions button:hover {
-  background: #4338ca;
-}
+/* =========================
+   THEME TOGGLE BUTTON
+========================= */
 
 .theme-toggle {
   display: flex;
@@ -581,291 +541,22 @@ button:disabled {
   transition: all 0.25s ease;
 }
 
-/* icon style */
 .theme-toggle .icon {
   font-size: 16px;
 }
 
-/* hover effect */
 .theme-toggle:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 15px rgba(124, 58, 237, 0.4);
+  box-shadow: 0 6px 15px rgba(124,58,237,0.4);
 }
 
-/* click press */
 .theme-toggle:active {
   transform: scale(0.95);
 }
 
-.profile-avatar {
-  width: 70px;
-  height: 70px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #4f46e5, #7c3aed);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 28px;
-  color: white;
-  margin-bottom: 15px;
-}
-
-.avatar.clickable {
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.avatar.clickable:hover {
-  transform: scale(1.1);
-  box-shadow: 0 0 10px rgba(124, 58, 237, 0.5);
-}
-
-/* overlay background */
-.overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.6);
-  z-index: 999;
-  pointer-events: none;
-
-}
-
-/* sliding drawer */
-.profile-drawer {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 320px;
-  height: 100%;
-  background: #020617;
-  padding: 20px;
-  z-index: 1000;
-
-  animation: slideInLeft 0.3s ease;
-  overflow-y: auto;
-}
-
-/* animation */
-@keyframes slideInLeft {
-  from {
-    transform: translateX(-100%);
-  }
-  to {
-    transform: translateX(0);
-  }
-}
-
-/* overlay with blur */
-.overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  backdrop-filter: blur(6px);
-  background: rgba(0, 0, 0, 0.4);
-  z-index: 999;
-}
-
-/* drawer base */
-.profile-drawer {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 320px;
-  height: 100%;
-  background: rgba(2, 6, 23, 0.95);
-  padding: 20px;
-  z-index: 1000;
-
-  transform: translateX(-100%);
-  transition: transform 0.3s ease;
-}
-
-/* open state */
-.profile-drawer.open {
-  transform: translateX(0);
-}
-
-/* smooth shadow */
-.profile-drawer {
-  box-shadow: 10px 0 30px rgba(0, 0, 0, 0.6);
-}
-
-.profile-container {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-/* header */
-.profile-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.profile-name {
-  font-weight: bold;
-}
-
-.profile-sub {
-  font-size: 12px;
-  opacity: 0.6;
-}
-
-/* divider */
-.divider {
-  height: 1px;
-  background: rgba(255, 255, 255, 0.1);
-  margin: 10px 0;
-}
-
-/* menu */
-.profile-menu {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.menu-item {
-  padding: 10px;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.menu-item:hover {
-  background: rgba(79, 70, 229, 0.2);
-}
-
-.app-shell {
-  max-width: 420px;
-  margin: auto;
-  padding: 16px;
-}
-
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 10px;
-}
-
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.hero {
-  padding: 16px;
-  border-radius: 16px;
-}
-
-.hero-actions {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.hero-actions button {
-  flex: 1;
-}
-
-.quick-actions {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
-}
-
-.accounts-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.profile-drawer {
-  width: 85%;
-  max-width: 320px;
-}
-
-.field input {
-  width: 100%;
-}
-
-@media (max-width: 480px) {
-  .app-shell {
-    padding: 12px;
-  }
-
-  .hero-amount {
-    font-size: 22px;
-  }
-
-  .avatar {
-    width: 40px;
-    height: 40px;
-  }
-
-  .profile-avatar {
-    width: 60px;
-    height: 60px;
-    font-size: 24px;
-  }
-}
-
-/* bottom nav */
-.bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  max-width: 420px;
-  margin: auto;
-
-  display: flex;
-  justify-content: space-around;
-
-  background: #020617;
-  padding: 10px 0;
-  border-top: 1px solid rgba(255,255,255,0.1);
-}
-
-/* nav buttons */
-.bottom-nav button {
-  background: none;
-  border: none;
-  color: white;
-  font-size: 12px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-}
-
-/* active tab */
-.bottom-nav button.active {
-  color: #7c3aed;
-}
-
-body.dark {
-  background-color: #111 !important;
-  color: #fff !important;
-}
-
-body.light {
-  background-color: #fff !important;
-  color: #000 !important;
-}
-
-.profile-container {
-  position: relative;
-  z-index: 10;
-}
+/* =========================
+   THEME TOGGLE PILL
+========================= */
 
 .theme-toggle-box {
   display: flex;
@@ -886,13 +577,8 @@ body.light {
   padding: 0 12px;
 }
 
-.toggle-pill.dark {
-  background: linear-gradient(135deg, #1e293b, #020617);
-}
-
-.toggle-pill.light {
-  background: #e5e7eb;
-}
+.toggle-pill.dark  { background: linear-gradient(135deg, #1e293b, #020617); }
+.toggle-pill.light { background: #e5e7eb; }
 
 .toggle-circle {
   position: absolute;
@@ -913,4 +599,168 @@ body.light {
 .toggle-label {
   font-size: 18px;
   z-index: 1;
+}
+
+/* =========================
+   PROFILE AVATAR
+========================= */
+
+.profile-avatar {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  color: white;
+  margin-bottom: 15px;
+}
+
+/* =========================
+   OVERLAY
+========================= */
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  backdrop-filter: blur(6px);
+  background: rgba(0,0,0,0.4);
+  z-index: 999;
+}
+
+/* =========================
+   PROFILE DRAWER
+========================= */
+
+.profile-drawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 85%;
+  max-width: 320px;
+  height: 100%;
+  background: rgba(2,6,23,0.95);
+  padding: 20px;
+  z-index: 1000;
+  overflow-y: auto;
+  box-shadow: 10px 0 30px rgba(0,0,0,0.6);
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+}
+
+.profile-drawer.open {
+  transform: translateX(0);
+}
+
+@keyframes slideInLeft {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(0); }
+}
+
+/* =========================
+   PROFILE CONTENT
+========================= */
+
+.profile-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  position: relative;
+  z-index: 10;
+}
+
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.profile-name { font-weight: bold; }
+
+.profile-sub {
+  font-size: 12px;
+  opacity: 0.6;
+}
+
+.divider {
+  height: 1px;
+  background: rgba(255,255,255,0.1);
+  margin: 10px 0;
+}
+
+.profile-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.menu-item {
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.menu-item:hover {
+  background: rgba(79,70,229,0.2);
+}
+
+/* =========================
+   BOTTOM NAV
+========================= */
+
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100% !important;
+  max-width: 420px !important;
+  z-index: 9999 !important;
+  display: flex;
+  justify-content: space-around;
+  background: #020617;
+  padding: 10px 0;
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.bottom-nav button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+/* =========================
+   MOBILE  (max 480px)
+========================= */
+
+@media (max-width: 480px) {
+  .app-shell {
+    padding: 12px !important;
+  }
+
+  .hero-amount {
+    font-size: 22px !important;
+  }
+
+  .avatar {
+    width: 40px;
+    height: 40px;
+  }
+
+  .profile-avatar {
+    width: 60px;
+    height: 60px;
+    font-size: 24px;
+  }
 }
