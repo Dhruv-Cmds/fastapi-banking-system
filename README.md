@@ -8,8 +8,12 @@ Designed to simulate real-world fintech backend systems with **secure authentica
 
 ## 🖼️ UI Preview
 
-![Dashboard](screenshots/ui_1.png)
-![Transactions](screenshots/ui_2.png)
+![Login](screenshots/login.mp4)
+[![Watch Full Demo](https://img.youtube.com/vi/iex0donzgtE/0.jpg)](https://youtu.be/iex0donzgtE)
+
+<!-- ![Dashboard](screenshots/ui_1.png)
+
+![Transactions](screenshots/ui_2.png) -->
 
 ---
 
