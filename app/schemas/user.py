@@ -16,12 +16,18 @@ class UserCreate(BaseModel):
 
     username: Annotated[
         str,
-        StringConstraints(min_length=3, max_length=30)
+        StringConstraints(
+            min_length=3, 
+            max_length=30
+            )
     ]
 
     name: Annotated[
         str,
-        StringConstraints(min_length=1, max_length=50)
+        StringConstraints(
+            min_length=1, 
+            max_length=50
+            )
     ]
 
     password: passwordStr
@@ -29,8 +35,11 @@ class UserCreate(BaseModel):
 class UserLogin(BaseModel):
     username: Annotated[
         str,
-        StringConstraints(min_length=3, max_length=30)
+        StringConstraints(min_length=3, 
+                          max_length=30
+                          )
     ]
+
     password: passwordStr
 
 
@@ -38,7 +47,9 @@ class UserUpdate(BaseModel):
     name: Optional[
         Annotated[
             str,
-            StringConstraints(min_length=1, max_length=50)
+            StringConstraints(min_length=1, 
+                              max_length=50
+                              )
         ]
     ] = None
 

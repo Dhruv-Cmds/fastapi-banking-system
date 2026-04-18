@@ -1,13 +1,14 @@
-from fastapi import Depends, HTTPException
+from fastapi import Depends,Header, HTTPException
+
 from jose import jwt, JWSError, ExpiredSignatureError
+
 from sqlalchemy.orm import Session
+
 from app.db import get_db
 from app.models import User
 from app.core import SECRET_KEY, ALGORITHM
-from fastapi import Header
+
 # from fastapi.security import OAuth2PasswordBearer
-
-
 
 # Depends(get_db) Opens data Base connection to read, write, delete, update
 

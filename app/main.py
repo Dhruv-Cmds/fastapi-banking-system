@@ -3,7 +3,6 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.db import engine, Base
 
-# IMPORTANT: rename imports to avoid conflict
 from app.routes import auth as auth_routes
 from app.routes import account as account_routes
 

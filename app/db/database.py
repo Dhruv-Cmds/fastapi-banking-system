@@ -1,10 +1,12 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
-from dotenv import load_dotenv
-import os
 
 # quote_plus = convert special characters into string.
 from urllib.parse import quote_plus
+from dotenv import load_dotenv
+
+import os
+
 
 
 #  Load environment variables

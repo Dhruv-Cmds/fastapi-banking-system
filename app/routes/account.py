@@ -82,7 +82,6 @@ def deposit(
 
         acc.balance += data.amount
 
-
         #  Audit log
         txn = Transaction(
             from_account_id=None,
@@ -146,7 +145,6 @@ def withdraw(
         db.commit()
         db.refresh(acc)
 
-
         return acc
     
     except SQLAlchemyError:
@@ -163,7 +161,7 @@ def transfer(
         current_user: User = Depends(get_current_user)
     ):
 
-    # with_for_update() = "I'm reading this row and nobody else can touch it until I'm done."
+    # with_for_update() = " This row and nobody else can touch it until I'm done."
 
     # Request 1                          Request 2
     # ─────────────────────────────────────────────────────
@@ -221,7 +219,6 @@ def transfer(
                     to_account_id=to_acc.id,
                     amount=data.amount
                 )
-        
 
         db.add(txn)
 
@@ -235,15 +232,10 @@ def transfer(
             "from_account_balance": from_acc.balance,
             "to_account_balance": to_acc.balance
         }
-    
-    except Exception as e:
-        db.rollback()
-        print("ERROR:", e)
-        raise HTTPException(status_code=500, detail=str(e))
 
     except SQLAlchemyError:
 
-        # db.rollback()
+        db.rollback()
         raise HTTPException (status_code=500, detail="Transfer failed")
 
 
@@ -280,5 +272,6 @@ def delete_account(
         return {"message": "Account closed successfully"}
     
     except SQLAlchemyError:
+
         db.rollback()
         raise HTTPException(status_code=500, detail="Something went wrong")
