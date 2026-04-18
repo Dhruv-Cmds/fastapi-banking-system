@@ -33,7 +33,9 @@ export default function Deposit({ accountId, onDone }) {
         onDone(); 
       }, 800);
 
-    } catch (e) {
+    } 
+    
+    catch (e) {
       setMsg({
         text: e.response?.data?.detail || "Deposit failed.",
         type: "err",
@@ -41,9 +43,12 @@ export default function Deposit({ accountId, onDone }) {
 
       setTimeout(() => setMsg(null), 3000);
 
-    } finally {
+    } 
+    
+    finally {
       setLoading(false);
     }
+    
   }
 
   return (

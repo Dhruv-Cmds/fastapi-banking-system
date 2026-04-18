@@ -35,7 +35,9 @@ export default function Withdraw({ accountId, onDone }) {
         onDone(); 
       }, 800);
 
-    } catch (e) {
+    } 
+    
+    catch (e) {
       setMsg({
         text: e.response?.data?.detail || "Withdrawal failed",
         type: "err",
@@ -43,8 +45,10 @@ export default function Withdraw({ accountId, onDone }) {
 
       setTimeout(() => setMsg(null), 3000);
 
-    } finally {
-      setLoading(false); // 🔥 always stop loading
+    } 
+    
+    finally {
+      setLoading(false);
     }
   }
 
@@ -72,14 +76,15 @@ export default function Withdraw({ accountId, onDone }) {
             ₹{q >= 1000 ? q / 1000 + "k" : q}
           </button>
         ))}
+
       </div>
 
       <button
-        className="btn btn-accent"
-        onClick={submit}
-        disabled={loading}
-      >
-        {loading ? "Processing..." : "Confirm Withdrawal →"}
+          className="btn btn-accent"
+          onClick={submit}
+          disabled={loading}
+        >
+          {loading ? "Processing..." : "Confirm Withdrawal →"}
       </button>
 
       {msg && <div className={`toast ${msg.type}`}>{msg.text}</div>}

@@ -46,7 +46,9 @@ export default function Transfer({ accountId, fromAccNo, onDone }) {
         onDone();        
       }, 800);
 
-    } catch (e) {
+    } 
+    
+    catch (e) {
       setMsg({
         text: e.response?.data?.detail || "Transfer failed",
         type: "err",
@@ -54,9 +56,12 @@ export default function Transfer({ accountId, fromAccNo, onDone }) {
 
       setTimeout(() => setMsg(null), 3000);
 
-    } finally {
+    } 
+    
+    finally {
       setLoading(false); 
     }
+
   }
 
   return (
@@ -104,6 +109,7 @@ export default function Transfer({ accountId, fromAccNo, onDone }) {
       </button>
 
       {msg && <div className={`toast ${msg.type}`}>{msg.text}</div>}
+      
     </div>
   );
 }

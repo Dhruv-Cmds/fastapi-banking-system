@@ -28,6 +28,7 @@ export default function Dashboard({ user, onLogout }) {
   const [tab, setTab] = useState("home");
 
   const loadAccounts = useCallback(async () => {
+
     try {
       const r = await API.get("/accounts");
       const data = r.data;
@@ -47,12 +48,16 @@ export default function Dashboard({ user, onLogout }) {
         setSelected(Number(data[0].id));
       }
 
-    } catch (err) {
+    } 
+
+    catch (err) {
       console.error("Failed to load accounts:", err);
     }
+
   }, [selected]);
 
   useEffect(() => {
+
     async function init() {
       await loadAccounts();
     }
@@ -61,6 +66,7 @@ export default function Dashboard({ user, onLogout }) {
   }, [loadAccounts]);
 
   useEffect(() => {
+
     function updateTheme() {
       const isDark = localStorage.getItem("theme") === "dark";
       setDark(isDark);
@@ -136,6 +142,7 @@ export default function Dashboard({ user, onLogout }) {
 
       {/* ACTIONS */}
       {tab === "actions" && (
+        
         <div className="quick-actions">
           {[
             { label: "Deposit", action: "deposit" },

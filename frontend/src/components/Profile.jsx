@@ -37,13 +37,18 @@ export default function Profile({ user, onLogout }) {
       setMsg("Saved!");
       setTimeout(() => setMsg(null), 2000);
 
-    } catch (e) {
+    } 
+    
+    catch (e) {
       setMsg(e.response?.data?.detail || "Update failed");
       setTimeout(() => setMsg(null), 2000);
 
-    } finally {
+    } 
+    
+    finally {
       setLoading(false); 
     }
+    
   }
 
   function toggleTheme() {

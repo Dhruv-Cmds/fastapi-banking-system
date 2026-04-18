@@ -28,6 +28,7 @@ API.interceptors.response.use(
   (response) => response,
 
   (error) => {
+
     //  If token expired or invalid → logout user
     if (error.response && error.response.status === 401) {
       console.warn("Unauthorized! Logging out...");
@@ -41,6 +42,5 @@ API.interceptors.response.use(
     return Promise.reject(error);
   }
 );
-
 
 export default API;
