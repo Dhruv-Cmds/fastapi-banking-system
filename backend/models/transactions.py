@@ -10,6 +10,6 @@ class Transaction(Base):
     id = Column(Integer, primary_key=True, index=True)
     from_account_id = Column(Integer, ForeignKey("accounts.id"), nullable=True)
     to_account_id = Column(Integer, ForeignKey("accounts.id"), nullable=True)
-    status = Column(String, default="ACTIVE")
+    status = Column(String(50), default="ACTIVE")
     amount = Column(Numeric, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
