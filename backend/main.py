@@ -6,7 +6,14 @@ from backend.db import engine, Base
 from backend.routes import auth as auth_routes
 from backend.routes import account as account_routes
 
+import time
+
 app = FastAPI()
+
+@app.on_event("startup")
+def on_startup():
+    time.sleep(10) 
+    Base.metadata.create_all(bind=engine)
 
 app.add_middleware(
     CORSMiddleware,
@@ -16,7 +23,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-Base.metadata.create_all(bind=engine)
 
 # include routers properly
 app.include_router(auth_routes.router, prefix="/api")
