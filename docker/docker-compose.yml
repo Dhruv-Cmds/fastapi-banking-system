@@ -1,41 +1,39 @@
-# everything that you need to run backend and database
 services:
-  api:  # just a name, you can give any name
+  api:
     image: banking-app-api
-    
-    # now we tell Docker how to build the image
     build:
-      context: ..                    # root project folder (correct)
-      dockerfile: docker/Dockerfile # path to Dockerfile from root
+      context: ..
+      dockerfile: docker/Dockerfile
 
-    container_name: banking-api     # name of the container
+    container_name: banking-api
 
-    ports:                          # map container port → local machine
-      - "8000:8000"                 # localhost:8000 → container:8000
-
-    env_file:
-      - ../.env   # .env is in root, compose file is in docker/, so go one level up
+    ports:
+      - "8000:8000"
 
     depends_on:
-      - db  # start database before backend (not full readiness, just order)
+      - db
+
+    environment:
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_HOST: ${DB_HOST}
+      DB_PORT: 3306
+      DB_NAME: ${DB_NAME}
 
   db:
-    image: mysql:8.0                # use official MySQL image
+    image: mysql:8.0
+    container_name: banking-db
+    restart: always
 
-    container_name: banking-db      # name of DB container
-
-    restart: always                 # restart if container crashes
-
-    environment:                    # database setup variables
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}  # taken from .env (compose level)
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
       MYSQL_DATABASE: ${DB_NAME}
 
-    ports:                          # expose DB to your machine (optional but useful)
-      - "3008:3306"                 # localhost:3008 → mysql:3306
+    ports:
+      - "3008:3306"
 
-    volumes:                        # persist database data
+    volumes:
       - db_data:/var/lib/mysql
 
-# define named volume (must be OUTSIDE services)
 volumes:
   db_data:
