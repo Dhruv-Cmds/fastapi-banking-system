@@ -1,0 +1,5 @@
+docker/mysql-data/
+node_modules/
+.git
+.env
+__pycache__/

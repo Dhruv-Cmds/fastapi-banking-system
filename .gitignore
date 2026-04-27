@@ -179,3 +179,10 @@ cython_debug/
 #  refer to https://docs.cursor.com/context/ignore-files
 .cursorignore
 .cursorindexingignore
+
+
+docker/mysql-data/
+*.pyc
+node_modules/
+dist/
+.vscode/
