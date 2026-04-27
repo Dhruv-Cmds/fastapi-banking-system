@@ -4,9 +4,9 @@ from jose import jwt, JWSError, ExpiredSignatureError
 
 from sqlalchemy.orm import Session
 
-from app.db import get_db
-from app.models import User
-from app.core import SECRET_KEY, ALGORITHM
+from backend.db import get_db
+from backend.models import User
+from backend.core import SECRET_KEY, ALGORITHM
 
 # from fastapi.security import OAuth2PasswordBearer
 

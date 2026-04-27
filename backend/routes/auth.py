@@ -4,11 +4,11 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 from sqlalchemy.exc import SQLAlchemyError
 
-from app.dependencies import get_current_user
-from app.db import get_db
-from app.models import User
-from app.schemas import UserCreate, UserLogin, UserUpdate
-from app.core import hash_password, verify_password, create_access_token
+from backend.dependencies import get_current_user
+from backend.db import get_db
+from backend.models import User
+from backend.schemas import UserCreate, UserLogin, UserUpdate
+from backend.core import hash_password, verify_password, create_access_token
 
 router = APIRouter()
 

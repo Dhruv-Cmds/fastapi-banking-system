@@ -2,12 +2,12 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 
-from app.models import User, Account, Transaction
-from app.schemas import AccountCreate, Amount, Transfer
-from app.dependencies import get_current_user
-from app.db import get_db
+from backend.models import User, Account, Transaction
+from backend.schemas import AccountCreate, Amount, Transfer
+from backend.dependencies import get_current_user
+from backend.db import get_db
 
-from app.core import MAX_DEPOSIT, MAX_WITHDRAW, MAX_TRANSFER
+from backend.core import MAX_DEPOSIT, MAX_WITHDRAW, MAX_TRANSFER
 
 router = APIRouter()
 

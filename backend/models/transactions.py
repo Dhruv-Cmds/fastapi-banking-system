@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, ForeignKey, Numeric, DateTime, String
 
 from datetime import datetime
 
-from app.db import Base
+from backend.db import Base
 
 class Transaction(Base):
     __tablename__ = "transactions"

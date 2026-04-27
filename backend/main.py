@@ -1,10 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.db import engine, Base
+from backend.db import engine, Base
 
-from app.routes import auth as auth_routes
-from app.routes import account as account_routes
+from backend.routes import auth as auth_routes
+from backend.routes import account as account_routes
 
 app = FastAPI()
 
