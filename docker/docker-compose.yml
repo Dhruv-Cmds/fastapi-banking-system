@@ -1,42 +1,49 @@
+version: "3.9"
+
 services:
   api:
-    image: banking-app-api
     build:
       context: ..
       dockerfile: docker/Dockerfile
-
     container_name: banking-api
-
     ports:
       - "8000:8000"
-    
     volumes:
-      - ..:/app  # sync the local and  container 
-
+      - ..:/app
     depends_on:
       - db
-
     environment:
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
-      DB_HOST: ${DB_HOST}
+      DB_HOST: db
       DB_PORT: 3306
       DB_NAME: ${DB_NAME}
+
+  frontend:
+    build:
+      context: ../frontend
+    container_name: banking-frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ../frontend:/app
+      - /app/node_modules
+    depends_on:
+      - api
+    environment:
+      - CHOKIDAR_USEPOLLING=true
 
   db:
     image: mysql:8.0
     container_name: banking-db
     restart: always
-
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
       MYSQL_DATABASE: ${DB_NAME}
-
     ports:
       - "3008:3306"
-
     volumes:
-      - db_data:/var/lib/mysql
+      - ./mysql-data:/var/lib/mysql 
 
 volumes:
   db_data:
