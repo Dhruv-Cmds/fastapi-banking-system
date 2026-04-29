@@ -22,18 +22,22 @@ load_dotenv(env_path)
 # ===== READ DB CONFIG =====
 DB_USER = os.getenv("DB_USER")
 DB_PASSWORD = quote_plus(os.getenv("DB_PASSWORD") or "")
-DB_PORT = os.getenv("DB_PORT", "3306")
 
 # dynamic switching
 if ENV == "test":
     DB_NAME = os.getenv("TEST_DB_NAME")
-    DB_HOST = os.getenv("DB_HOST")
+    DB_HOST = "127.0.0.1"
+    DB_PORT = "3008"  
+
 elif ENV == "docker":
     DB_NAME = os.getenv("DB_NAME")
     DB_HOST = os.getenv("DOCKER_DB_HOST") or os.getenv("DB_HOST")
+    DB_PORT = "3306"
+
 else:
     DB_NAME = os.getenv("DB_NAME")
     DB_HOST = os.getenv("DB_HOST")
+    DB_PORT = os.getenv("DB_PORT", "3306")
 
 
 # ===== SAFETY CHECK =====

@@ -2,14 +2,24 @@ import pytest
 import asyncio
 
 
+async def create_test_user(client):
+    await client.post("/api/signup", json={
+        "username": "testuser",
+        "name": "Test User",
+        "password": "password123"
+    })
+
+
 async def get_token(client):
+    await create_test_user(client)
+
     login = await client.post("/api/login", json={
         "username": "testuser",
         "password": "password123"
     })
 
     if login.status_code != 200:
-        pytest.skip("Login failed")
+        pytest.fail("Login failed")
 
     return login.json()["access_token"]
 
@@ -18,27 +28,19 @@ async def get_first_account_id(client, headers):
     res = await client.get("/api/accounts", headers=headers)
 
     if res.status_code != 200:
-        pytest.skip("Failed to fetch accounts")
+        pytest.fail("Failed to fetch accounts")
 
     data = res.json()
 
     if not data:
-        pytest.skip("No accounts found")
+        pytest.fail("No accounts found")
 
     return data[0]["id"]
 
 
 @pytest.mark.asyncio
 async def test_concurrent_requests(client):
-    login = await client.post("/api/login", json={
-        "username": "testuser",
-        "password": "password123"
-    })
-
-    if login.status_code != 200:
-        pytest.skip("Login failed")
-
-    token = login.json()["access_token"]
+    token = await get_token(client)
     headers = {"Authorization": f"Bearer {token}"}
 
     async def spam():
@@ -91,12 +93,12 @@ async def test_transfer(client):
     res = await client.get("/api/accounts", headers=headers)
 
     if res.status_code != 200:
-        pytest.skip("Failed to fetch accounts")
+        pytest.fail("Failed to fetch accounts")
 
     accounts = res.json()
 
     if len(accounts) < 2:
-        pytest.skip("Not enough accounts")
+        pytest.fail("Not enough accounts")
 
     sender_id = accounts[0]["id"]
     receiver_acc_no = accounts[1]["acc_no"]
