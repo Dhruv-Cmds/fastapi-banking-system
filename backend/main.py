@@ -1,41 +1,43 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from backend.db import engine, Base
-import backend.routes.auth as auth_routes
-import backend.routes.account as account_routes
+from contextlib import asynccontextmanager
+import asyncio
 
 from sqlalchemy.exc import OperationalError
 from sqlalchemy import text
-from contextlib import asynccontextmanager
-import asyncio
+
+from backend.db import engine, Base
+from backend.routes import auth, account
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
 
-    for i in range(15):
+    for attempt in range(15):
         try:
-            with engine.connect() as conn:
-                conn.execute(text("SELECT 1"))
+            async with engine.connect() as conn:
+                await conn.execute(text("SELECT 1"))
 
             async with engine.begin() as conn:
                 await conn.run_sync(Base.metadata.create_all)
-
             break
 
         except OperationalError:
-            print(f"⏳ Waiting for DB... {i+1}/15")
+            print(f"Waiting for DB... ({attempt + 1}/15)")
             await asyncio.sleep(2)
 
     else:
-        raise RuntimeError("❌ DB never became ready")
+        raise RuntimeError("Database not available")
 
     yield
 
 
+# 🔹 App instance
 app = FastAPI(lifespan=lifespan)
 
+
+# 🔹 Middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -45,5 +47,6 @@ app.add_middleware(
 )
 
 
-app.include_router(auth_routes.router, prefix="/api")
-app.include_router(account_routes.router, prefix="/api")
+# 🔹 Routes
+app.include_router(auth.router, prefix="/api")
+app.include_router(account.router, prefix="/api")
