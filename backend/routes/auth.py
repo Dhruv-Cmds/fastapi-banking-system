@@ -1,17 +1,19 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.dependencies import get_db
 from backend.schemas import UserCreate, UserLogin, UserUpdate
 from backend.services import user_service
-from backend.dependencies import get_current_user
+from backend.dependencies import get_current_user, get_db
+from backend.core.limiter import limiter
 
 router = APIRouter()
 
 
 # SIGNUP
 @router.post("/signup")
+@limiter.limit("3/second")
 async def signup(
+    request: Request,
     user: UserCreate,
     db: AsyncSession = Depends(get_db)
 ):
@@ -20,7 +22,9 @@ async def signup(
 
 # LOGIN
 @router.post("/login")
+@limiter.limit("5/minute")
 async def login(
+    request: Request,
     user: UserLogin,
     db: AsyncSession = Depends(get_db)
 ):
@@ -29,7 +33,9 @@ async def login(
 
 # UPDATE PROFILE
 @router.put("/me")
+@limiter.limit("5/second")
 async def update_profile(
+    request: Request,
     data: UserUpdate,
     db: AsyncSession = Depends(get_db),
     current_user = Depends(get_current_user)
