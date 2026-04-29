@@ -3,7 +3,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.schemas import UserCreate, UserLogin, UserUpdate
 from backend.services import user_service
-from backend.dependencies import get_current_user, get_db
+from backend.dependencies import get_current_user
+from backend.dependencies.db import get_db
 from backend.core.limiter import limiter
 
 router = APIRouter()
@@ -38,7 +39,6 @@ async def update_profile(
     request: Request,
     data: UserUpdate,
     db: AsyncSession = Depends(get_db),
-    current_user = Depends(get_current_user)
+    current_user: dict = Depends(get_current_user)
 ):
     return await user_service.update_profile(db, data, current_user)
-

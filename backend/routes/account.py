@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.dependencies import get_db, get_current_user
+from backend.dependencies.db import get_db
+from backend.dependencies import get_current_user
 from backend.schemas import AccountCreate, Amount, Transfer
 from backend.services import account_service
 from backend.core.limiter import limiter
@@ -17,8 +18,9 @@ async def create_account(
     request: Request,
     account: AccountCreate,
     db: AsyncSession = Depends(get_db),
-    current_user = Depends(get_current_user)
-):
+    current_user: dict = Depends(get_current_user)
+    ):
+
     return await account_service.create_account(db, account, current_user)
 
 
@@ -28,8 +30,9 @@ async def create_account(
 async def get_accounts(
     request: Request,
     db: AsyncSession = Depends(get_db),
-    current_user = Depends(get_current_user)
-):
+    current_user: dict = Depends(get_current_user)
+    ):
+
     return await account_service.get_accounts(db, current_user)
 
 
@@ -41,8 +44,9 @@ async def deposit(
     id: int,
     data: Amount,
     db: AsyncSession = Depends(get_db),
-    current_user = Depends(get_current_user)
-):
+    current_user: dict = Depends(get_current_user)
+    ):
+
     return await account_service.deposit(db, id, data, current_user)
 
 
@@ -54,8 +58,9 @@ async def withdraw(
     id: int,
     data: Amount,
     db: AsyncSession = Depends(get_db),
-    current_user = Depends(get_current_user)
-):
+    current_user: dict = Depends(get_current_user)
+    ):
+
     return await account_service.withdraw(db, id, data, current_user)
 
 
@@ -66,8 +71,9 @@ async def transfer(
     request: Request,
     data: Transfer,
     db: AsyncSession = Depends(get_db),
-    current_user = Depends(get_current_user)
-):
+    current_user: dict = Depends(get_current_user)
+    ):
+
     return await account_service.transfer(db, data, current_user)
 
 
@@ -78,6 +84,7 @@ async def delete_account(
     request: Request,
     id: int,
     db: AsyncSession = Depends(get_db),
-    current_user = Depends(get_current_user)
-):
+    current_user: dict = Depends(get_current_user)
+    ):
+    
     return await account_service.delete_account(db, id, current_user)
