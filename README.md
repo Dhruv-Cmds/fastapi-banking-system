@@ -1,360 +1,292 @@
-# 🏦 FastAPI Banking System
+# 🏦 FastAPI Banking System (Production-Level Backend)
 
-A production-style **Bank Account Management API** built with **FastAPI**, **SQLAlchemy**, and **MySQL**.
-
-Designed to simulate real-world fintech backend systems with **secure authentication, transactional integrity, and rule-based financial operations**.
+A production-ready **Bank Account Management API** built with **FastAPI, MySQL, Async SQLAlchemy, and Docker**.
 
 ---
 
-## 🖼️ UI Preview
+## 🚀 Project Overview
 
-![Login](screenshots/login.gif)
-Watch Full Demo:- https://youtu.be/iex0donzgtE
+* 🔐 JWT Authentication
+* 🏦 Account Management
+* 💸 Transactions (Deposit, Withdraw, Transfer)
+* ⚙️ Async MySQL (SQLAlchemy + aiomysql)
+* 🧪 Pytest testing (MySQL-based)
+* 📊 Load tested with k6
+* 🐳 Dockerized (API + MySQL + Frontend)
 
 ---
 
 ## 🌐 Live Demo
 
-* Frontend: https://fastapi-banking-system.vercel.app
-* Backend API: https://fastapi-banking-system.onrender.com
-* API Docs: https://fastapi-banking-system.onrender.com/docs
+* **Frontend:** https://fastapi-banking-system.vercel.app          (current no available)
+* **Backend:** https://fastapi-banking-system.onrender.com         (current no available)
+* **API Docs:** https://fastapi-banking-system.onrender.com/docs   (current no available)
 
 ---
 
-# 🚀 Key Features
+## 🧠 Features
 
-## 🔐 Authentication
+### 🔐 Authentication
 
-* JWT-based authentication
-* Secure password hashing (bcrypt)
-* Case-insensitive username handling
-* Protected routes using dependency injection
-
----
-
-## 🏦 Account Management
-
-* Create multiple accounts per user
-* Unique account number enforcement
-* Accounts initialized with **zero balance (system-controlled)**
-* Fetch all user accounts securely
+* JWT-based login/signup
+* Password hashing with bcrypt
+* Protected routes
 
 ---
 
-## 🔄 Account Lifecycle (NEW)
+### 🏦 Account Management
 
-Accounts are not physically deleted. Instead, they are marked as:
-
-* `ACTIVE` → usable account
-* `CLOSED` → hidden from UI and blocked from operations
-
-This ensures:
-
-* Data integrity
-* Transaction history preservation
-* Real-world banking behavior
+* Multiple accounts per user
+* Unique account numbers
+* Balance initialized to 0
+* Fetch all user accounts
 
 ---
 
-## 💸 Transactions (Core System)
+### 🔄 Account Lifecycle
 
-### ✔ Supported Operations
-
-* Deposit funds
-* Withdraw funds with balance validation
-* Transfer money between accounts
-
-### ✔ Safety & Integrity
-
-* Prevent overdraft (no negative balance)
-* Prevent self-transfers
-* Only ACTIVE accounts can perform operations
-* Atomic database transactions using commit/rollback
+* ACTIVE → usable
+* CLOSED → blocked
+* No deletion (real-world banking logic)
 
 ---
 
-## 🧠 Business Rules & Financial Constraints
+### 💸 Transactions
 
-### 💰 Transaction Limits
+* Deposit
+* Withdraw
+* Transfer
 
-* Deposit limit per transaction
-* Withdraw limit per transaction
-* Transfer limit enforcement
+---
 
-> Limits are centrally managed via a **config module**, making the system flexible and maintainable.
+### 🛡️ Safety & Integrity
+
+* Prevent negative balances
+* Prevent self-transfer
+* Only ACTIVE accounts allowed
+* Atomic DB transactions (commit/rollback)
 
 ---
 
 ### 🧾 Transaction Ledger
 
-* Every operation (deposit, withdraw, transfer) is recorded
-* Enables audit tracking and system transparency
-* Foundation for future features like:
-
-  * Statements
-  * Analytics
-  * Fraud detection
+* Every transaction recorded
+* Enables auditing
+* Foundation for analytics & fraud detection
 
 ---
 
-## 🧠 Validation Strategy
+## 🧠 Business Rules
 
-* Strong input validation using Pydantic schemas
-* Backend-driven validation (never trusting frontend)
-* Ownership-based authorization
-* Clean separation of validation and business logic:
-
-  * **Data validation (schemas)**
-  * **Business logic (routes/services)**
+* Deposit limits
+* Withdraw limits
+* Transfer limits
+* Config-driven rules
 
 ---
 
-# 🧱 Tech Stack
+## 🧱 Tech Stack
 
-| Layer      | Technology             |
-| ---------- | ---------------------- |
-| Backend    | FastAPI                |
-| ORM        | SQLAlchemy             |
-| Database   | MySQL                  |
-| Validation | Pydantic               |
-| Auth       | JWT (python-jose)      |
-| Security   | Passlib (bcrypt)       |
-| Config     | python-dotenv          |
-| DevOps     | Docker, Docker Compose |
+| Layer     | Tech               |
+| --------- | ------------------ |
+| Backend   | FastAPI            |
+| ORM       | SQLAlchemy (Async) |
+| Database  | MySQL              |
+| Driver    | aiomysql           |
+| Auth      | JWT                |
+| Security  | bcrypt             |
+| Testing   | pytest             |
+| Load Test | k6                 |
+| DevOps    | Docker             |
 
 ---
 
-# 📁 Project Structure
+## 📁 Project Structure
 
 ```
 fastapi-banking-system/
 │
-├── app/
-│   ├── routes/        # API endpoints    
-│       (auth, accounts, transactions)
-│   ├── models/        # Database models
-│   ├── schemas/       # Request/response validation
-│   ├── db/            # DB connection setup
-│   ├── core/          # Security, config (JWT, hashing, limits)
-│   └── dependencies/  # Auth middleware
+├── backend/
+│   ├── routes/
+│   ├── models/
+│   ├── schemas/
+│   ├── services/
+│   ├── db/
+│   ├── core/
+│   ├── dependencies/
+│   ├── tests/
+│   └── main.py
 │
-├── main.py
-├── requirements.txt
-├── .env
-└── .gitignore
+├── docker/
+│   ├── .env
+│   ├── docker-compose.yml
+│   └── Dockerfile
+│
+├── frontend/
+│   ├── node_modules/
+│   ├── public/
+│   ├── src/
+│   ├── .env
+│   ├── .env.production
+│   ├── .gitignore
+│   ├── Dockerfile
+│   ├── eslint.config.js
+│   ├── index.html
+│   ├── package.json
+│   ├── package-lock.json
+│   └── vite.config.js
+│
+├── screenshots/
+│
+├── .dockerignore
+├── .gitattributes
+├── .gitignore
+├── LICENSE
+├── load_test.js
+├── main.sql
+├── README.md
+└── requirements.txt
+
 ```
 
 ---
 
-# ⚙️ Setup Guide
+## ⚙️ Environment Variables
 
-## 1️⃣ Clone Repository
-
-```bash
-git clone https://github.com/Dhruv-Cmds/fastapi-banking-system.git
-cd fastapi-banking-system
 ```
+ENV=dev
 
----
-
-## 2️⃣ Create Virtual Environment
-
-```bash
-python -m venv .venv
-```
-
-### Activate:
-
-**Windows**
-
-```bash
-.venv\Scripts\activate
-```
-
-**Mac/Linux**
-
-```bash
-source .venv/bin/activate
-```
-
----
-
-## 3️⃣ Install Dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
----
-
-## 4️⃣ Configure Environment
-
-Create a `.env` file:
-
-```env
 DB_USER=root
 DB_PASSWORD=your_password
-DB_HOST=localhost
+DB_HOST=127.0.0.1
+DB_PORT=3008
 DB_NAME=bankaccountsystem
+
+TEST_DB_NAME=bankaccountsystem_test
 
 SECRET_KEY=your_secret_key
 ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=your_time
+ACCESS_TOKEN_EXPIRE_MINUTES=30
 ```
 
 ---
 
-## 5️⃣ Run Server
+## 🐳 Docker Setup
 
-```bash
-uvicorn main:app --reload (backend)
-npm run dev (frontend)
+### Run Application
+
 ```
-
----
-
-# 🐳 Docker Setup (Recommended)
-
-Run the entire project using Docker (Backend + Frontend + MySQL).
-
----
-
-## ⚙️ Requirements
-
-* Docker
-* Docker Compose
-
----
-
-## 🚀 Run with Docker
-
-```bash
 docker-compose up --build
 ```
 
----
+### Reset Database
 
-## 🌐 Services
-
-* Backend API → http://localhost:8000
-* API Docs → http://localhost:8000/docs
-* Frontend → http://localhost:5173
-* MySQL → localhost:3008
-
----
-
-## 🔐 Environment Variables
-
-Make sure `.env` file is configured:
-
-```env
-DB_USER=root
-DB_PASSWORD=your_password
-DB_NAME=bankaccountsystem
-
-SECRET_KEY=your_secret_key
-ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=60
 ```
-
----
-
-## 🧠 Docker Notes
-
-* Uses **named volume (`db_data`)** for MySQL persistence
-* Avoids local bind mount issues (prevents DB corruption)
-* Data persists across container restarts
-
-### Reset database if needed:
-
-```bash
 docker-compose down -v
 ```
 
 ---
 
-# 📌 API Endpoints
+## 🧪 Testing
 
-## 🔐 Auth
-
-* `POST /signup`
-* `POST /login`
-
-## 🏦 Accounts
-
-* `POST /accounts`
-* `GET  /accounts`
-* `DELETE /accounts/{id} → closes account`
-
-## 💰 Transactions
-
-* `POST /accounts/{id}/deposit`
-* `POST /accounts/{id}/withdraw`
-* `POST /transfer`
-
----
-
-# 🧠 System Behavior
-
-* Tables auto-created at startup:
-
-```python
-Base.metadata.create_all(bind=engine)
-```
-
-* Account lifecycle:
+### Run Tests
 
 ```
-Create account → balance = 0  
-Deposit → increases balance  
-Withdraw → decreases balance  
-Transfer → moves funds safely 
-Close account → status = CLOSED (not deleted) 
+$env:PYTHONPATH="."
+$env:ENV="test"
+pytest -v
+```
+
+### Test Features
+
+* MySQL test database (no SQLite)
+* Per-test DB reset
+* Async-safe fixtures
+* Dependency overrides
+
+---
+
+## ⚙️ Async Fixes (Critical)
+
+* Fixed Windows event loop issues
+* Eliminated cross-loop DB errors
+* Per-test engine isolation
+* Fixed connection leaks
+* Fixed password encoding (`@ → %40`)
+
+---
+
+## 📊 Load Testing (k6)
+
+### Run
+
+```
+k6 run load_test.js
 ```
 
 ---
 
-# 🔐 Security Highlights
+## 📈 Performance Results
 
-* JWT authentication
-* Password hashing (bcrypt)
-* Environment-based secrets
-* Ownership-based authorization checks
-* Safe transaction handling using DB locks
-* Protection against race conditions
+### Windows (2 Workers)
 
----
+* Stable: ~200 users
+* Stress: ~250–300 users
+* Overload: 300+ users
 
-# 💎 Highlights
+### Linux (Estimated, 4 Workers)
 
-* Clean, modular architecture
-* Real-world banking logic implementation
-* Soft-delete system (account lifecycle)
-* Transaction safety (race-condition prevention)
-* Rule-based financial system (limits + validation)
-* Scalable backend design
-* Dockerized full-stack setup (API + Frontend + Database)
-* Persistent MySQL storage using Docker volumes
-* Resolved real-world DB corruption & container restart issues
+* Stable: ~400–500 users
+* Max: ~600–700 users
 
 ---
 
-# 🏁 Conclusion
+## 🧠 Bottlenecks Identified
 
-This project demonstrates how to build a **real-world backend system** with:
-
-* Authentication & authorization
-* Database design & ORM usage
-* Transaction safety & concurrency handling
-* Business rule enforcement
-* Clean architecture & scalability
-* Containerized deployment using Docker
-
-It serves as a strong foundation for evolving into a **full fintech platform** 🚀
+* Windows socket limitations
+* Uvicorn worker count
+* MySQL connection pool limits
+* Request queueing delays
 
 ---
 
-# ⭐ Author
+## 🔧 Optimizations Applied
 
-**Dhruv**
-Backend-focused developer building systems with strong fundamentals in **API design, data integrity, and system thinking**.
+* Async database engine
+* Connection pooling
+* Rate limiting
+* Docker networking fixes
+* Removed SQLite fallback
+
+---
+
+## 🏁 Final Status
+
+* ✅ Fully functional backend
+* ✅ MySQL-only architecture
+* ✅ All tests passing
+* ✅ Load tested up to 1000 VUs
+* ✅ Performance limits identified
+
+---
+
+## 🚀 Future Improvements
+
+* Migrate to Linux (WSL2 or cloud VM)
+* Increase worker processes
+* Add Redis caching
+* Implement load balancer
+* Enable horizontal scaling
+
+---
+
+## 🎯 Capacity Summary
+
+* ~300 concurrent users (Windows setup)
+* ~500+ users (Linux production setup)
+
+---
+
+## 📌 License
+
+This project is for educational and portfolio purposes.
