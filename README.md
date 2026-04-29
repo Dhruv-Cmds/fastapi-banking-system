@@ -24,6 +24,10 @@ A production-ready **Bank Account Management API** built with **FastAPI, MySQL, 
 
 ---
 
+## Preview
+
+![Login Preview](screenshots/login.gif)
+
 ## 🧠 Features
 
 ### 🔐 Authentication
