@@ -1,13 +1,14 @@
-from sqlalchemy import create_engine
+
 from sqlalchemy.orm import sessionmaker, declarative_base
+
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 
 # quote_plus = convert special characters into string.
 from urllib.parse import quote_plus
 from dotenv import load_dotenv
 
+
 import os
-
-
 
 #  Load environment variables
 load_dotenv()
@@ -26,14 +27,14 @@ if not all([DB_USER, DB_PASSWORD, DB_HOST, DB_NAME]):
     raise ValueError("Database environment variables are not properly set")
 
 # Build database URL
-DATABASE_URL = f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+DATABASE_URL = f"mysql+aiomysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
 
 if not DATABASE_URL:
     raise ValueError("DATABASE_URL is not set properly")
 
 #  Create engine with production-safe settings
-engine = create_engine(
+engine = create_async_engine(
     DATABASE_URL,
     pool_pre_ping=True,     #  Avoid stale connections
     pool_size=10,           #  Connection pool size
@@ -43,11 +44,12 @@ engine = create_engine(
 
 
 # Session factory
-SessionLocal = sessionmaker(
-    bind=engine, 
-    autocommit=False, 
+AsyncSessionLocal = sessionmaker(
+    bind=engine,
+    class_= AsyncSession,
+    expire_on_commit=False,
     autoflush=False
-    )
+)
 
 
 # Base class for models
@@ -55,29 +57,9 @@ Base = declarative_base()
 
 
 # Dependency for DB session (used in FastAPI routes)
-def get_db():
-
-    """
-    Provides a database session per request.
-    Ensures:
-    - connection is opened
-    - properly closed after request
-    """
+async def get_db():
 
     # It Used to read, add, update, delete data.
-    db = SessionLocal() 
-
-    try:
+    async with AsyncSessionLocal() as db:
         # Give the database connection to who needs it
         yield db
-    
-    except:  
-
-        # If something goes wrong → rollback
-        db.rollback()
-        raise
-        
-    finally:
-
-        # close the database
-        db.close() 

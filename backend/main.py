@@ -11,7 +11,6 @@ from contextlib import asynccontextmanager
 import asyncio
 
 
-# 🔥 Proper startup control (no race conditions)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
 
@@ -20,10 +19,8 @@ async def lifespan(app: FastAPI):
             with engine.connect() as conn:
                 conn.execute(text("SELECT 1"))
 
-            print("✅ DB connected")
-
-            Base.metadata.create_all(bind=engine)
-            print("✅ Tables created")
+            async with engine.begin() as conn:
+                await conn.run_sync(Base.metadata.create_all)
 
             break
 
@@ -37,11 +34,8 @@ async def lifespan(app: FastAPI):
     yield
 
 
-# 🚀 App with lifespan
 app = FastAPI(lifespan=lifespan)
 
-
-# 🌐 CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -51,6 +45,5 @@ app.add_middleware(
 )
 
 
-# 📌 Routers
 app.include_router(auth_routes.router, prefix="/api")
 app.include_router(account_routes.router, prefix="/api")

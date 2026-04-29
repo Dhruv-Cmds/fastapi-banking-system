@@ -1,8 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
 
-from sqlalchemy.orm import Session
 from sqlalchemy import func
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.dependencies import get_current_user
 from backend.db import get_db
@@ -15,52 +16,59 @@ router = APIRouter()
 
 # SIGNUP
 @router.post("/signup")
-def signup(user: UserCreate, db: Session = Depends(get_db)):
+async def signup(user: UserCreate, db: AsyncSession = Depends(get_db)):
 
     try:
         
         # Case-insensitive username check
-        existing = db.query(User).filter(
+        result = await db.execute(
+            select(User)
+            .where(
             func.lower(User.username) == user.username.lower()
-        ).first()
+            )
+        )
+
+        existing = result.scalar_one_or_none()
 
         if existing:
             raise HTTPException(status_code=400, detail="Username already exists")
 
-
-        # Hash password before storing
-        hashed_pw = hash_password(user.password)
-
         new_user = User(
             username=user.username.lower(),
             name=user.name,
-            password=hashed_pw
+            password=hash_password(user.password)
         )
 
 
         db.add(new_user)
         
-        db.commit()
+        await db.commit()
 
-        db.refresh(new_user)
+        await db.refresh(new_user)
 
         return {"message": "User created"}
 
     except SQLAlchemyError:
-        db.rollback()
+
+        await db.rollback()
+
         raise HTTPException(status_code=500, detail="Signup failed")
 
 
 # LOGIN
 @router.post("/login")
-def login(user: UserLogin, db: Session = Depends(get_db)):
+async def login(user: UserLogin, db: AsyncSession = Depends(get_db)):
 
     try:
 
         # Case-insensitive lookup
-        db_user = db.query(User).filter(
-            func.lower(User.username) == user.username.lower()
-        ).first()
+        result = await db.execute(
+            select(User)
+            .where(
+            func.lower(User.username) == user.username.lower())
+        )
+
+        db_user = result.scalar_one_or_none()
 
 
         # Do NOT reveal whether user exists or password is wrong
@@ -85,9 +93,9 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
 
 #  UPDATE PROFILE
 @router.put("/me")
-def update_profile(
+async def update_profile(
     data: UserUpdate,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user)
     ):
     
@@ -103,17 +111,13 @@ def update_profile(
 
         db.commit()
         
-        db.refresh(current_user)
+        await db.refresh(current_user)
 
 
         return {"message": "Profile updated"}
     
-
-    except Exception as e:
-        print("ERROR:", e)
-        raise HTTPException(status_code=500, detail=str(e))
     
-    # except SQLAlchemyError:
+    except SQLAlchemyError:
 
-    #     db.rollback()
-    #     raise HTTPException(500, "Update failed")
+        await db.rollback()
+        raise HTTPException(500, "Update failed")

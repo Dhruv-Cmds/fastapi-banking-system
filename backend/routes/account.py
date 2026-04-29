@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.models import User, Account, Transaction
 from backend.schemas import AccountCreate, Amount, Transfer
@@ -14,16 +15,20 @@ router = APIRouter()
 
 # CREATE ACCOUNT
 @router.post("/accounts",)
-def create_accounts (
+async def create_accounts (
                 account: AccountCreate, 
-                db: Session = Depends(get_db), 
+                db: AsyncSession = Depends(get_db), 
                 current_user: User = Depends(get_current_user)
     ):
 
     try:
 
          # Check duplicate account number   
-        existing = db.query(Account).filter(Account.acc_no == account.acc_no).first()
+        result = await db.execute(
+            select(Account).where(Account.acc_no == account.acc_no)
+        )
+
+        existing = result.scalar_one_or_none()
 
         if existing:
             raise HTTPException(status_code=400, detail="Account number already exists")
@@ -35,47 +40,56 @@ def create_accounts (
         )
 
         db.add(new_acc)
-        db.commit()
-        db.refresh(new_acc)
+        await db.commit()
+        await db.refresh(new_acc)
 
         return new_acc
 
     except SQLAlchemyError:
-        db.rollback()
+
+        await db.rollback()
         raise HTTPException(status_code=500, detail="Account creation failed")
 
 
 #  GET USER ACCOUNTS
 @router.get("/accounts")
-def get_account(
-    db: Session = Depends(get_db), 
+async def get_account(
+    db: AsyncSession = Depends(get_db), 
     current_user: User = Depends(get_current_user)
     ):
 
-    return db.query(Account).filter(Account.user_id == current_user.id).all()
+    result = await db.execute(
+        select(Account).where(Account.user_id == current_user.id)
+    )
+
+    return result.scalar().all()
 
 
 # DEPOSIT
 @router.post("/accounts/{id}/deposit")
-def deposit(
+async def deposit(
             id: int, 
             data: Amount, 
-            db: Session = Depends(get_db), 
+            db: AsyncSession = Depends(get_db), 
             current_user: User = Depends(get_current_user)
     ):
 
     try:
+        result = await db.execute(
+            select(Account)
+            .where(
+                Account.id == id,
+                Account.user_id == current_user.id,
+                Account.status == "ACTIVE"
+            )
+            .with_for_update()
+        )
 
-        #  Lock account row
-        acc = db.query(Account)\
-            .filter(Account.id == id, Account.user_id == current_user.id, Account.status == "ACTIVE")\
-            .with_for_update()\
-            .first()
+        acc = result.scalar_one_or_none()
 
         if not acc:
             raise HTTPException(status_code=404, detail="Account not found")
         
-        # Removed duplicate amount <= 0 check (handled by schema)
         
         if data.amount > MAX_DEPOSIT:
             raise HTTPException(status_code=400, detail="Deposit limit exceeded")
@@ -91,34 +105,39 @@ def deposit(
 
         db.add(txn)
 
-        db.commit()
-        db.refresh(acc)
+        await db.commit()
+        await db.refresh(acc)
 
         return acc
     
     except SQLAlchemyError:
 
-        db.rollback()
+        await db.rollback()
         raise HTTPException (status_code=500, detail="Deposit failed")
 
 
 # WITHDRAW
 @router.post("/accounts/{id}/withdraw")
-def withdraw(
+async def withdraw(
 
             id: int, 
             data: Amount, 
-            db: Session = Depends(get_db), 
+            db: AsyncSession = Depends(get_db), 
             current_user: User = Depends(get_current_user)
     ):
 
     try:
+        result = await db.execute(
+            select(Account)
+            .where(
+                Account.id == id,
+                Account.user_id == current_user.id,
+                Account.status == "ACTIVE"
+            )
+            .with_for_update()
+        )
 
-        #  Lock account row
-        acc = db.query(Account)\
-            .filter(Account.id == id, Account.user_id == current_user.id, Account.status == "ACTIVE")\
-            .with_for_update()\
-            .first()
+        acc = result.scalar_one_or_none()
         
         if not acc:
             raise HTTPException(status_code=404, detail="Account not found")
@@ -142,50 +161,50 @@ def withdraw(
 
         db.add(txn)
 
-        db.commit()
-        db.refresh(acc)
+        await db.commit()
+        await db.refresh(acc)
 
         return acc
     
     except SQLAlchemyError:
         
-        db.rollback()
+        await db.rollback()
         raise HTTPException (status_code=500, detail="Withdrawn failed")
 
 
 # TRANSFER 
 @router.post("/transfer")
-def transfer(
+async def transfer(
         data: Transfer, 
-        db: Session = Depends(get_db), 
+        db: AsyncSession = Depends(get_db), 
         current_user: User = Depends(get_current_user)
     ):
 
     # with_for_update() = " This row and nobody else can touch it until I'm done."
 
-    # Request 1                          Request 2
-    # ─────────────────────────────────────────────────────
-    # reads + LOCKS balance = 1000       tries to read...
-    # checks: 1000 >= 800 ✅             🔒 WAITING for lock
-    # balance -= 800 → writes 200        
-    # db.commit() → lock released        reads balance = 200
-    #                                 checks: 200 >= 800 ❌
-    #                                 returns "Insufficient balance"
-
-    # -------------------------------------------------------------------------------------------------------------------------
     try:
         
-        # Lock sender
-        from_acc = db.query(Account)\
-            .filter(Account.id == data.from_account_id, Account.status == "ACTIVE")\
-            .with_for_update()\
-            .first()
+        result_from  = await db.execute(
+            select(Account)
+            .where(
+                Account.id == data.from_account_id, 
+                Account.status == "ACTIVE"
+            )
+            .with_for_update()     
+        )
+
+        from_acc = result_from.scalar_one_or_none()
+
+        result_to  = db.execute(
+            select(Account)
+            .where(
+                Account.acc_no == data.to_account_no, 
+                Account.status == "ACTIVE"
+            )
+            .with_for_update()
+        )
         
-        # Lock receiver
-        to_acc = db.query(Account)\
-            .filter(Account.acc_no == data.to_account_no, Account.status == "ACTIVE")\
-            .with_for_update()\
-            .first()
+        to_acc = result_to.scalar_one_or_none()
 
         if not from_acc or not to_acc:
             raise HTTPException(status_code=404, detail="Account not found")
@@ -222,10 +241,10 @@ def transfer(
 
         db.add(txn)
 
-        db.commit()
+        await db.commit()
 
-        db.refresh(from_acc)
-        db.refresh(to_acc)
+        await db.refresh(from_acc)
+        await db.refresh(to_acc)
 
         return {
             "message": "Transfer successful",
@@ -235,23 +254,27 @@ def transfer(
 
     except SQLAlchemyError:
 
-        db.rollback()
+        await db.rollback()
         raise HTTPException (status_code=500, detail="Transfer failed")
 
 
 # DELETE   
 @router.delete("/accounts/{id}")
-def delete_account(
+async def delete_account(
     id: int,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
 
     try:
     
-        acc = db.query(Account)\
-            .filter(Account.id == id)\
-            .first()
+        result = await db.execute(
+            select(Account)
+            .where(Account.id == id)
+            .with_for_update()
+        )
+
+        acc = result.scalar_one_or_none()
 
         if not acc:
             raise HTTPException(status_code=404, detail="Account not found")
@@ -267,11 +290,11 @@ def delete_account(
 
         acc.status = "CLOSED"
 
-        db.commit()
+        await db.commit()
 
         return {"message": "Account closed successfully"}
     
     except SQLAlchemyError:
 
-        db.rollback()
+        await db.rollback()
         raise HTTPException(status_code=500, detail="Something went wrong")
