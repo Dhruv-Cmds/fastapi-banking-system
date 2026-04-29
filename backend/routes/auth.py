@@ -15,7 +15,7 @@ async def signup(
     user: UserCreate,
     db: AsyncSession = Depends(get_db)
 ):
-    return await user_service.login_user(db, user)
+    return await user_service.signup_user(db, user)
 
 
 # LOGIN
@@ -24,7 +24,7 @@ async def login(
     user: UserLogin,
     db: AsyncSession = Depends(get_db)
 ):
-    return await user_service.signup_user(db, user)
+    return await user_service.login_user(db, user)
 
 
 # UPDATE PROFILE

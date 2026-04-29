@@ -18,7 +18,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))
 
 # Safety check (VERY IMPORTANT)
 if not SECRET_KEY:
-    raise RuntimeError(status_code="SECRET_KEY is not set in environment variable")
+    raise RuntimeError("SECRET_KEY is not set in environment variable")
 
     
 #  Password hashing context
