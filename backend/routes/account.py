@@ -5,8 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.models import User, Account, Transaction
 from backend.schemas import AccountCreate, Amount, Transfer
-from backend.dependencies import get_current_user
-from backend.db import get_db
+from backend.dependencies import get_db, get_current_user 
 
 from backend.core import MAX_DEPOSIT, MAX_WITHDRAW, MAX_TRANSFER
 

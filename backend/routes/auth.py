@@ -5,8 +5,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.dependencies import get_current_user
-from backend.db import get_db
+from backend.dependencies import get_db, get_current_user 
 from backend.models import User
 from backend.schemas import UserCreate, UserLogin, UserUpdate
 from backend.core import hash_password, verify_password, create_access_token

@@ -1,5 +1,5 @@
 
-from sqlalchemy.orm import sessionmaker, declarative_base
+from sqlalchemy.orm import sessionmaker
 
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 
@@ -29,10 +29,6 @@ if not all([DB_USER, DB_PASSWORD, DB_HOST, DB_NAME]):
 # Build database URL
 DATABASE_URL = f"mysql+aiomysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
-
-if not DATABASE_URL:
-    raise ValueError("DATABASE_URL is not set properly")
-
 #  Create engine with production-safe settings
 engine = create_async_engine(
     DATABASE_URL,
@@ -50,16 +46,3 @@ AsyncSessionLocal = sessionmaker(
     expire_on_commit=False,
     autoflush=False
 )
-
-
-# Base class for models
-Base = declarative_base()
-
-
-# Dependency for DB session (used in FastAPI routes)
-async def get_db():
-
-    # It Used to read, add, update, delete data.
-    async with AsyncSessionLocal() as db:
-        # Give the database connection to who needs it
-        yield db
