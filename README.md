@@ -11,10 +11,6 @@ Designed to simulate real-world fintech backend systems with **secure authentica
 ![Login](screenshots/login.gif)
 Watch Full Demo:- https://youtu.be/iex0donzgtE
 
-<!-- ![Dashboard](screenshots/ui_1.png)
-
-![Transactions](screenshots/ui_2.png) -->
-
 ---
 
 ## 🌐 Live Demo
@@ -49,14 +45,14 @@ Watch Full Demo:- https://youtu.be/iex0donzgtE
 
 Accounts are not physically deleted. Instead, they are marked as:
 
-- `ACTIVE` → usable account  
-- `CLOSED` → hidden from UI and blocked from operations  
+* `ACTIVE` → usable account
+* `CLOSED` → hidden from UI and blocked from operations
 
 This ensures:
 
-- Data integrity  
-- Transaction history preservation  
-- Real-world banking behavior  
+* Data integrity
+* Transaction history preservation
+* Real-world banking behavior
 
 ---
 
@@ -70,12 +66,10 @@ This ensures:
 
 ### ✔ Safety & Integrity
 
- Prevent overdraft (no negative balance)
-
-* Prevent overdraft (no negative balance)  
-* Prevent self-transfers  
-* Only ACTIVE accounts can perform operations  
-* Atomic database transactions using commit/rollback  
+* Prevent overdraft (no negative balance)
+* Prevent self-transfers
+* Only ACTIVE accounts can perform operations
+* Atomic database transactions using commit/rollback
 
 ---
 
@@ -107,8 +101,8 @@ This ensures:
 
 * Strong input validation using Pydantic schemas
 * Backend-driven validation (never trusting frontend)
-* Ownership-based authorization 
-* SClean separation of validation and business logic:
+* Ownership-based authorization
+* Clean separation of validation and business logic:
 
   * **Data validation (schemas)**
   * **Business logic (routes/services)**
@@ -117,15 +111,16 @@ This ensures:
 
 # 🧱 Tech Stack
 
-| Layer      | Technology        |
-| ---------- | ----------------- |
-| Backend    | FastAPI           |
-| ORM        | SQLAlchemy        |
-| Database   | MySQL             |
-| Validation | Pydantic          |
-| Auth       | JWT (python-jose) |
-| Security   | Passlib (bcrypt)  |
-| Config     | python-dotenv     |
+| Layer      | Technology             |
+| ---------- | ---------------------- |
+| Backend    | FastAPI                |
+| ORM        | SQLAlchemy             |
+| Database   | MySQL                  |
+| Validation | Pydantic               |
+| Auth       | JWT (python-jose)      |
+| Security   | Passlib (bcrypt)       |
+| Config     | python-dotenv          |
+| DevOps     | Docker, Docker Compose |
 
 ---
 
@@ -204,15 +199,7 @@ DB_NAME=bankaccountsystem
 
 SECRET_KEY=your_secret_key
 ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES = your_time
-
-IF You Want to go live: 
-
-MYSQL_PUBLIC_URL = your_url
-
-SECRET_KEY=your_secret_key
-ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES = your_time
+ACCESS_TOKEN_EXPIRE_MINUTES=your_time
 ```
 
 ---
@@ -222,6 +209,66 @@ ACCESS_TOKEN_EXPIRE_MINUTES = your_time
 ```bash
 uvicorn main:app --reload (backend)
 npm run dev (frontend)
+```
+
+---
+
+# 🐳 Docker Setup (Recommended)
+
+Run the entire project using Docker (Backend + Frontend + MySQL).
+
+---
+
+## ⚙️ Requirements
+
+* Docker
+* Docker Compose
+
+---
+
+## 🚀 Run with Docker
+
+```bash
+docker-compose up --build
+```
+
+---
+
+## 🌐 Services
+
+* Backend API → http://localhost:8000
+* API Docs → http://localhost:8000/docs
+* Frontend → http://localhost:5173
+* MySQL → localhost:3008
+
+---
+
+## 🔐 Environment Variables
+
+Make sure `.env` file is configured:
+
+```env
+DB_USER=root
+DB_PASSWORD=your_password
+DB_NAME=bankaccountsystem
+
+SECRET_KEY=your_secret_key
+ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=60
+```
+
+---
+
+## 🧠 Docker Notes
+
+* Uses **named volume (`db_data`)** for MySQL persistence
+* Avoids local bind mount issues (prevents DB corruption)
+* Data persists across container restarts
+
+### Reset database if needed:
+
+```bash
+docker-compose down -v
 ```
 
 ---
@@ -286,6 +333,9 @@ Close account → status = CLOSED (not deleted)
 * Transaction safety (race-condition prevention)
 * Rule-based financial system (limits + validation)
 * Scalable backend design
+* Dockerized full-stack setup (API + Frontend + Database)
+* Persistent MySQL storage using Docker volumes
+* Resolved real-world DB corruption & container restart issues
 
 ---
 
@@ -298,6 +348,7 @@ This project demonstrates how to build a **real-world backend system** with:
 * Transaction safety & concurrency handling
 * Business rule enforcement
 * Clean architecture & scalability
+* Containerized deployment using Docker
 
 It serves as a strong foundation for evolving into a **full fintech platform** 🚀
 
