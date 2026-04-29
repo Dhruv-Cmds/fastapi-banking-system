@@ -33,8 +33,8 @@ DATABASE_URL = f"mysql+aiomysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{D
 engine = create_async_engine(
     DATABASE_URL,
     pool_pre_ping=True,     #  Avoid stale connections
-    pool_size=10,           #  Connection pool size
-    max_overflow=20,        #  Extra connections if needed
+    pool_size=25,           #  Connection pool size
+    max_overflow=50,        #  Extra connections if needed
     echo=False              #  Disable SQL logs in production
 )
 

@@ -1,19 +1,13 @@
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import HTTPException
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 
 from backend.models import Account, Transaction
 from backend.core import MAX_DEPOSIT, MAX_WITHDRAW, MAX_TRANSFER
 
-
 # CREATE
 async def create_account(db: AsyncSession, account, current_user):
-    result = await db.execute(
-        select(Account).where(Account.acc_no == account.acc_no)
-    )
-    if result.scalar_one_or_none():
-        raise HTTPException(400, "Account number already exists")
 
     new_acc = Account(
         acc_no=account.acc_no,
@@ -21,11 +15,17 @@ async def create_account(db: AsyncSession, account, current_user):
         user_id=current_user.id
     )
 
-    db.add(new_acc)
-    await db.commit()
-    await db.refresh(new_acc)
+    try:
 
-    return new_acc
+        db.add(new_acc)
+        await db.commit()
+
+        return new_acc
+
+    except IntegrityError:
+        
+        await db.rollback()
+        raise HTTPException (status_code=400, detail="Account number already exists")
 
 
 # READ
@@ -38,139 +38,138 @@ async def get_accounts(db: AsyncSession, current_user):
 
 # DEPOSIT
 async def deposit(db: AsyncSession, id, data, current_user):
-    result = await db.execute(
-        select(Account)
-        .where(
-            Account.id == id,
-            Account.user_id == current_user.id,
-            Account.status == "ACTIVE"
+
+    try:
+
+        if data.amount > MAX_DEPOSIT:
+            raise HTTPException(400, "Deposit limit exceeded")
+
+        result = await db.execute(
+            update(Account)
+            .where(
+                Account.id==id,
+                Account.user_id==current_user.id,
+                Account.status=="ACTIVE"
+            )
+            .values(balance=Account.balance + data.amount)
+            .execution_options(synchronize_session="fetch")
         )
-        .with_for_update()
-    )
 
-    acc = result.scalar_one_or_none()
+        if result.rowcount == 0:
+            raise HTTPException(404, "Account not found")
 
-    if not acc:
-        raise HTTPException(404, "Account not found")
+        db.add(Transaction(
+            from_account_id=None,
+            to_account_id=id,
+            amount=data.amount
+        ))
 
-    if data.amount > MAX_DEPOSIT:
-        raise HTTPException(400, "Deposit limit exceeded")
+        await db.commit()
 
-    acc.balance += data.amount
+        return {"message": "Deposit successful"}
+    
+    except SQLAlchemyError:
 
-    db.add(Transaction(
-        from_account_id=None,
-        to_account_id=acc.id,
-        amount=data.amount
-    ))
-
-    await db.commit()
-    await db.refresh(acc)
-
-    return acc
+        await db.rollback()
+        raise HTTPException(500, "Deposit failed")
 
 # WITHDRAW
 async def withdraw(db: AsyncSession, id, data, current_user):
+
     try:
+  
+        if data.amount > MAX_WITHDRAW:
+            raise HTTPException(400, "Withdraw limit exceeded")
+        
         result = await db.execute(
-            select(Account)
+            update(Account)
             .where(
                 Account.id == id,
                 Account.user_id == current_user.id,
-                Account.status == "ACTIVE"
+                Account.status == "ACTIVE",
+                Account.balance >= data.amount
             )
-            .with_for_update()
+            .values(balance = Account.balance - data.amount)
         )
 
-        acc = result.scalar_one_or_none()
+        if result.rowcount == 0:
+            raise HTTPException(400, "Insufficient balance or account not found")
 
-        if not acc:
-            raise HTTPException(404, "Account not found")
-
-        if data.amount > MAX_WITHDRAW:
-            raise HTTPException(400, "Withdraw limit exceeded")
-
-        if data.amount > acc.balance:
-            raise HTTPException(400, "Insufficient balance")
-
-        acc.balance -= data.amount
 
         db.add(Transaction(
-            from_account_id=acc.id,
+            from_account_id=id,
             to_account_id=None,
             amount=data.amount
         ))
 
         await db.commit()
-        await db.refresh(acc)
 
-        return acc
+        return {"message": "Withdraw successful"}
 
     except SQLAlchemyError:
+
         await db.rollback()
         raise HTTPException(500, "Withdraw failed")
 
 
 # TRANSFER
 async def transfer(db: AsyncSession, data, current_user):
+
     try:
-        # Lock sender
-        result_from = await db.execute(
-            select(Account)
-            .where(
-                Account.id == data.from_account_id,
-                Account.status == "ACTIVE"
+        async with db.begin():
+             # Lock sender
+            result_from = await db.execute(
+                select(Account)
+                .where(
+                    Account.id == data.from_account_id,
+                    Account.status == "ACTIVE"
+                )
+                .with_for_update()
             )
-            .with_for_update()
-        )
-        from_acc = result_from.scalar_one_or_none()
+            from_acc = result_from.scalar_one_or_none()
 
-        # Lock receiver
-        result_to = await db.execute(
-            select(Account)
-            .where(
-                Account.acc_no == data.to_account_no,
-                Account.status == "ACTIVE"
+            # Lock receiver
+            result_to = await db.execute(
+                select(Account)
+                .where(
+                    Account.acc_no == data.to_account_no,
+                    Account.status == "ACTIVE"
+                )
+                .with_for_update()
             )
-            .with_for_update()
-        )
-        to_acc = result_to.scalar_one_or_none()
+            to_acc = result_to.scalar_one_or_none()
 
-        if not from_acc or not to_acc:
-            raise HTTPException(404, "Account not found")
+            if not from_acc or not to_acc:
+                raise HTTPException(404, "Account not found")
 
-        if from_acc.user_id != current_user.id:
-            raise HTTPException(403, "Not authorized")
+            if from_acc.user_id != current_user.id:
+                raise HTTPException(403, "Not authorized")
 
-        if from_acc.id == to_acc.id:
-            raise HTTPException(400, "Cannot transfer to same account")
+            if from_acc.id == to_acc.id:
+                raise HTTPException(400, "Cannot transfer to same account")
 
-        if data.amount > MAX_TRANSFER:
-            raise HTTPException(400, "Transfer limit exceeded")
+            if data.amount > MAX_TRANSFER:
+                raise HTTPException(400, "Transfer limit exceeded")
 
-        if from_acc.balance < data.amount:
-            raise HTTPException(400, "Insufficient balance")
+            if from_acc.balance < data.amount:
+                raise HTTPException(400, "Insufficient balance")
 
-        # Perform transfer
-        from_acc.balance -= data.amount
-        to_acc.balance += data.amount
+            # Perform transfer
+            from_acc.balance -= data.amount
+            to_acc.balance += data.amount
 
-        db.add(Transaction(
-            from_account_id=from_acc.id,
-            to_account_id=to_acc.id,
-            amount=data.amount
-        ))
+            db.add(Transaction(
+                from_account_id=from_acc.id,
+                to_account_id=to_acc.id,
+                amount=data.amount
+            ))
 
-        await db.commit()
 
-        await db.refresh(from_acc)
-        await db.refresh(to_acc)
-
-        return {
-            "message": "Transfer successful",
-            "from_account_balance": from_acc.balance,
-            "to_account_balance": to_acc.balance
-        }
+            return {
+                "message": "Transfer successful",
+                "from_account_balance": from_acc.balance,
+                "to_account_balance": to_acc.balance
+            }
 
     except SQLAlchemyError:
         await db.rollback()
@@ -180,32 +179,36 @@ async def transfer(db: AsyncSession, data, current_user):
 
 # DELETE ACCOUNT
 async def delete_account(db: AsyncSession, id, current_user):
+
     try:
-        result = await db.execute(
-            select(Account)
-            .where(Account.id == id)
-            .with_for_update()
-        )
 
-        acc = result.scalar_one_or_none()
+        async with db.begin():
 
-        if not acc:
-            raise HTTPException(404, "Account not found")
+            result = await db.execute(
+                select(Account)
+                .where(Account.id == id)
+                .with_for_update()
+            )
 
-        if acc.user_id != current_user.id:
-            raise HTTPException(403, "Not authorized")
+            acc = result.scalar_one_or_none()
 
-        if acc.status == "CLOSED":
-            raise HTTPException(400, "Account already closed")
+            if not acc:
+                raise HTTPException(404, "Account not found")
 
-        if acc.balance != 0:
-            raise HTTPException(400, "Balance must be zero")
+            if acc.user_id != current_user.id:
+                raise HTTPException(403, "Not authorized")
 
-        acc.status = "CLOSED"
+            if acc.status == "CLOSED":
+                raise HTTPException(400, "Account already closed")
 
-        await db.commit()
+            if acc.balance != 0:
+                raise HTTPException(400, "Balance must be zero")
 
-        return {"message": "Account closed successfully"}
+            acc.status = "CLOSED"
+
+            await db.commit()
+
+            return {"message": "Account closed successfully"}
 
     except SQLAlchemyError:
         await db.rollback()
