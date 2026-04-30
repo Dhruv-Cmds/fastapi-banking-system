@@ -15,8 +15,7 @@ services:
     env_file:
       - .env
     environment:
-      DB_HOST: banking-db
-      DB_PORT: 3306
+      ENV: docker 
 
   banking-frontend:
     container_name: banking-frontend

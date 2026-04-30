@@ -1,4 +1,4 @@
-# 🏦 FastAPI Banking System (Production-Level Backend)
+# 🏦 FastAPI Banking System (Production-style Backend)
 
 A production-ready **Bank Account Management API** built with **FastAPI, MySQL, Async SQLAlchemy, and Docker**.
 
@@ -18,9 +18,9 @@ A production-ready **Bank Account Management API** built with **FastAPI, MySQL, 
 
 ## 🌐 Live Demo
 
-* **Frontend:** https://fastapi-banking-system.vercel.app          (current no available)
-* **Backend:** https://fastapi-banking-system.onrender.com         (current no available)
-* **API Docs:** https://fastapi-banking-system.onrender.com/docs   (current no available)
+* **Frontend:** https://fastapi-banking-system.vercel.app          (Currently offline)
+* **Backend:** https://fastapi-banking-system.onrender.com         (Currently offline)
+* **API Docs:** https://fastapi-banking-system.onrender.com/docs   (Currently offline)
 
 ---
 
@@ -157,6 +157,26 @@ fastapi-banking-system/
 
 ## ⚙️ Environment Variables
 
+### 🐳 Docker Environment (Recommended)
+
+```
+ENV=docker
+
+DB_USER=root
+DB_PASSWORD=your_password
+DB_NAME=banking
+
+SECRET_KEY=your_secret_key
+ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+```
+
+> Note: `DB_HOST` and `DB_PORT` are handled internally by Docker (`banking-db:3306`).
+
+---
+
+### 💻 Local Development (Optional)
+
 ```
 ENV=dev
 
@@ -164,14 +184,27 @@ DB_USER=root
 DB_PASSWORD=your_password
 DB_HOST=127.0.0.1
 DB_PORT=3008
-DB_NAME=bankaccountsystem
-
-TEST_DB_NAME=bankaccountsystem_test
+DB_NAME=banking
 
 SECRET_KEY=your_secret_key
 ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=30
 ```
+
+---
+
+### 🧪 Testing Environment
+
+```
+ENV=test
+
+DB_USER=root
+DB_PASSWORD=your_password
+DB_HOST=127.0.0.1
+DB_PORT=3008
+TEST_DB_NAME=bankaccountsystem_test
+```
+
 
 ---
 
@@ -238,10 +271,10 @@ k6 run load_test.js
 * Stress: ~250–300 users
 * Overload: 300+ users
 
-### Linux (Estimated, 4 Workers)
+### Linux (Expected, Not Tested)
 
-* Stable: ~400–500 users
-* Max: ~600–700 users
+* Estimated based on benchmarks: ~300–500 users
+* Actual results may vary depending on hardware
 
 ---
 
@@ -269,7 +302,7 @@ k6 run load_test.js
 * ✅ Fully functional backend
 * ✅ MySQL-only architecture
 * ✅ All tests passing
-* ✅ Load tested up to 1000 VUs
+* ✅ Load tested up to 1000 VUs (stress testing) System stability observed up to ~300 concurrent users
 * ✅ Performance limits identified
 
 ---
@@ -286,8 +319,25 @@ k6 run load_test.js
 
 ## 🎯 Capacity Summary
 
-* ~300 concurrent users (Windows setup)
-* ~500+ users (Linux production setup)
+* ~200–300 concurrent users (Docker on Windows)
+* ~300–500 users expected on native Linux (not tested)
+
+---
+
+## 🧠 Key Learnings
+
+- Handling async DB connections under load
+- Debugging connection pool exhaustion
+- Understanding system limits via k6 testing
+- Differences between Windows, Docker, and Linux performance
+
+---
+
+## ⚠️ Limitations
+
+- Single instance (no horizontal scaling)
+- No caching layer (Redis)
+- Performance constrained by MySQL connection pool
 
 ---
 

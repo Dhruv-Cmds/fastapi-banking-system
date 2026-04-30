@@ -18,4 +18,4 @@ COPY . .
 EXPOSE 8000
 
 # Run Fast Api "0.0.0.0" Allow outside access
-CMD [ "uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload" ]
+CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4"]

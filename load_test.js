@@ -1,8 +1,8 @@
 export let options = {
   stages: [
-    { duration: "10s", target: 200 },
-    { duration: "10s", target: 500 },
-    { duration: "10s", target: 1000 },
+    { duration: "20s", target: 100 },
+    { duration: "30s", target: 200 },
+    { duration: "40s", target: 300 },
   ],
 };
 
@@ -11,44 +11,37 @@ import { check, sleep } from 'k6';
 
 const BASE_URL = 'http://localhost:8000';
 
-export function setup() {
-    // 🔥 ensure user exists
+const headers = {
+  'Content-Type': 'application/json',
+};
+
+export default function () {
+    const username = `user_${__VU}_${__ITER}`;
+
+    // signup
     http.post(`${BASE_URL}/api/signup`, JSON.stringify({
-        username: 'testuser',
-        name: 'Test User',
-        password: 'password123'
-    }), {
-        headers: { 'Content-Type': 'application/json' }
+        username,
+        name: "Test",
+        password: "password123"
+    }), { headers });
+
+    // login
+    let loginRes = http.post(`${BASE_URL}/api/login`, JSON.stringify({
+        username,
+        password: "password123"
+    }), { headers });
+
+    let token = loginRes.json('access_token');
+
+    // request with token
+    let res = http.get(`${BASE_URL}/api/accounts`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
     });
-
-    // 🔐 login
-    let res = http.post(`${BASE_URL}/api/login`, JSON.stringify({
-        username: 'testuser',
-        password: 'password123'
-    }), {
-        headers: { 'Content-Type': 'application/json' }
-    });
-
-    console.log("LOGIN STATUS:", res.status);
-
-    if (res.status !== 200) {
-        console.log("LOGIN BODY:", res.body);
-        throw new Error("Login failed in setup()");
-    }
-
-    return { token: res.json('access_token') };
-}
-
-export default function (data) {
-    let headers = {
-        Authorization: `Bearer ${data.token}`,
-        'Content-Type': 'application/json'
-    };
-
-    let res = http.get(`${BASE_URL}/api/accounts`, { headers });
 
     check(res, {
-        'status is 200 or 429': (r) => r.status === 200 || r.status === 429,
+        'status ok': (r) => r.status === 200 || r.status === 429,
     });
 
     sleep(1);
