@@ -1,5 +1,20 @@
+# database files (VERY IMPORTANT)
+docker/databases/
 docker/mysql-data/
-node_modules/
-.git
-.env
+
+# system junk
+*.sock
+*.pid
+
+# python
 __pycache__/
+*.pyc
+
+# node
+node_modules/
+
+# git
+.git
+
+# env
+.env

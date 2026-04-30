@@ -186,3 +186,8 @@ docker/mysql-data/
 node_modules/
 dist/
 .vscode/
+
+docker/databases/
+
+# misc
+*.sock
