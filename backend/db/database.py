@@ -30,7 +30,6 @@ engine = create_async_engine(
     echo=False
 )
 
-print("POOL CONFIG:", engine.pool.size(), engine.pool._max_overflow)
 
 AsyncSessionLocal = sessionmaker(
     bind=engine,

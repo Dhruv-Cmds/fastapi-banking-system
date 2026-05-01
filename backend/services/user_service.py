@@ -48,17 +48,20 @@ async def login_user(db: AsyncSession, user):
 
 
 async def update_profile(db: AsyncSession, data, current_user):
+    
     try:
 
-        async with db.begin():
+        if data.name:
+            current_user.name = data.name
 
-            if data.name:
-                current_user.name = data.name
+        if data.password:
+            current_user.password = hash_password(data.password)
 
-            if data.password:
-                current_user.password = hash_password(data.password)
+        db.add(current_user)
 
-            return {"message": "Profile updated"}
+        await db.commit()
+
+        return {"message": "Profile updated"}
 
     except SQLAlchemyError:
 
