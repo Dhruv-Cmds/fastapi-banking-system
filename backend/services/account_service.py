@@ -19,7 +19,7 @@ async def create_account(db: AsyncSession, account, current_user):
     try:
         db.add(new_acc)
         await db.commit()
-        await db.refresh(new_acc)  # ✅ FIX
+        await db.refresh(new_acc) 
 
         return new_acc
 
