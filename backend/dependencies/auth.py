@@ -1,4 +1,4 @@
-from fastapi import Depends,Header, HTTPException
+from fastapi import Depends,Header, HTTPException, status
 from jose import jwt, JWTError, ExpiredSignatureError
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -7,7 +7,6 @@ from sqlalchemy import select
 from .db import get_db
 from backend.models import User
 from backend.core import SECRET_KEY, ALGORITHM
-
 # from fastapi.security import OAuth2PasswordBearer
 
 # Depends(get_db) Opens data Base connection to read, write, delete, update
@@ -63,3 +62,13 @@ async def get_current_user(
         raise HTTPException(status_code=401, detail="User not found")
     
     return user
+
+
+async def get_admin_user(current_user = Depends(get_current_user)):
+    if current_user.role != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin access required"
+        )
+
+    return current_user
