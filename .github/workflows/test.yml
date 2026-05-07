@@ -47,5 +47,5 @@ jobs:
           ALGORITHM: HS256
           ACCESS_TOKEN_EXPIRE_MINUTES: 30
         run: |
-          cd fastapi-backend-system
+          cd fastapi-banking-system
           python -m pytest -v
