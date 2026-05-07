@@ -1,113 +1,133 @@
-# 🏦 FastAPI Banking System (Production-style Backend)
+````md
+# 🏦 FastAPI Banking System
 
-A production-ready **Bank Account Management API** built with **FastAPI, MySQL, Async SQLAlchemy, and Docker**.
+### Production-Style Banking API with FastAPI, MySQL & Docker
 
----
-
-## 🚀 Project Overview
-
-* 🔐 JWT Authentication
-* 🏦 Account Management
-* 💸 Transactions (Deposit, Withdraw, Transfer)
-* ⚙️ Async MySQL (SQLAlchemy + aiomysql)
-* 🧪 Pytest testing (MySQL-based)
-* 📊 Load tested with k6
-* 🐳 Dockerized (API + MySQL + Frontend)
+A production-ready **Bank Account Management API** built using **FastAPI, MySQL, Async SQLAlchemy, and Docker**.
 
 ---
 
-## 🌐 Live Demo
+# 🚀 Project Overview
 
-* **Frontend:** https://fastapi-banking-system.vercel.app          (Currently offline)
-* **Backend:** https://fastapi-banking-system.onrender.com         (Currently offline)
-* **API Docs:** https://fastapi-banking-system.onrender.com/docs   (Currently offline)
+- 🔐 JWT Authentication
+- 🏦 Account Management
+- 💸 Transactions (Deposit, Withdraw, Transfer)
+- ⚙️ Async MySQL using SQLAlchemy + aiomysql
+- 🧪 Pytest Testing
+- 📊 Load Testing with k6
+- 🐳 Dockerized Full Stack Setup
+
+> Demo deployment currently offline.
 
 ---
 
-## Preview
+# 🌐 Live Demo
+
+- Frontend: https://fastapi-banking-system.vercel.app
+- Backend: https://fastapi-banking-system.onrender.com
+- API Docs: https://fastapi-banking-system.onrender.com/docs
+
+---
+
+# 📸 Preview
 
 ![Login Preview](screenshots/login.gif)
 
-## 🧠 Features
+---
 
-### 🔐 Authentication
+# 🧩 Architecture Highlights
 
-* JWT-based login/signup
-* Password hashing with bcrypt
-* Protected routes
+- Layered service architecture
+- Async-first backend design
+- Config-driven business rules
+- Dockerized multi-service environment
+- CI tested with GitHub Actions
 
 ---
 
-### 🏦 Account Management
+# 🧠 Features
 
-* Multiple accounts per user
-* Unique account numbers
-* Balance initialized to 0
-* Fetch all user accounts
+## 🔐 Authentication
 
----
-
-### 🔄 Account Lifecycle
-
-* ACTIVE → usable
-* CLOSED → blocked
-* No deletion (real-world banking logic)
+- JWT-based signup/login
+- Password hashing with bcrypt
+- Protected routes
 
 ---
 
-### 💸 Transactions
+## 🏦 Account Management
 
-* Deposit
-* Withdraw
-* Transfer
-
----
-
-### 🛡️ Safety & Integrity
-
-* Prevent negative balances
-* Prevent self-transfer
-* Only ACTIVE accounts allowed
-* Atomic DB transactions (commit/rollback)
+- Multiple accounts per user
+- Unique account numbers
+- Initial balance set to 0
+- Fetch all user accounts
 
 ---
 
-### 🧾 Transaction Ledger
+## 🔄 Account Lifecycle
 
-* Every transaction recorded
-* Enables auditing
-* Foundation for analytics & fraud detection
+- ACTIVE → usable
+- CLOSED → blocked
 
----
-
-## 🧠 Business Rules
-
-* Deposit limits
-* Withdraw limits
-* Transfer limits
-* Config-driven rules
+Implements soft-close account behavior similar to real banking systems.
 
 ---
 
-## 🧱 Tech Stack
+## 💸 Transactions
 
-| Layer     | Tech               |
-| --------- | ------------------ |
-| Backend   | FastAPI            |
-| ORM       | SQLAlchemy (Async) |
-| Database  | MySQL              |
-| Driver    | aiomysql           |
-| Auth      | JWT                |
-| Security  | bcrypt             |
-| Testing   | pytest             |
-| Load Test | k6                 |
-| DevOps    | Docker             |
+- Deposit
+- Withdraw
+- Transfer
 
 ---
 
-## 📁 Project Structure
+## 🛡️ Safety & Integrity
 
-```
+- Prevents negative balances
+- Prevents self-transfer
+- Allows only ACTIVE accounts
+- Atomic database transactions using commit/rollback
+
+---
+
+## 🧾 Transaction Ledger
+
+Every transaction is recorded for:
+
+- Auditing
+- Analytics
+- Fraud detection foundations
+
+---
+
+# 🧠 Business Rules
+
+- Deposit limits
+- Withdraw limits
+- Transfer limits
+- Config-driven validation rules
+
+---
+
+# 🧱 Tech Stack
+
+| Layer | Technology |
+|------|------|
+| Backend | FastAPI |
+| ORM | SQLAlchemy (Async) |
+| Database | MySQL |
+| Driver | aiomysql |
+| Authentication | JWT |
+| Security | bcrypt |
+| Testing | pytest |
+| Load Testing | k6 |
+| DevOps | Docker |
+
+---
+
+# 📁 Project Structure
+
+```text
 fastapi-banking-system/
 │
 ├── backend/
@@ -127,41 +147,30 @@ fastapi-banking-system/
 │   └── Dockerfile
 │
 ├── frontend/
-│   ├── node_modules/
-│   ├── public/
 │   ├── src/
-│   ├── .env
-│   ├── .env.production
-│   ├── .gitignore
+│   ├── public/
 │   ├── Dockerfile
-│   ├── eslint.config.js
-│   ├── index.html
 │   ├── package.json
-│   ├── package-lock.json
 │   └── vite.config.js
 │
 ├── screenshots/
-│
+├── .github/
 ├── .dockerignore
-├── .gitattributes
 ├── .gitignore
 ├── LICENSE
 ├── load_test.js
-├── main.sql
 ├── README.md
 └── requirements.txt
-
-```
+````
 
 ---
 
-## ⚙️ Environment Variables
+# ⚙️ Environment Variables
 
-### 🐳 Docker Environment (Recommended)
+## 🐳 Docker Environment (Recommended)
 
-```
+```env
 ENV=docker
-
 DB_USER=root
 DB_PASSWORD=your_password
 DB_NAME=banking
@@ -171,15 +180,14 @@ ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=30
 ```
 
-> Note: `DB_HOST` and `DB_PORT` are handled internally by Docker (`banking-db:3306`).
+Note: `DB_HOST` and `DB_PORT` are internally handled by Docker (`banking-db:3306`).
 
 ---
 
-### 💻 Local Development (Optional)
+## 💻 Local Development
 
-```
+```env
 ENV=dev
-
 DB_USER=root
 DB_PASSWORD=your_password
 DB_HOST=127.0.0.1
@@ -193,11 +201,10 @@ ACCESS_TOKEN_EXPIRE_MINUTES=30
 
 ---
 
-### 🧪 Testing Environment
+## 🧪 Testing Environment
 
-```
+```env
 ENV=test
-
 DB_USER=root
 DB_PASSWORD=your_password
 DB_HOST=127.0.0.1
@@ -205,80 +212,89 @@ DB_PORT=3008
 TEST_DB_NAME=bankaccountsystem_test
 ```
 
-
 ---
 
-## 🐳 Docker Setup
+# 🐳 Docker Setup
 
-### Run Application
+## Run Application
 
-```
+```bash
 docker-compose up --build
 ```
 
-### Reset Database
+## Reset Database
 
-```
+```bash
 docker-compose down -v
 ```
 
 ---
 
-## 🧪 Testing
+# 🧪 Testing
 
-### Run Tests
+## Run Tests
 
-```
+```bash
 $env:PYTHONPATH="."
 $env:ENV="test"
-pytest -v
+
+python -m pytest -v
 ```
 
-### Test Features
+---
 
-* MySQL test database (no SQLite)
-* Per-test DB reset
+## Test Features
+
+* MySQL-based testing
+* Per-test database reset
 * Async-safe fixtures
 * Dependency overrides
 
 ---
 
-## ⚙️ Async Fixes (Critical)
+# ⚙️ Async Fixes
+
+## Critical Issues Fixed
 
 * Fixed Windows event loop issues
 * Eliminated cross-loop DB errors
-* Per-test engine isolation
+* Added per-test engine isolation
 * Fixed connection leaks
-* Fixed password encoding (`@ → %40`)
+* Fixed password encoding issues (`@ → %40`)
 
 ---
 
-## 📊 Load Testing (k6)
+# 📊 Load Testing (k6)
 
-### Run
+## Run Load Test
 
-```
+```bash
 k6 run load_test.js
 ```
 
 ---
 
-## 📈 Performance Results
+# 📈 Performance Results
 
-### Windows (2 Workers)
+## Windows (2 Workers)
 
 * Stable: ~200 users
 * Stress: ~250–300 users
 * Overload: 300+ users
 
-### Linux (Expected, Not Tested)
+---
 
-* Estimated based on benchmarks: ~300–500 users
-* Actual results may vary depending on hardware
+## Linux (Estimated)
+
+Based on benchmarks:
+
+* ~300–500 concurrent users expected
+
+> Actual performance depends on hardware and deployment setup.
 
 ---
 
-## 🧠 Bottlenecks Identified
+# 🧠 Bottlenecks Identified
 
 * Windows socket limitations
 * Uvicorn worker count
@@ -287,7 +303,7 @@ k6 run load_test.js
 
 ---
 
-## 🔧 Optimizations Applied
+# 🔧 Optimizations Applied
 
 * Async database engine
 * Connection pooling
@@ -297,50 +313,56 @@ k6 run load_test.js
 
 ---
 
-## 🏁 Final Status
+# 🏁 Final Status
 
 * ✅ Fully functional backend
 * ✅ MySQL-only architecture
 * ✅ All tests passing
-* ✅ Load tested up to 1000 VUs (stress testing) System stability observed up to ~300 concurrent users
-* ✅ Performance limits identified
+* ✅ CI pipeline passing
+* ✅ Dockerized full-stack environment
+* ✅ Load tested up to 1000 virtual users
+
+Stable behavior observed around ~300 concurrent users.
 
 ---
 
-## 🚀 Future Improvements
+# 🚀 Future Improvements
 
 * Migrate to Linux (WSL2 or cloud VM)
 * Increase worker processes
 * Add Redis caching
-* Implement load balancer
+* Implement load balancing
 * Enable horizontal scaling
 
 ---
 
-## 🎯 Capacity Summary
+# 🎯 Capacity Summary
 
-* ~200–300 concurrent users (Docker on Windows)
-* ~300–500 users expected on native Linux (not tested)
-
----
-
-## 🧠 Key Learnings
-
-- Handling async DB connections under load
-- Debugging connection pool exhaustion
-- Understanding system limits via k6 testing
-- Differences between Windows, Docker, and Linux performance
+* ~200–300 concurrent users on Docker Desktop (Windows)
+* ~300–500 expected on native Linux environments
 
 ---
 
-## ⚠️ Limitations
+# 🧠 Key Learnings
 
-- Single instance (no horizontal scaling)
-- No caching layer (Redis)
-- Performance constrained by MySQL connection pool
+* Managing async DB connections under load
+* Debugging connection pool exhaustion
+* Understanding infrastructure bottlenecks using k6
+* Comparing Windows vs Docker vs Linux performance
 
 ---
 
-## 📌 License
+# ⚠️ Limitations
 
-This project is for educational and portfolio purposes.
+* Single instance deployment
+* No Redis caching layer
+* Performance constrained by MySQL connection pool
+
+---
+
+# 📌 License
+
+This project is intended for educational and portfolio purposes.
+
+```
+```
