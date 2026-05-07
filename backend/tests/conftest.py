@@ -57,9 +57,8 @@ DB_PASSWORD = quote_plus(
     os.getenv("DB_PASSWORD") or ""
 )
 
-DB_HOST = "127.0.0.1"
-
-DB_PORT = "3008"
+DB_HOST = os.getenv("DB_HOST", "127.0.0.1")
+DB_PORT = os.getenv("DB_PORT", "3306")
 
 DB_NAME = os.getenv("TEST_DB_NAME")
 
