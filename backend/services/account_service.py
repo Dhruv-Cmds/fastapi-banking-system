@@ -1,10 +1,17 @@
 from sqlalchemy import select, update
+
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi import HTTPException
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 
+from fastapi import HTTPException
+
 from backend.models import Account, Transaction
-from backend.core import MAX_DEPOSIT, MAX_WITHDRAW, MAX_TRANSFER
+
+from backend.core import (
+    MAX_DEPOSIT, 
+    MAX_WITHDRAW, 
+    MAX_TRANSFER
+)
 
 
 # CREATE
@@ -30,9 +37,11 @@ async def create_account(db: AsyncSession, account, current_user):
 
 # READ
 async def get_accounts(db: AsyncSession, current_user):
+
     result = await db.execute(
         select(Account).where(Account.user_id == current_user.id)
     )
+    
     return result.scalars().all()
 
 
@@ -152,7 +161,7 @@ async def transfer(db: AsyncSession, data, current_user):
         db.add(Transaction(
             from_account_id=from_acc.id,
             to_account_id=to_acc.id,
-            amount=data.amountm,
+            amount=data.amount,
             status="SUCCESS"
         ))
 
@@ -168,18 +177,21 @@ async def transfer(db: AsyncSession, data, current_user):
         raise HTTPException(500, "Transfer failed")
     
 async def get_transactions(
-    db: AsyncSession,
-    account_id: int,
-    current_user,
-    skip: int = 0,
-    limit: int = 20
-):
+        db: AsyncSession,
+        account_id: int,
+        current_user,
+        skip: int = 0,
+        limit: int = 20
+    ):
+
     # make sure account belongs to current user
     account_query = select(Account).where(
         Account.id == account_id,
         Account.user_id == current_user.id
     )
+
     result = await db.execute(account_query)
+
     account = result.scalar_one_or_none()
 
     if not account:
@@ -197,6 +209,7 @@ async def get_transactions(
     )
 
     result = await db.execute(txn_query)
+
     return result.scalars().all()
 
 

@@ -4,7 +4,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
 from backend.models import User
-from backend.core import hash_password, verify_password, create_access_token
+
+from backend.core import (
+    hash_password, 
+    verify_password, 
+    create_access_token
+)
 
 
 async def signup_user(db: AsyncSession, user):

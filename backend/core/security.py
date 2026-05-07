@@ -1,23 +1,9 @@
 from passlib.context import CryptContext
 from jose import jwt
 
-from datetime import datetime, timedelta
-from dotenv import load_dotenv
+from datetime import datetime, timedelta, timezone
 
-import os
-
-# Load environment variables
-load_dotenv()
-
-SECRET_KEY = os.getenv("SECRET_KEY")
-ALGORITHM = os.getenv("ALGORITHM", "HS256")
-ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))
-
-
-# Safety check (VERY IMPORTANT)
-if not SECRET_KEY:
-    raise RuntimeError("SECRET_KEY is not set in environment variable")
-
+from .config import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
     
 #  Password hashing context
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -40,7 +26,7 @@ def create_access_token(data: dict): # user info come in json (dict) formate
     to_encode = data.copy()
 
     #  decide when to expire user token
-    expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
 
     # Add standard JWT fields
     to_encode.update({"exp": expire})  #  user expire time 

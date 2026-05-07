@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 from .db import get_db
+
 from backend.models import User
 from backend.core import SECRET_KEY, ALGORITHM
 # from fastapi.security import OAuth2PasswordBearer

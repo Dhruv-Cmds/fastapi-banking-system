@@ -1,5 +1,6 @@
 import "./panel.css";
-import API from "../api/api";
+
+import { deleteAccount } from "../api/accountApi";
 
 const fmt = (n) =>
   "₹" +
@@ -7,9 +8,15 @@ const fmt = (n) =>
     minimumFractionDigits: 2,
   });
 
-export default function AccountsList({ accounts, selected, onSelect, onRefresh }) {
+export default function AccountsList({
+  accounts,
+  selected,
+  onSelect,
+  onRefresh,
+}) {
 
   async function handleDelete(e, id) {
+
     e.stopPropagation();
 
     const confirmDelete = window.confirm(
@@ -19,17 +26,19 @@ export default function AccountsList({ accounts, selected, onSelect, onRefresh }
     if (!confirmDelete) return;
 
     try {
-      await API.delete(`/accounts/${id}`);
+
+      await deleteAccount(id);
 
       alert("Account closed");
 
       onRefresh();
+
     } 
     
     catch (err) {
+
       alert(err.response?.data?.detail || "Action failed");
     }
-    
   }
 
   if (!accounts.length) {
@@ -37,39 +46,42 @@ export default function AccountsList({ accounts, selected, onSelect, onRefresh }
   }
 
   return (
-      <div className="accounts-grid">
-        {accounts
-          .filter((a) => a.status === "ACTIVE")
-          .map((a) => (
-            <div
-                key={a.id}
-                className={`account-card ${
-                  Number(selected) === Number(a.id) ? "active" : ""
-                }`}
+    <div className="accounts-grid">
 
-                onClick={() => onSelect(a.id)}
-              >
-                <p className="acc-name">
-                  {a.account_name || "Account"}
-                </p>
+      {accounts
+        .filter((a) => a.status === "ACTIVE")
+        .map((a) => (
+          <div
+            key={a.id}
+            className={`account-card ${
+              Number(selected) === Number(a.id) ? "active" : ""
+            }`}
+            onClick={() => onSelect(a.id)}
+          >
 
-                <p className="acc-balance">
-                  {fmt(a.balance)}
-                </p>
+            <p className="acc-name">
+              {a.account_name || "Account"}
+            </p>
 
-                <p className="acc-number">
-                  •••• {a.acc_no}
-                </p>
+            <p className="acc-balance">
+              {fmt(a.balance)}
+            </p>
 
-                <button
-                  className="btn btn-accent"
-                  style={{ marginTop: "10px" }}
-                  onClick={(e) => handleDelete(e, a.id)}
-                >
-                  Close
-                </button>
-            </div>
-          ))}
+            <p className="acc-number">
+              •••• {a.acc_no}
+            </p>
+
+            <button
+              className="btn btn-accent"
+              style={{ marginTop: "10px" }}
+              onClick={(e) => handleDelete(e, a.id)}
+            >
+              Close
+            </button>
+
+          </div>
+        ))}
+
     </div>
   );
 }

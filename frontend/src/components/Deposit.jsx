@@ -1,81 +1,131 @@
 import { useState } from "react";
-import API from "../api/api";
+
+import { depositMoney } from "../api/accountApi";
+
 import "./panel.css";
+
 
 const QUICK = [500, 1000, 5000, 10000];
 
-export default function Deposit({ accountId, onDone }) {
+
+export default function Deposit({
+  accountId,
+  onDone
+}) {
+
   const [amount, setAmount] = useState("");
+
   const [msg, setMsg] = useState(null);
+
   const [loading, setLoading] = useState(false);
 
+
   async function submit() {
-    
+
     if (!amount || Number(amount) <= 0) {
-      setMsg({ text: "Enter valid amount", type: "err" });
+
+      setMsg({
+        text: "Enter valid amount",
+        type: "err"
+      });
+
       return;
     }
 
     setMsg(null);
+
     setLoading(true);
 
     try {
-      await API.post(`/accounts/${Number(accountId)}/deposit`, {
-        amount: Number(amount),
+
+      await depositMoney(
+        Number(accountId),
+        {
+          amount: Number(amount),
+        }
+      );
+
+      setMsg({
+        text: "Deposit successful!",
+        type: "ok",
       });
 
-      setMsg({ text: "Deposit successful!", type: "ok" });
-
-      setAmount(""); 
+      setAmount("");
 
       setTimeout(() => {
+
         setMsg(null);
-        onDone(); 
+
+        onDone();
+
       }, 800);
 
-    } 
-    
+    }
+
     catch (e) {
+
       setMsg({
-        text: e.response?.data?.detail || "Deposit failed.",
+        text:
+          e.response?.data?.detail ||
+          "Deposit failed.",
         type: "err",
       });
 
-      setTimeout(() => setMsg(null), 3000);
+      setTimeout(() => {
+        setMsg(null);
+      }, 3000);
 
-    } 
-    
+    }
+
     finally {
+
       setLoading(false);
     }
-    
   }
+
 
   return (
     <div className="panel">
-      <p className="panelTitle">Add Cash</p>
+
+      <p className="panelTitle">
+        Add Cash
+      </p>
 
       <div className="field">
-        <label>Amount (₹)</label>
+
+        <label>
+          Amount (₹)
+        </label>
 
         <input
           type="number"
           placeholder="0.00"
           value={amount}
-          onChange={(e) => setAmount(e.target.value)}
+          onChange={(e) =>
+            setAmount(e.target.value)
+          }
         />
+
       </div>
 
       <div className="chips">
+
         {QUICK.map((q) => (
+
           <button
             key={q}
             className="chip"
-            onClick={() => setAmount(String(q))}
+            onClick={() =>
+              setAmount(String(q))
+            }
           >
-            ₹{q >= 1000 ? q / 1000 + "k" : q}
+            ₹{q >= 1000
+              ? q / 1000 + "k"
+              : q}
           </button>
+
         ))}
+
       </div>
 
       <button
@@ -83,10 +133,17 @@ export default function Deposit({ accountId, onDone }) {
         onClick={submit}
         disabled={loading}
       >
-        {loading ? "Processing..." : "Confirm Deposit →"}
+        {loading
+          ? "Processing..."
+          : "Confirm Deposit →"}
       </button>
 
-      {msg && <div className={`toast ${msg.type}`}>{msg.text}</div>}
+      {msg && (
+        <div className={`toast ${msg.type}`}>
+          {msg.text}
+        </div>
+      )}
+
     </div>
   );
 }

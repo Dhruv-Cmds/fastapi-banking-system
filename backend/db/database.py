@@ -1,25 +1,33 @@
-from dotenv import load_dotenv
-import os
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from urllib.parse import quote_plus
 
-load_dotenv()
+import os
 
-ENV = os.getenv("ENV", "dev")
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+
+from backend.core import ENV
+
 
 DB_USER = os.getenv("DB_USER")
 DB_PASSWORD = quote_plus(os.getenv("DB_PASSWORD") or "")
 DB_NAME = os.getenv("DB_NAME")
 
+
 if ENV == "docker":
     DB_HOST = "banking-db"
     DB_PORT = "3306"
+    
 else:
     DB_HOST = "127.0.0.1"
     DB_PORT = "3008"
 
-DATABASE_URL = f"mysql+aiomysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+
+DATABASE_URL = (
+    f"mysql+aiomysql://"
+    f"{DB_USER}:{DB_PASSWORD}"
+    f"@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+)
+
 
 engine = create_async_engine(
     DATABASE_URL,

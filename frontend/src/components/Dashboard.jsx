@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
-import API from "../api/api";
+
+import { getAccounts } from "../api/accountApi";
 
 import AccountsList from "./AccountsList";
 import CreateAccount from "./CreateAccount";
@@ -10,13 +11,16 @@ import Profile from "./Profile";
 
 import "./panel.css";
 
+
 const fmt = (n) =>
   "₹" +
   Number(n || 0).toLocaleString("en-IN", {
     minimumFractionDigits: 2,
   });
 
+
 export default function Dashboard({ user, onLogout }) {
+
   const [accounts, setAccounts] = useState([]);
   const [selected, setSelected] = useState(null);
   const [panel, setPanel] = useState(null);
@@ -27,10 +31,13 @@ export default function Dashboard({ user, onLogout }) {
 
   const [tab, setTab] = useState("home");
 
+
   const loadAccounts = useCallback(async () => {
 
     try {
-      const r = await API.get("/accounts");
+
+      const r = await getAccounts();
+
       const data = r.data;
 
       setAccounts(data);
@@ -49,12 +56,14 @@ export default function Dashboard({ user, onLogout }) {
       }
 
     } 
-
+    
     catch (err) {
+
       console.error("Failed to load accounts:", err);
     }
 
   }, [selected]);
+
 
   useEffect(() => {
 
@@ -63,21 +72,36 @@ export default function Dashboard({ user, onLogout }) {
     }
 
     init();
+
   }, [loadAccounts]);
+
 
   useEffect(() => {
 
     function updateTheme() {
-      const isDark = localStorage.getItem("theme") === "dark";
+
+      const isDark =
+        localStorage.getItem("theme") === "dark";
+
       setDark(isDark);
-      document.body.className = isDark ? "dark" : "light";
+
+      document.body.className =
+        isDark ? "dark" : "light";
     }
 
-    window.addEventListener("themeChange", updateTheme);
+    window.addEventListener(
+      "themeChange",
+      updateTheme
+    );
 
     return () =>
-      window.removeEventListener("themeChange", updateTheme);
+      window.removeEventListener(
+        "themeChange",
+        updateTheme
+      );
+
   }, []);
+
 
   const selAcc = accounts.find(
     (a) => Number(a.id) === Number(selected)
@@ -85,26 +109,34 @@ export default function Dashboard({ user, onLogout }) {
 
   const hasAccounts = accounts.length > 0;
 
+
   return (
     <div className={`app-shell ${dark ? "dark" : "light"}`}>
 
       {/* HEADER */}
       {tab !== "profile" && (
         <header className="header">
+
           <div
             className="avatar clickable"
             onClick={() => setTab("profile")}
           >
             {user ? user[0].toUpperCase() : "U"}
           </div>
+
         </header>
       )}
+
 
       {/* HOME */}
       {tab === "home" && (
         <>
+
           <div className="hero">
-            <p className="hero-label">Cash Balance</p>
+
+            <p className="hero-label">
+              Cash Balance
+            </p>
 
             <p style={{ opacity: 0.6 }}>
               Account • #{selAcc?.acc_no || "-"}
@@ -115,6 +147,7 @@ export default function Dashboard({ user, onLogout }) {
             </p>
 
             <div className="hero-actions">
+
               <button
                 disabled={!hasAccounts}
                 onClick={() => setPanel("deposit")}
@@ -128,7 +161,9 @@ export default function Dashboard({ user, onLogout }) {
               >
                 Send Money
               </button>
+
             </div>
+
           </div>
 
           <AccountsList
@@ -137,38 +172,58 @@ export default function Dashboard({ user, onLogout }) {
             onSelect={(id) => setSelected(Number(id))}
             onRefresh={loadAccounts}
           />
+
         </>
       )}
 
+
       {/* ACTIONS */}
       {tab === "actions" && (
-        
+
         <div className="quick-actions">
+
           {[
             { label: "Deposit", action: "deposit" },
             { label: "Withdraw", action: "withdraw" },
             { label: "Transfer", action: "transfer" },
             { label: "New Acc", action: "new" },
           ].map(({ label, action }) => (
-            <button key={action} onClick={() => setPanel(action)}>
+
+            <button
+              key={action}
+              onClick={() => setPanel(action)}
+            >
               {label}
             </button>
+
           ))}
+
         </div>
       )}
 
+
       {/* PROFILE */}
       {tab === "profile" && (
-        <Profile user={user} onLogout={onLogout} />
+        <Profile
+          user={user}
+          onLogout={onLogout}
+        />
       )}
+
 
       {/* PANELS */}
       {panel === "deposit" && selected && (
-        <Deposit accountId={Number(selected)} onDone={loadAccounts} />
+        <Deposit
+          accountId={Number(selected)}
+          onDone={loadAccounts}
+        />
       )}
 
       {panel === "withdraw" && selected && (
-        <Withdraw accountId={Number(selected)} onDone={loadAccounts} />
+        <Withdraw
+          accountId={Number(selected)}
+          onDone={loadAccounts}
+        />
       )}
 
       {panel === "transfer" && selected && (
@@ -180,11 +235,15 @@ export default function Dashboard({ user, onLogout }) {
       )}
 
       {panel === "new" && (
-        <CreateAccount onDone={loadAccounts} />
+        <CreateAccount
+          onDone={loadAccounts}
+        />
       )}
+
 
       {/* BOTTOM NAV */}
       <div className="bottom-nav">
+
         <button
           className={tab === "home" ? "active" : ""}
           onClick={() => setTab("home")}
@@ -205,6 +264,7 @@ export default function Dashboard({ user, onLogout }) {
         >
           👤 Profile
         </button>
+
       </div>
 
     </div>

@@ -1,8 +1,15 @@
 import { useState } from "react";
-import API from "../api/api";
+
+import {
+  loginUser,
+  signupUser
+} from "../api/authApi";
+
 import "./panel.css";
 
+
 export default function Login({ onLogin }) {
+
   const [tab, setTab] = useState("login");
 
   const [form, setForm] = useState({
@@ -11,110 +18,178 @@ export default function Login({ onLogin }) {
   });
 
   const [msg, setMsg] = useState(null);
+
   const [loading, setLoading] = useState(false);
 
+
   const set = (k) => (e) =>
-    setForm((p) => ({ ...p, [k]: e.target.value }));
+    setForm((p) => ({
+      ...p,
+      [k]: e.target.value
+    }));
+
 
   async function submit() {
-    
+
     if (!form.username || !form.password) {
-      setMsg({ text: "Enter username & password", type: "err" });
+
+      setMsg({
+        text: "Enter username & password",
+        type: "err"
+      });
+
       return;
     }
 
     setMsg(null);
+
     setLoading(true);
 
     try {
+
       if (tab === "login") {
-        const r = await API.post("/login", {
+
+        const r = await loginUser({
           username: form.username,
           password: form.password,
         });
 
-        localStorage.setItem("token", r.data.access_token);
+        localStorage.setItem(
+          "token",
+          r.data.access_token
+        );
 
         onLogin(form.username);
-      } else {
-        
-        await API.post("/signup", {
+
+      }
+
+      else {
+
+        await signupUser({
           username: form.username,
           password: form.password,
           name: form.username,
         });
 
-       
-        const r = await API.post("/login", {
+        const r = await loginUser({
           username: form.username,
           password: form.password,
         });
 
-        localStorage.setItem("token", r.data.access_token);
+        localStorage.setItem(
+          "token",
+          r.data.access_token
+        );
 
         onLogin(form.username);
 
-        setMsg({ text: "Account created!", type: "ok" });
+        setMsg({
+          text: "Account created!",
+          type: "ok"
+        });
+
         setTab("login");
       }
 
-    } catch (e) {
+    }
+
+    catch (e) {
+
       setMsg({
-        text: e.response?.data?.detail || "Something went wrong.",
+        text:
+          e.response?.data?.detail ||
+          "Something went wrong.",
         type: "err",
       });
-    } finally {
-      setLoading(false); 
+
+    }
+
+    finally {
+
+      setLoading(false);
     }
   }
 
+
   return (
     <div className="page-center">
+
       <div className="wrap">
 
         <div className="orb" />
 
         <div className="logo">
-          <span className="logoMark">V</span>
+
+          <span className="logoMark">
+            V
+          </span>
 
           <div>
-            <h1 className="logoName">VaultX</h1>
+
+            <h1 className="logoName">
+              VaultX
+            </h1>
+
             <p className="tagline">
               Save money & get best financial experience
             </p>
+
           </div>
+
         </div>
+
 
         <div className="tabs">
+
           {["login", "signup"].map((t) => (
+
             <button
               key={t}
-              className={`tab ${tab === t ? "active" : ""}`}
+              className={`tab ${
+                tab === t ? "active" : ""
+              }`}
               onClick={() => setTab(t)}
             >
-              {t === "login" ? "Sign In" : "Sign Up"}
+              {t === "login"
+                ? "Sign In"
+                : "Sign Up"}
             </button>
+
           ))}
+
         </div>
 
+
         <div className="field">
-          <label>Username</label>
+
+          <label>
+            Username
+          </label>
+
           <input
             placeholder="username"
             value={form.username}
             onChange={set("username")}
           />
+
         </div>
 
+
         <div className="field">
-          <label>Password</label>
+
+          <label>
+            Password
+          </label>
+
           <input
             type="password"
             placeholder="••••••••"
             value={form.password}
             onChange={set("password")}
           />
+
         </div>
+
 
         <button
           className="btn btn-primary"
@@ -128,18 +203,38 @@ export default function Login({ onLogin }) {
             : "Create Account →"}
         </button>
 
-        {msg && <div className={`toast ${msg.type}`}>{msg.text}</div>}
+
+        {msg && (
+          <div className={`toast ${msg.type}`}>
+            {msg.text}
+          </div>
+        )}
+
 
         <div className="auth-box">
+
           <div className="switch">
+
             Don't have an account?
-            <span onClick={() => setTab(tab === "login" ? "signup" : "login")}>
+
+            <span
+              onClick={() =>
+                setTab(
+                  tab === "login"
+                    ? "signup"
+                    : "login"
+                )
+              }
+            >
               Sign up
             </span>
+
           </div>
+
         </div>
 
       </div>
+
     </div>
   );
 }

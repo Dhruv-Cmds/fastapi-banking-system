@@ -1,46 +1,67 @@
-version: "3.9"
-
 services:
   banking-api:
+
     container_name: banking-api
+
     build:
       context: ..
       dockerfile: docker/Dockerfile
+      
     ports:
       - "8000:8000"
+
     volumes:
       - ..:/app
+
     depends_on:
       - banking-db
+
     env_file:
       - .env
+
     environment:
       ENV: docker 
 
+    restart: always
+
   banking-frontend:
+
     container_name: banking-frontend
+
     build:
       context: ../frontend
+
     ports:
       - "5173:5173"
+
     volumes:
       - ../frontend:/app
       - /app/node_modules
+
     depends_on:
       - banking-api
 
-  banking-db:
-    container_name: banking-db
-    image: mysql:8.0
     restart: always
+
+  banking-db:
+
+    container_name: banking-db
+
+    image: mysql:8.0
+
+    restart: always
+
     env_file:
       - .env
+
     environment:
         MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
         MYSQL_DATABASE: ${DB_NAME}
         MYSQL_USER: ${DB_USER}
         MYSQL_PASSWORD: ${DB_PASSWORD}
+
     ports:
       - "3008:3306"
+      
     volumes:
       - ./databases/banking:/var/lib/mysql
