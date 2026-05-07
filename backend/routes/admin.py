@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 from backend.models import User, Account
-from backend.db import get_db
+from backend.dependencies.db import get_db
 from backend.dependencies.auth import get_admin_user
 
 router = APIRouter(prefix="/api/admin", tags=["Admin"])
