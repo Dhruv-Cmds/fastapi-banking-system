@@ -61,7 +61,8 @@ async def deposit(db: AsyncSession, id, data, current_user):
         db.add(Transaction(
             from_account_id=None,
             to_account_id=id,
-            amount=data.amount
+            amount=data.amount,
+            status="SUCCESS"
         ))
 
         await db.commit()
@@ -90,7 +91,7 @@ async def withdraw(db: AsyncSession, id, data, current_user):
                 Account.balance >= data.amount
             )
             .values(balance=Account.balance - data.amount)
-            .execution_options(synchronize_session="fetch")  # ✅ FIX
+            .execution_options(synchronize_session="fetch")
         )
 
         if result.rowcount == 0:
@@ -99,7 +100,8 @@ async def withdraw(db: AsyncSession, id, data, current_user):
         db.add(Transaction(
             from_account_id=id,
             to_account_id=None,
-            amount=data.amount
+            amount=data.amount,
+            status="SUCCESS"
         ))
 
         await db.commit()
@@ -150,7 +152,8 @@ async def transfer(db: AsyncSession, data, current_user):
         db.add(Transaction(
             from_account_id=from_acc.id,
             to_account_id=to_acc.id,
-            amount=data.amount
+            amount=data.amountm,
+            status="SUCCESS"
         ))
 
         await db.commit()
@@ -163,6 +166,38 @@ async def transfer(db: AsyncSession, data, current_user):
     except SQLAlchemyError:
         await db.rollback()
         raise HTTPException(500, "Transfer failed")
+    
+async def get_transactions(
+    db: AsyncSession,
+    account_id: int,
+    current_user,
+    skip: int = 0,
+    limit: int = 20
+):
+    # make sure account belongs to current user
+    account_query = select(Account).where(
+        Account.id == account_id,
+        Account.user_id == current_user.id
+    )
+    result = await db.execute(account_query)
+    account = result.scalar_one_or_none()
+
+    if not account:
+        raise HTTPException(404, "Account not found")
+
+    txn_query = (
+        select(Transaction)
+        .where(
+            (Transaction.from_account_id == account_id) |
+            (Transaction.to_account_id == account_id)
+        )
+        .order_by(Transaction.created_at.desc())
+        .offset(skip)
+        .limit(limit)
+    )
+
+    result = await db.execute(txn_query)
+    return result.scalars().all()
 
 
 # DELETE ACCOUNT

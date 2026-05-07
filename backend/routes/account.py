@@ -76,6 +76,22 @@ async def transfer(
 
     return await account_service.transfer(db, data, current_user)
 
+@router.get("/transactions/{account_id}")
+async def get_transactions(
+    account_id: int,
+    request: Request,
+    skip: int = 0,
+    limit: int = 20,
+    db: AsyncSession = Depends(get_db),
+    current_user: dict = Depends(get_current_user)
+):
+    return {
+        "data": await account_service.get_transactions(
+            db, account_id, current_user, skip=skip, limit=limit
+        ),
+        "skip": skip,
+        "limit": limit
+    }
 
 # DELETE (CLOSE ACCOUNT)
 @router.delete("/accounts/{id}")
