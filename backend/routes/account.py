@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.dependencies.db import get_db
 from backend.dependencies import get_current_user
-from backend.schemas import AccountCreate, Amount, Transfer
+from backend.schemas import AccountCreate, Amount, Transfer, TransactionListResponse
 from backend.services import account_service
 from backend.core.limiter import limiter
 
@@ -76,7 +76,7 @@ async def transfer(
 
     return await account_service.transfer(db, data, current_user)
 
-@router.get("/transactions/{account_id}")
+@router.get("/transactions/{account_id}", response_model=TransactionListResponse)
 async def get_transactions(
     account_id: int,
     request: Request,
