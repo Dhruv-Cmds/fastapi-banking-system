@@ -18,9 +18,9 @@ from sqlalchemy.ext.asyncio import (
 
 from sqlalchemy.orm import sessionmaker
 
-from db import Base
-from dependencies import get_db
-from main import app
+from backend.db import Base
+from backend.dependencies import get_db
+from backend.main import app
 
 import pytest_asyncio
 
