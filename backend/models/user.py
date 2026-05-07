@@ -11,4 +11,5 @@ class User (Base):
     username = Column(String(100), unique=True, nullable=False)
     name = Column(String(100), nullable=False)
     password = Column(String(255), nullable=False)
+    role = Column(String(20), nullable=False, default="user")
     accounts = relationship("Account", back_populates="owner")

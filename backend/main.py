@@ -6,15 +6,21 @@ from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 
 from contextlib import asynccontextmanager
+from passlib.context import CryptContext
+
 import asyncio
 
 from sqlalchemy.exc import OperationalError
-from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from sqlalchemy import text, select
 
 from backend.db import engine, Base
-from backend.routes import auth, account
+from backend.routes import auth, account, admin
 from backend.core import limiter
+from backend.models import User
 
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -26,6 +32,20 @@ async def lifespan(app: FastAPI):
 
             async with engine.begin() as conn:
                 await conn.run_sync(Base.metadata.create_all)
+                
+                # create default admin on first run
+                async with AsyncSession(engine) as session:
+                    result = await session.execute(select(User).where(User.username == "admin"))
+                    
+                    if not result.scalar_one_or_none():
+                        session.add(User(
+                            username="admin",
+                            name="Admin",
+                            password=pwd_context.hash("admin123"),
+                            role="admin"
+                        ))
+                        await session.commit()
+                        print("✅ Admin user created: admin / admin123")
 
             break
 
@@ -63,5 +83,6 @@ app.add_middleware(
 )
 
 
+app.include_router(admin.router, prefix="/api")
 app.include_router(auth.router, prefix="/api")
 app.include_router(account.router, prefix="/api")
