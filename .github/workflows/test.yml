@@ -46,6 +46,5 @@ jobs:
           SECRET_KEY: testsecretkey
           ALGORITHM: HS256
           ACCESS_TOKEN_EXPIRE_MINUTES: 30
-        run: |
-          cd fastapi-banking-system
+        run: | 
           python -m pytest -v
