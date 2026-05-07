@@ -6,7 +6,7 @@ from backend.models import User, Account
 from backend.dependencies.db import get_db
 from backend.dependencies.auth import get_admin_user
 
-router = APIRouter(prefix="/api/admin", tags=["Admin"])
+router = APIRouter(prefix="/admin", tags=["Admin"])
 
 
 # View all users
