@@ -1,26 +1,15 @@
-from dotenv import load_dotenv
+import sys
 from pathlib import Path
+
+sys.path.append(
+    str(Path(__file__).resolve().parent.parent)
+)
+
+from dotenv import load_dotenv
 import os
 import asyncio
 from urllib.parse import quote_plus
-
-# ===== LOAD ENV =====
-env_path = Path(__file__).resolve().parent.parent.parent / "docker" / ".env"
-
-load_dotenv(env_path)
-
-os.environ["ENV"] = "test"
-
-
-# ⚠️ keep this for Windows stability
 import platform
-
-if platform.system() == "Windows":
-
-    asyncio.set_event_loop_policy(
-        asyncio.WindowsSelectorEventLoopPolicy()
-    )
-
 
 from sqlalchemy.ext.asyncio import (
     create_async_engine,
@@ -29,9 +18,9 @@ from sqlalchemy.ext.asyncio import (
 
 from sqlalchemy.orm import sessionmaker
 
-from backend.db import Base
-
-from backend.dependencies import get_db
+from db import Base
+from dependencies import get_db
+from main import app
 
 import pytest_asyncio
 
@@ -40,7 +29,25 @@ from httpx import (
     ASGITransport
 )
 
-from backend.main import app
+
+# ===== LOAD ENV =====
+env_path = (
+    Path(__file__).resolve().parent.parent.parent
+    / "docker"
+    / ".env"
+)
+
+load_dotenv(env_path)
+
+os.environ["ENV"] = "test"
+
+
+# ⚠️ keep this for Windows stability
+if platform.system() == "Windows":
+
+    asyncio.set_event_loop_policy(
+        asyncio.WindowsSelectorEventLoopPolicy()
+    )
 
 
 # ===== DB CONFIG =====
