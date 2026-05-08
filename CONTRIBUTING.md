@@ -1,7 +1,44 @@
-````md id="contrib7"
-# Contributing to FastAPI Banking System
+# 🤝 Contributing to FastAPI Banking System
 
-Thanks for your interest in contributing! This guide will help you get started.
+Thanks for your interest in contributing to this project 💙
+
+This repository welcomes contributions from:
+- beginners learning open source
+- backend developers
+- frontend contributors
+- DevOps learners
+- documentation writers
+- performance enthusiasts
+
+You can contribute by:
+- fixing bugs
+- improving documentation
+- adding tests
+- building features
+- improving frontend UX
+- optimizing backend performance
+
+If you're new to open source, start with issues labeled:
+- `good first issue`
+- `help wanted`
+
+---
+
+# 🏗️ Project Structure
+
+```text
+backend/
+├── routes/
+├── services/
+├── models/
+├── schemas/
+├── dependencies/
+├── core/
+└── tests/
+
+frontend/
+docker/
+```
 
 ---
 
@@ -18,39 +55,65 @@ Thanks for your interest in contributing! This guide will help you get started.
 
 ## 1. Clone the Repository
 
-```bash id="clone1"
+```bash
 git clone https://github.com/Dhruv-Cmds/fastapi-banking-system.git
 cd fastapi-banking-system
-````
+```
 
 ---
 
 ## 2. Backend Setup
 
-```bash id="backend1"
+```bash
 pip install -r requirements.txt
-cp docker/.env.example docker/.env
 ```
 
-Fill in your database credentials inside `docker/.env`.
+Create:
+
+```text
+docker/.env
+```
+
+Then add your environment variables.
+
+Example:
+
+```env
+ENV=dev
+
+DB_USER=root
+DB_PASSWORD=your_password
+DB_HOST=127.0.0.1
+DB_PORT=3008
+DB_NAME=banking
+
+SECRET_KEY=your_secret_key
+ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+```
 
 ---
 
 ## 3. Frontend Setup
 
-```bash id="frontend1"
+```bash
 cd frontend
 npm install
-cp .env.example .env
 ```
 
-Edit `.env` if needed.
+Create:
+
+```text
+frontend/.env
+```
+
+Add your frontend environment variables if required.
 
 ---
 
 ## 4. Run with Docker (Recommended)
 
-```bash id="docker1"
+```bash
 docker-compose up --build
 ```
 
@@ -60,7 +123,7 @@ docker-compose up --build
 
 ### Windows
 
-```powershell id="win1"
+```powershell
 cd backend
 $env:ENV="dev"
 uvicorn main:app --reload
@@ -68,7 +131,7 @@ uvicorn main:app --reload
 
 ### Linux / macOS
 
-```bash id="linux1"
+```bash
 cd backend
 export ENV=dev
 uvicorn main:app --reload
@@ -80,7 +143,7 @@ uvicorn main:app --reload
 
 ### Windows
 
-```powershell id="testwin1"
+```powershell
 $env:ENV="test"
 cd backend
 pytest -v
@@ -88,30 +151,47 @@ pytest -v
 
 ### Linux / macOS
 
-```bash id="testlinux1"
+```bash
 export ENV=test
 cd backend
 pytest -v
 ```
 
-Make sure your test database is running and `TEST_DB_NAME` is configured in your `.env`.
+Make sure your test database is running and configured correctly.
 
 ---
 
-# 📬 Submitting a Pull Request
+# 📬 Pull Request Guidelines
 
 1. Fork the repository
 2. Create a new branch
 
-```bash id="branch1"
+```bash
 git checkout -b feature/your-feature-name
 ```
 
+Example:
+
+```bash
+git checkout -b fix/transaction-pagination
+```
+
 3. Make your changes
-4. Run tests and ensure they pass
-5. Push your branch
-6. Open a Pull Request against `main`
-7. Clearly describe what changed and why
+4. Run tests
+5. Commit your changes
+6. Push your branch
+7. Open a Pull Request against `main`
+
+---
+
+# ✅ PR Expectations
+
+Please keep pull requests:
+- focused on a single feature or fix
+- clearly described
+- reasonably small when possible
+
+Large unrelated refactors may be difficult to review.
 
 ---
 
@@ -119,21 +199,84 @@ git checkout -b feature/your-feature-name
 
 When opening an issue, include:
 
-* What you expected to happen
-* What actually happened
-* Steps to reproduce
-* Your operating system
-* Python version
+- expected behavior
+- actual behavior
+- steps to reproduce
+- operating system
+- Python version
+- logs/screenshots if applicable
+
+---
+
+# 🔐 Security Issues
+
+Please avoid publicly disclosing serious security vulnerabilities.
+
+Instead, open a private discussion or contact the maintainer directly.
 
 ---
 
 # 📌 Good First Issues
 
-Look for issues tagged `good first issue`.
+Look for issues labeled:
 
-These are beginner-friendly tasks and a great place to start contributing:
+- `good first issue`
+- `help wanted`
+
+These are beginner-friendly tasks and a great place to start contributing.
+
+Example:
 
 https://github.com/Dhruv-Cmds/fastapi-banking-system/issues?q=is%3Aissue+label%3A%22good+first+issue%22
 
-```
-```
+---
+
+# 🧠 Development Guidelines
+
+## Backend
+- Follow FastAPI best practices
+- Use async-safe patterns
+- Keep services modular
+- Add type hints where possible
+
+## Frontend
+- Keep components reusable
+- Maintain responsive UI
+- Avoid unnecessary dependencies
+
+---
+
+# 🚫 Please Avoid
+
+- massive unrelated PRs
+- hardcoded secrets
+- unnecessary dependency additions
+- breaking API changes without discussion
+
+---
+
+# 🌱 Open Source Philosophy
+
+This project is intentionally contributor-friendly.
+
+The goal is to:
+- encourage learning
+- provide real-world backend experience
+- allow experimentation
+- help developers contribute to open source comfortably
+
+Contributors are encouraged to:
+- improve architecture
+- optimize performance
+- add features
+- improve developer experience
+
+---
+
+# 🙌 Thanks
+
+Every contribution matters.
+
+Even small fixes help improve the project for future contributors and learners.
+
+Happy coding 🚀
