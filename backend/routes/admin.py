@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
@@ -12,9 +12,10 @@ router = APIRouter(prefix="/admin", tags=["Admin"])
 # View all users
 @router.get("/users")
 async def get_all_users(
-    db: AsyncSession = Depends(get_db),
-    admin = Depends(get_admin_user)
-):
+        db: AsyncSession = Depends(get_db),
+        admin = Depends(get_admin_user)
+    ):
+    
     result = await db.execute(select(User))
     users = result.scalars().all()
     return [
@@ -26,9 +27,10 @@ async def get_all_users(
 # View all accounts
 @router.get("/accounts")
 async def get_all_accounts(
-    db: AsyncSession = Depends(get_db),
-    admin = Depends(get_admin_user)
-):
+        db: AsyncSession = Depends(get_db),
+        admin = Depends(get_admin_user)
+    ):
+
     result = await db.execute(select(Account))
     accounts = result.scalars().all()
     return [
@@ -37,22 +39,24 @@ async def get_all_accounts(
     ]
 
 
-# Freeze or unfreeze an account
-@router.put("/accounts/{account_id}/freeze")
-async def freeze_account(
-    account_id: int,
-    db: AsyncSession = Depends(get_db),
-    admin = Depends(get_admin_user)
-):
+# Close an account
+@router.put("/accounts/{account_id}/close")
+async def close_account(
+        account_id: int,
+        db: AsyncSession = Depends(get_db),
+        admin = Depends(get_admin_user)
+    ):
     result = await db.execute(select(Account).where(Account.id == account_id))
     account = result.scalar_one_or_none()
 
     if not account:
-        from fastapi import HTTPException
         raise HTTPException(404, "Account not found")
 
-    # toggle freeze
-    account.status = "FROZEN" if account.status == "ACTIVE" else "ACTIVE"
+    if account.status == "CLOSED":
+        raise HTTPException (400, "Account already closed")
+    
+    # toggle closed
+    account.status = "CLOSED"
     await db.commit()
 
-    return {"message": f"Account {account.status.lower()}d successfully"}
+    return {"message": "Account closed successfully"}

@@ -1,4 +1,4 @@
-from fastapi import Depends,Header, HTTPException, status
+from fastapi import Depends, HTTPException, status, Security
 from jose import jwt, JWTError, ExpiredSignatureError
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -8,16 +8,22 @@ from .db import get_db
 
 from backend.models import User
 from backend.core import SECRET_KEY, ALGORITHM
+
+from fastapi.security import APIKeyHeader
+
 # from fastapi.security import OAuth2PasswordBearer
 
 # Depends(get_db) Opens data Base connection to read, write, delete, update
 
+api_key_header = APIKeyHeader(
+    name="Authorization",
+    auto_error=True
+)
 # takes a token ---> verifies the token, finds the user in data base and return the user  
 async def get_current_user(
-        authorization: str = Header(None), 
+        authorization: str = Security(api_key_header), 
         db: AsyncSession  = Depends(get_db)
     ):
-
 
     #  No token provided
     if not authorization:
@@ -30,7 +36,7 @@ async def get_current_user(
 
 
     # Extract token
-    token = authorization.split(" ")[1]
+    token = authorization.split()[1]
 
 
     try:
