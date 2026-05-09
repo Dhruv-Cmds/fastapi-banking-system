@@ -20,10 +20,11 @@ async def health_check():
             "database": "connected",
             "message": "Application is running and database is accessible"
         }
-    except Exception as e:
+    
+    except Exception:
+        
         return {
             "status": "unhealthy",
             "database": "disconnected",
-            "error": str(e),
             "message": "Application is running but database is not accessible"
         }
