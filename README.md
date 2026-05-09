@@ -81,6 +81,33 @@ Implements soft-close account behavior similar to real banking systems.
 
 ---
 
+## ❤️ Health Monitoring
+
+The API includes a health monitoring endpoint for deployment and infrastructure checks.
+
+### Endpoint
+
+```http
+GET /health
+```
+
+### Purpose
+
+- Verify API availability
+- Check database connectivity
+- Support Docker/container health monitoring
+
+### Example Healthy Response
+
+```json
+{
+  "status": "healthy",
+  "database": "connected",
+  "message": "Application is running and database is accessible"
+}
+```
+---
+
 ## 🛡️ Safety & Integrity
 
 - Prevents negative balances
