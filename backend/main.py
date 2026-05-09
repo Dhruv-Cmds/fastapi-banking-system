@@ -59,7 +59,23 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(
+    title="FastAPI Banking System",
+    description=(
+        "Secure banking API for user signup/login, account management, "
+        "deposits, withdrawals, transfers, and transaction history. "
+        "Use the /api/login endpoint to obtain a JWT access token and "
+        "authorize protected endpoints with the Bearer token."
+    ),
+    version="1.0.0",
+    lifespan=lifespan,
+    openapi_tags=[
+        {"name": "Authentication", "description": "Signup, login, and profile management."},
+        {"name": "Accounts", "description": "Create accounts, deposit, withdraw, transfer, and view transactions."},
+        {"name": "Admin", "description": "Administrative endpoints for admin users."},
+        {"name": "Health", "description": "Service health checks and diagnostics."}
+    ]
+)
 
 app.state.limiter = limiter
 
@@ -83,7 +99,7 @@ app.add_middleware(
 )
 
 
-app.include_router(admin.router, prefix="/api")
-app.include_router(auth.router, prefix="/api")
-app.include_router(account.router, prefix="/api")
-app.include_router(health.router)
+app.include_router(admin.router, prefix="/api", tags=["Admin"])
+app.include_router(auth.router, prefix="/api", tags=["Authentication"])
+app.include_router(account.router, prefix="/api", tags=["Accounts"])
+app.include_router(health.router, tags=["Health"])

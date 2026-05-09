@@ -9,34 +9,18 @@ from .db import get_db
 from backend.models import User
 from backend.core import SECRET_KEY, ALGORITHM
 
-from fastapi.security import APIKeyHeader
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
-# from fastapi.security import OAuth2PasswordBearer
+# Token-based authentication for Swagger and runtime security.
+bearer_scheme = HTTPBearer(auto_error=True)
 
-# Depends(get_db) Opens data Base connection to read, write, delete, update
-
-api_key_header = APIKeyHeader(
-    name="Authorization",
-    auto_error=True
-)
-# takes a token ---> verifies the token, finds the user in data base and return the user  
+# takes a token ---> verifies the token, finds the user in data base and return the user
 async def get_current_user(
-        authorization: str = Security(api_key_header), 
+        credentials: HTTPAuthorizationCredentials = Security(bearer_scheme), 
         db: AsyncSession  = Depends(get_db)
     ):
 
-    #  No token provided
-    if not authorization:
-        raise HTTPException(status_code=401, detail="No token")
-
-
-    #  Wrong format
-    if not authorization.startswith("Bearer "):
-        raise HTTPException(status_code=401, detail="Invalid format")
-
-
-    # Extract token
-    token = authorization.split()[1]
+    token = credentials.credentials
 
 
     try:
