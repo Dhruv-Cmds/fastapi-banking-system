@@ -16,7 +16,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text, select
 
 from backend.db import engine, Base
-from backend.routes import auth, account, admin
+from backend.routes import auth, account, admin, health
 from backend.core import limiter
 from backend.models import User
 
@@ -86,3 +86,4 @@ app.add_middleware(
 app.include_router(admin.router, prefix="/api")
 app.include_router(auth.router, prefix="/api")
 app.include_router(account.router, prefix="/api")
+app.include_router(health.router)
