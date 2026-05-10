@@ -49,8 +49,9 @@ jobs:
 
       - name: Wait for MySQL
         run: |
-          until mysqladmin ping -h "127.0.0.1" -ptestpassword --silent; do
-            echo "Waiting for MySQL..."
+          for i in {1..30}; do
+            mysql -h 127.0.0.1 -uroot -ptestpassword -e "SELECT 1" && break
+            echo "Waiting for MySQL to fully initialize..."
             sleep 2
           done
 
