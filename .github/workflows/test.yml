@@ -3,6 +3,7 @@ name: Run Tests
 on:
   push:
     branches: [main]
+
   pull_request:
     branches: [main]
 
@@ -13,11 +14,14 @@ jobs:
     services:
       mysql:
         image: mysql:8.0
+
         env:
           MYSQL_ROOT_PASSWORD: testpassword
           MYSQL_DATABASE: bankaccountsystem_test
+
         ports:
           - 3306:3306
+
         options: >-
           --health-cmd="mysqladmin ping"
           --health-interval=10s
@@ -29,6 +33,7 @@ jobs:
 
       - name: Set up Python
         uses: actions/setup-python@v5
+
         with:
           python-version: "3.11"
 
@@ -36,15 +41,21 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Run tests
+
         env:
-          ENV: test
+          ENV: ci
+
           DB_USER: root
           DB_PASSWORD: testpassword
-          DB_HOST: 127.0.0.1
+
+          DB_HOST: mysql
           DB_PORT: 3306
+
           TEST_DB_NAME: bankaccountsystem_test
+
           SECRET_KEY: testsecretkey
           ALGORITHM: HS256
           ACCESS_TOKEN_EXPIRE_MINUTES: 30
-        run: | 
+
+        run: |
           python -m pytest -v

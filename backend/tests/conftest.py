@@ -55,9 +55,16 @@ DB_PASSWORD = quote_plus(
     os.getenv("DB_PASSWORD") or ""
 )
 
-if os.getenv("ENV") == "docker":
+ENV = os.getenv("ENV")
+
+if ENV == "docker":
 
     DB_HOST = "banking-db"
+    DB_PORT = "3306"
+
+elif ENV == "ci":
+
+    DB_HOST = "mysql"
     DB_PORT = "3306"
 
 else:
