@@ -62,11 +62,6 @@ if ENV == "docker":
     DB_HOST = "banking-db"
     DB_PORT = "3306"
 
-elif ENV == "ci":
-
-    DB_HOST = "mysql"
-    DB_PORT = "3306"
-
 else:
 
     DB_HOST = "127.0.0.1"
