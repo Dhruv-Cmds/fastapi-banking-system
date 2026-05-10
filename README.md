@@ -228,6 +228,46 @@ ACCESS_TOKEN_EXPIRE_MINUTES=30
 
 ---
 
+## 🚀 Developer Quick Start
+
+1. Create a `.env` file with the local environment variables above.
+2. Start the backend with:
+
+```bash
+uvicorn backend.main:app --reload --port 8000
+```
+
+3. Open the interactive OpenAPI docs at:
+
+- `http://127.0.0.1:8000/docs`
+- `http://127.0.0.1:8000/redoc`
+
+4. Use `/api/login` to sign in and then click the `Authorize` button.
+
+---
+
+## 📘 Swagger OpenAPI Notes
+
+- Protected routes use `Authorization: Bearer <token>`.
+- `/api/signup` and `/api/login` are public.
+- `/api/accounts`, `/api/transfer`, `/api/transactions/{account_id}` and account operations require a valid JWT.
+- Example request bodies are shown in Swagger UI under each endpoint.
+
+### JWT Authentication Example
+
+```bash
+curl -X POST http://127.0.0.1:8000/api/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"admin","password":"admin123"}'
+```
+
+```bash
+curl http://127.0.0.1:8000/api/accounts \
+  -H "Authorization: Bearer <ACCESS_TOKEN>"
+```
+
+---
+
 ## 🧪 Testing Environment
 
 ```env
@@ -238,6 +278,16 @@ DB_HOST=127.0.0.1
 DB_PORT=3008
 TEST_DB_NAME=bankaccountsystem_test
 ```
+
+---
+
+## ✅ Acceptance Criteria
+
+- Swagger/OpenAPI docs show JWT authentication instructions and `Authorize` support.
+- Every endpoint includes a clear summary and description.
+- Example request bodies are available for signup, login, account creation, deposit, withdraw, and transfer.
+- Protected endpoints require a Bearer token and are grouped under `Authentication` / `Accounts` tags.
+- Developer onboarding covers local startup, docs, and sample auth requests.
 
 ---
 
