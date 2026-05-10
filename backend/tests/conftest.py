@@ -37,7 +37,8 @@ env_path = (
     / ".env"
 )
 
-load_dotenv(env_path)
+if os.getenv("GITHUB_ACTIONS") != "true":
+    load_dotenv(env_path)
 
 
 # ⚠️ keep this for Windows stability
@@ -64,8 +65,8 @@ if ENV == "docker":
 
 else:
 
-    DB_HOST = "127.0.0.1"
-    DB_PORT = "3008"
+    DB_HOST = os.getenv("DB_HOST", "127.0.0.1")
+    DB_PORT = os.getenv("DB_PORT", "3008")
 
 DB_NAME = os.getenv("TEST_DB_NAME")
 
