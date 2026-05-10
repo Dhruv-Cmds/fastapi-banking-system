@@ -119,8 +119,8 @@ async def transfer(
     description="Return transaction history for a specific account owned by the authenticated user."
 )
 async def get_transactions(
-    account_id: int,
     request: Request,
+    account_id: int,
     skip: int = 0,
     limit: int = 20,
     db: AsyncSession = Depends(get_db),
