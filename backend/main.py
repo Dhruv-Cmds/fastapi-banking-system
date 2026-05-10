@@ -70,10 +70,22 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan,
     openapi_tags=[
-        {"name": "Authentication", "description": "Signup, login, and profile management."},
-        {"name": "Accounts", "description": "Create accounts, deposit, withdraw, transfer, and view transactions."},
-        {"name": "Admin", "description": "Administrative endpoints for admin users."},
-        {"name": "Health", "description": "Service health checks and diagnostics."}
+        {
+            "name": "Authentication", 
+            "description": "Signup, login, and profile management."
+        },
+        {
+            "name": "Accounts", 
+            "description": "Create accounts, deposit, withdraw, transfer, and view transactions."
+        },
+        {
+            "name": "Admin", 
+            "description": "Administrative endpoints for admin users."
+        },
+        {
+            "name": "Health", 
+            "description": "Service health checks and diagnostics."
+        }
     ]
 )
 

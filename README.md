@@ -1,4 +1,3 @@
-````md
 # 🏦 FastAPI Banking System
 
 ### Production-Style Banking API with FastAPI, MySQL & Docker
@@ -106,6 +105,7 @@ GET /health
   "message": "Application is running and database is accessible"
 }
 ```
+
 ---
 
 ## 🛡️ Safety & Integrity
@@ -188,7 +188,7 @@ fastapi-banking-system/
 ├── load_test.js
 ├── README.md
 └── requirements.txt
-````
+```
 
 ---
 
@@ -198,8 +198,10 @@ fastapi-banking-system/
 
 ```env
 ENV=docker
-DB_USER=root
+
+DB_USER=banking_user
 DB_PASSWORD=your_password
+
 DB_NAME=banking
 
 SECRET_KEY=your_secret_key
@@ -215,10 +217,13 @@ Note: `DB_HOST` and `DB_PORT` are internally handled by Docker (`banking-db:3306
 
 ```env
 ENV=dev
-DB_USER=root
+
+DB_USER=banking_user
 DB_PASSWORD=your_password
+
 DB_HOST=127.0.0.1
 DB_PORT=3008
+
 DB_NAME=banking
 
 SECRET_KEY=your_secret_key
@@ -228,9 +233,51 @@ ACCESS_TOKEN_EXPIRE_MINUTES=30
 
 ---
 
+## 🧪 Testing Environment
+
+```env
+ENV=test
+
+DB_USER=banking_user
+DB_PASSWORD=your_password
+
+DB_HOST=127.0.0.1
+DB_PORT=3008
+
+TEST_DB_NAME=banking_test
+
+SECRET_KEY=your_secret_key
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+```
+
+---
+
+### 🐳 Running Tests Inside Docker
+
+When running tests inside the `banking-api` container,
+Docker networking is used automatically.
+
+The test suite switches to:
+
+```text
+banking-db:3306
+```
+
+instead of:
+
+```text
+127.0.0.1:3008
+```
+
+This allows the same test suite to work both:
+- locally on the host machine
+- inside Docker containers
+
+---
+
 ## 🚀 Developer Quick Start
 
-1. Create a `.env` file with the local environment variables above.
+1. Create a `.env` file with the environment variables above.
 2. Start the backend with:
 
 ```bash
@@ -268,19 +315,6 @@ curl http://127.0.0.1:8000/api/accounts \
 
 ---
 
-## 🧪 Testing Environment
-
-```env
-ENV=test
-DB_USER=root
-DB_PASSWORD=your_password
-DB_HOST=127.0.0.1
-DB_PORT=3008
-TEST_DB_NAME=bankaccountsystem_test
-```
-
----
-
 ## ✅ Acceptance Criteria
 
 - Swagger/OpenAPI docs show JWT authentication instructions and `Authorize` support.
@@ -311,9 +345,21 @@ docker-compose down -v
 
 ## Run Tests
 
+### Local Machine
+
 ```bash
 $env:PYTHONPATH="."
 $env:ENV="test"
+
+python -m pytest -v
+```
+
+### Inside Docker Container
+
+```bash
+docker exec -it banking-api bash
+
+export ENV=docker
 
 python -m pytest -v
 ```
@@ -322,10 +368,10 @@ python -m pytest -v
 
 ## Test Features
 
-* MySQL-based testing
-* Per-test database reset
-* Async-safe fixtures
-* Dependency overrides
+- MySQL-based testing
+- Per-test database reset
+- Async-safe fixtures
+- Dependency overrides
 
 ---
 
@@ -333,11 +379,10 @@ python -m pytest -v
 
 ## Critical Issues Fixed
 
-* Fixed Windows event loop issues
-* Eliminated cross-loop DB errors
-* Added per-test engine isolation
-* Fixed connection leaks
-* Fixed password encoding issues (`@ → %40`)
+- Fixed Windows event loop issues
+- Eliminated cross-loop DB errors
+- Added per-test engine isolation
+- Fixed connection leaks
 
 ---
 
@@ -355,9 +400,9 @@ k6 run load_test.js
 
 ## Windows (2 Workers)
 
-* Stable: ~200 users
-* Stress: ~250–300 users
-* Overload: 300+ users
+- Stable: ~200 users
+- Stress: ~250–300 users
+- Overload: 300+ users
 
 ---
 
@@ -365,7 +410,7 @@ k6 run load_test.js
 
 Based on benchmarks:
 
-* ~300–500 concurrent users expected
+- ~300–500 concurrent users expected
 
 > Actual performance depends on hardware and deployment setup.
 
@@ -373,31 +418,31 @@ Based on benchmarks:
 
 # 🧠 Bottlenecks Identified
 
-* Windows socket limitations
-* Uvicorn worker count
-* MySQL connection pool limits
-* Request queueing delays
+- Windows socket limitations
+- Uvicorn worker count
+- MySQL connection pool limits
+- Request queueing delays
 
 ---
 
 # 🔧 Optimizations Applied
 
-* Async database engine
-* Connection pooling
-* Rate limiting
-* Docker networking fixes
-* Removed SQLite fallback
+- Async database engine
+- Connection pooling
+- Rate limiting
+- Docker networking fixes
+- Removed SQLite fallback
 
 ---
 
 # 🏁 Final Status
 
-* ✅ Fully functional backend
-* ✅ MySQL-only architecture
-* ✅ All tests passing
-* ✅ CI pipeline passing
-* ✅ Dockerized full-stack environment
-* ✅ Load tested up to 1000 virtual users
+- ✅ Fully functional backend
+- ✅ MySQL-only architecture
+- ✅ All tests passing
+- ✅ CI pipeline passing
+- ✅ Dockerized full-stack environment
+- ✅ Load tested up to 1000 virtual users
 
 Stable behavior observed around ~300 concurrent users.
 
@@ -405,41 +450,38 @@ Stable behavior observed around ~300 concurrent users.
 
 # 🚀 Future Improvements
 
-* Migrate to Linux (WSL2 or cloud VM)
-* Increase worker processes
-* Add Redis caching
-* Implement load balancing
-* Enable horizontal scaling
+- Migrate to Linux (WSL2 or cloud VM)
+- Increase worker processes
+- Add Redis caching
+- Implement load balancing
+- Enable horizontal scaling
 
 ---
 
 # 🎯 Capacity Summary
 
-* ~200–300 concurrent users on Docker Desktop (Windows)
-* ~300–500 expected on native Linux environments
+- ~200–300 concurrent users on Docker Desktop (Windows)
+- ~300–500 expected on native Linux environments
 
 ---
 
 # 🧠 Key Learnings
 
-* Managing async DB connections under load
-* Debugging connection pool exhaustion
-* Understanding infrastructure bottlenecks using k6
-* Comparing Windows vs Docker vs Linux performance
+- Managing async DB connections under load
+- Debugging connection pool exhaustion
+- Understanding infrastructure bottlenecks using k6
+- Comparing Windows vs Docker vs Linux performance
 
 ---
 
 # ⚠️ Limitations
 
-* Single instance deployment
-* No Redis caching layer
-* Performance constrained by MySQL connection pool
+- Single instance deployment
+- No Redis caching layer
+- Performance constrained by MySQL connection pool
 
 ---
 
 # 📌 License
 
 This project is intended for educational and portfolio purposes.
-
-```
-```
