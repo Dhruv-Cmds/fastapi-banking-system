@@ -1,6 +1,3 @@
-
-hi
-
 # 🏦 FastAPI Banking System
 
 ### Production-Style Banking API with FastAPI, MySQL & Docker
