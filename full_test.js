@@ -2,8 +2,8 @@ import http from 'k6/http';
 import { check, sleep } from 'k6';
 
 export const options = {
-  vus: 5,
-  duration: '30s',
+  vus: 500,
+  duration: '200s',
 };
 
 const BASE_URL = 'https://vaultx.dhruvsystems.tech';
