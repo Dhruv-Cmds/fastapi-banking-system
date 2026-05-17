@@ -23,9 +23,6 @@ A production-ready **Bank Account Management API** built using **FastAPI, MySQL,
 # 🌐 Live Demo
 
 - Frontend: https://vaultx.dhruvsystems.tech/
-- Backend: https://fastapi-banking-system.onrender.com
-- API Docs: https://fastapi-banking-system.onrender.com/docs
-
 ---
 
 # 📸 Preview
