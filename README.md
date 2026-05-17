@@ -15,6 +15,9 @@ A production-ready **Bank Account Management API** built using **FastAPI, MySQL,
 - 🧪 Pytest Testing
 - 📊 Load Testing with k6
 - 🐳 Dockerized Full Stack Setup
+- 🌐 VPS Production Deployment
+- 🔒 HTTPS + nginx Reverse Proxy
+- 🚀 GitHub Actions CI/CD
 
 > Demo deployment currently offline.
 
@@ -23,6 +26,7 @@ A production-ready **Bank Account Management API** built using **FastAPI, MySQL,
 # 🌐 Live Demo
 
 - Frontend: https://vaultx.dhruvsystems.tech/
+
 ---
 
 # 📸 Preview
@@ -38,6 +42,9 @@ A production-ready **Bank Account Management API** built using **FastAPI, MySQL,
 - Config-driven business rules
 - Dockerized multi-service environment
 - CI tested with GitHub Actions
+- nginx reverse proxy deployment
+- Production-ready VPS infrastructure
+- JWT + RBAC secured architecture
 
 ---
 
@@ -48,6 +55,7 @@ A production-ready **Bank Account Management API** built using **FastAPI, MySQL,
 - JWT-based signup/login
 - Password hashing with bcrypt
 - Protected routes
+- RBAC authorization system
 
 ---
 
@@ -74,6 +82,15 @@ Implements soft-close account behavior similar to real banking systems.
 - Deposit
 - Withdraw
 - Transfer
+
+---
+
+## 👑 Admin Features
+
+- View all users
+- View all accounts
+- Close accounts
+- RBAC-protected admin routes
 
 ---
 
@@ -111,6 +128,8 @@ GET /health
 - Prevents self-transfer
 - Allows only ACTIVE accounts
 - Atomic database transactions using commit/rollback
+- JWT-secured endpoints
+- HTTPS encryption in production
 
 ---
 
@@ -146,6 +165,9 @@ Every transaction is recorded for:
 | Testing | pytest |
 | Load Testing | k6 |
 | DevOps | Docker |
+| Reverse Proxy | nginx |
+| SSL | Let's Encrypt |
+| CI/CD | GitHub Actions |
 
 ---
 
@@ -330,6 +352,75 @@ curl http://127.0.0.1:8000/api/accounts \
 
 ---
 
+# 🌐 VPS Production Deployment
+
+## Infrastructure
+
+- Hostinger VPS
+- Ubuntu 24.04
+- Dockerized deployment
+- nginx reverse proxy
+- HTTPS enabled using Certbot + Let's Encrypt
+
+---
+
+## Production Stack
+
+### Backend
+
+- FastAPI
+- Async SQLAlchemy
+- JWT Authentication
+- RBAC authorization
+- Dockerized API container
+
+### Frontend
+
+- React + Vite
+- Dockerized frontend container
+- nginx reverse proxy integration
+
+### Database
+
+- MySQL 8
+- Dedicated Docker container
+- Persistent Docker volumes
+
+---
+
+## Production Security
+
+- Swagger/OpenAPI disabled in production
+- HTTPS enforced
+- SSH key authentication
+- UFW firewall configured
+- JWT authentication
+- bcrypt password hashing
+- nginx reverse proxy isolation
+- Rate limiting using SlowAPI
+
+---
+
+## CI/CD Pipeline
+
+Automatic deployment configured using GitHub Actions.
+
+### Deployment Flow
+
+```text
+git push origin main
+        ↓
+GitHub Actions
+        ↓
+SSH into VPS
+        ↓
+git pull
+        ↓
+docker compose up --build -d
+```
+
+---
+
 # 🐳 Docker Setup
 
 ## Run Application
@@ -411,22 +502,60 @@ k6 run load_test.js
 
 ---
 
-## Linux (Estimated)
+## Linux VPS Production Testing
 
-Based on benchmarks:
+### VPS Specifications
 
-- ~300–500 concurrent users expected
+- 2 vCPU
+- 8GB RAM
+- Ubuntu 24.04
+- Dockerized environment
 
-> Actual performance depends on hardware and deployment setup.
+### Tested Workflows
+
+- Signup
+- Login
+- Account creation
+- Deposits
+- Withdrawals
+- Transfers
+- Transaction history
+- Profile updates
+- Account deletion
+- Admin endpoints
+
+### Production Results
+
+- ~534 requests/sec observed
+- 111k+ HTTP requests processed
+- 55k+ iterations completed
+
+### Stable Range
+
+- ~100–300 realistic concurrent active users
+
+### Stress Range
+
+- ~300–500 concurrent virtual users
+
+### Overload Behavior
+
+At aggressive loads beyond 500 concurrent VUs:
+
+- Increased latency observed
+- High 429 rate limiting responses
+- No catastrophic crashes
+- Services remained operational
 
 ---
 
 # 🧠 Bottlenecks Identified
 
-- Windows socket limitations
-- Uvicorn worker count
+- bcrypt hashing cost under concurrency
 - MySQL connection pool limits
+- Single MySQL container architecture
 - Request queueing delays
+- Rate limiting during auth-heavy traffic
 
 ---
 
@@ -437,17 +566,29 @@ Based on benchmarks:
 - Rate limiting
 - Docker networking fixes
 - Removed SQLite fallback
+- MySQL-only architecture
+- HTTPS production deployment
+- nginx reverse proxy
+- JWT authentication
+- RBAC admin authorization
+- GitHub Actions CI/CD pipeline
 
 ---
 
 # 🏁 Final Status
 
 - ✅ Fully functional backend
-- ✅ MySQL-only architecture
-- ✅ All tests passing
-- ✅ CI pipeline passing
 - ✅ Dockerized full-stack environment
-- ✅ Load tested up to 1000 virtual users
+- ✅ MySQL-only architecture
+- ✅ HTTPS production deployment
+- ✅ JWT-secured API
+- ✅ RBAC admin authorization
+- ✅ CI/CD operational
+- ✅ VPS secured and hardened
+- ✅ All tests passing
+- ✅ Load tested in live VPS environment
+- ✅ Stable under moderate concurrent traffic
+- ✅ Survived 500 concurrent k6 virtual users without total service collapse
 
 Stable behavior observed around ~300 concurrent users.
 
@@ -455,18 +596,20 @@ Stable behavior observed around ~300 concurrent users.
 
 # 🚀 Future Improvements
 
-- Migrate to Linux (WSL2 or cloud VM)
-- Increase worker processes
 - Add Redis caching
+- Increase worker processes
+- Add background task queues
 - Implement load balancing
 - Enable horizontal scaling
+- Add observability stack (Grafana/Prometheus)
+- Add database replication
 
 ---
 
 # 🎯 Capacity Summary
 
 - ~200–300 concurrent users on Docker Desktop (Windows)
-- ~300–500 expected on native Linux environments
+- ~300–500 concurrent users on Linux VPS environments
 
 ---
 
@@ -476,6 +619,8 @@ Stable behavior observed around ~300 concurrent users.
 - Debugging connection pool exhaustion
 - Understanding infrastructure bottlenecks using k6
 - Comparing Windows vs Docker vs Linux performance
+- Deploying secure Dockerized applications on VPS infrastructure
+- Production hardening using nginx, HTTPS, and firewalls
 
 ---
 
@@ -484,6 +629,7 @@ Stable behavior observed around ~300 concurrent users.
 - Single instance deployment
 - No Redis caching layer
 - Performance constrained by MySQL connection pool
+- No horizontal scaling yet
 
 ---
 
