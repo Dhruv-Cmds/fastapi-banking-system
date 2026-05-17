@@ -6,21 +6,21 @@ from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 
 from contextlib import asynccontextmanager
-from passlib.context import CryptContext
 
 import asyncio
 
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from sqlalchemy import text, select
+from sqlalchemy import text
 
 from backend.db import engine, Base
 from backend.routes import auth, account, admin, health
 from backend.core import limiter
 from backend.models import User
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+from backend.services import admin_service
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -32,20 +32,9 @@ async def lifespan(app: FastAPI):
 
             async with engine.begin() as conn:
                 await conn.run_sync(Base.metadata.create_all)
-                
-                # create default admin on first run
-                async with AsyncSession(engine) as session:
-                    result = await session.execute(select(User).where(User.username == "admin"))
-                    
-                    if not result.scalar_one_or_none():
-                        session.add(User(
-                            username="admin",
-                            name="Admin",
-                            password=pwd_context.hash("admin123"),
-                            role="admin"
-                        ))
-                        await session.commit()
-                        print("✅ Admin user created: admin / admin123")
+
+            async with AsyncSession(engine) as session:
+                await admin_service.create_admin(session)
 
             break
 
@@ -109,7 +98,7 @@ async def rate_limit_handler(request: Request, exc: RateLimitExceeded):
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["https://vaultx.dhruvsystems.tech"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
