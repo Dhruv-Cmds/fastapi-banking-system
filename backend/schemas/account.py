@@ -41,7 +41,7 @@ class AccountResponse(BaseModel):
 
 class TransactionResponse(BaseModel):
     id: int
-    type: str
+    # type: str
     amount: float
 
     from_account_id: Optional[int]
