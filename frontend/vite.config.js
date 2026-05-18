@@ -9,7 +9,7 @@ export default defineConfig({
     host: "0.0.0.0",
     allowedHosts: [
       "dhruvsystems.tech",
-      "vaultx.dhruvsystems.tech"
+      "bank.dhruvcore.com"
     ]
   }
 })
