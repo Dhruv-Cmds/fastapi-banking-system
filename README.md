@@ -25,7 +25,7 @@ A production-ready **Bank Account Management API** built using **FastAPI, MySQL,
 
 # 🌐 Live Demo
 
-- Frontend: https://vaultx.dhruvsystems.tech/
+- Frontend: https://bank.dhruvcore.com/
 
 ---
 
