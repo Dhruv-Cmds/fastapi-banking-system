@@ -139,11 +139,50 @@ Implements soft-close account behavior similar to real banking systems.
 * Close accounts
 * RBAC-protected admin routes
 
-## ❤️ Health Monitoring
+---
+
+# 📡 API Endpoints
+
+## Admin — `/api/admin`
+
+| Method | Endpoint                         | Auth | Description        |
+| ------ | -------------------------------- | ---- | ------------------ |
+| GET    | `/api/admin/users`               | ✅    | View all users     |
+| GET    | `/api/admin/accounts`            | ✅    | View all accounts  |
+| PUT    | `/api/admin/accounts/{account_id}/close` | ✅ | Close account |
+
+## Authentication — `/api`
+
+| Method | Endpoint      | Auth | Description           |
+| ------ | ------------- | ---- | --------------------- |
+| POST   | `/api/signup` | ❌    | Register user         |
+| POST   | `/api/login`  | ❌    | Login and receive JWT |
+| PUT    | `/api/me`     | ✅    | Update user profile   |
+
+## Accounts — `/api/accounts`
+
+| Method | Endpoint                     | Auth | Description      |
+| ------ | ---------------------------- | ---- | ---------------- |
+| POST   | `/api/accounts`              | ✅    | Create account   |
+| GET    | `/api/accounts`              | ✅    | List accounts    |
+| DELETE | `/api/accounts/{id}`         | ✅    | Delete account   |
+| POST   | `/api/accounts/{id}/deposit` | ✅    | Deposit money    |
+| POST   | `/api/accounts/{id}/withdraw` | ✅   | Withdraw money   |
+
+## Transfers & Transactions — `/api`
+
+| Method | Endpoint                         | Auth | Description              |
+| ------ | -------------------------------- | ---- | ------------------------ |
+| POST   | `/api/transfer`                  | ✅    | Transfer money           |
+| GET    | `/api/transactions/{account_id}` | ✅    | View transaction history |
+
+## Health — `/health`
+
+| Method | Endpoint  | Auth | Description                   |
+| ------ | --------- | ---- | ----------------------------- |
+| GET    | `/health` | ❌    | Check API and database health |
 
 The API includes a health monitoring endpoint for deployment and infrastructure checks.
-
-### Endpoint
 
 ```http
 GET /health
@@ -436,6 +475,9 @@ This project is deployed on a Linux VPS using Docker, Nginx, HTTPS, GitHub Actio
 * bcrypt password hashing
 * Nginx reverse proxy isolation
 * Rate limiting using SlowAPI
+* Public access is limited to the deployed frontend only.
+* OpenAPI docs, database access, and internal production controls are blocked from public access.
+* Production changes require codebase access or VPS-level access.
 
 ## Deployment Flow
 
@@ -561,13 +603,25 @@ k6 run load_test.js
 
 ---
 
-# 📈 Performance Results
+# 📈 Load Testing Results
 
-## Windows Docker Testing
+| Test                          | Virtual Users | Duration | Requests/sec | Result |
+| ----------------------------- | ------------- | -------- | ------------ | ------ |
+| Linux VPS Production Test     | 500 VUs       | 60s      | ~534 req/s   | Services remained operational |
+| Banking Workflow Load Test    | 500 VUs       | 60s      | ~534 req/s   | 111k+ HTTP requests processed |
+| Sustained Banking Sessions    | 500 VUs       | 60s      | Stable under moderate traffic | No catastrophic crashes |
+| Transaction Workflow Test     | 500 VUs       | 60s      | Included Above | Deposits, withdrawals, transfers completed |
 
-| Environment | Workers | Stable Range | Stress Range    | Overload Range |
-| ----------- | ------- | ------------ | --------------- | -------------- |
-| Windows     | 2       | ~200 users   | ~250–300 users  | 300+ users     |
+---
+
+# ⚡ Scaling Behavior
+
+| Concurrent Users | System Behavior                                      |
+| ---------------- | ---------------------------------------------------- |
+| 1–200 Users      | Stable with healthy response times                   |
+| 200–300 Users    | Stable under moderate authenticated traffic          |
+| 300–500 Users    | Stress range with higher latency and rate limiting   |
+| 500+ Users       | Overload behavior begins appearing                   |
 
 ---
 
