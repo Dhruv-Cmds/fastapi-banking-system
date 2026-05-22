@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 
+
 from backend.dependencies.db import get_db
 from backend.dependencies import get_current_user
 from backend.schemas import (
@@ -119,8 +120,8 @@ async def transfer(
     description="Return transaction history for a specific account owned by the authenticated user."
 )
 async def get_transactions(
-    account_id: int,
     request: Request,
+    account_id: int,
     skip: int = 0,
     limit: int = 20,
     db: AsyncSession = Depends(get_db),

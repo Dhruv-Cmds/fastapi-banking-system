@@ -37,9 +37,8 @@ env_path = (
     / ".env"
 )
 
-load_dotenv(env_path)
-
-os.environ["ENV"] = "test"
+if os.getenv("GITHUB_ACTIONS") != "true":
+    load_dotenv(env_path)
 
 
 # ⚠️ keep this for Windows stability
@@ -57,14 +56,22 @@ DB_PASSWORD = quote_plus(
     os.getenv("DB_PASSWORD") or ""
 )
 
-DB_HOST = os.getenv("DB_HOST", "127.0.0.1")
-DB_PORT = os.getenv("DB_PORT", "3306")
+ENV = os.getenv("ENV")
+
+if ENV == "docker":
+
+    DB_HOST = "banking-db"
+    DB_PORT = "3306"
+
+else:
+
+    DB_HOST = os.getenv("DB_HOST", "127.0.0.1")
+    DB_PORT = os.getenv("DB_PORT", "3008")
 
 DB_NAME = os.getenv("TEST_DB_NAME")
 
-
 DATABASE_URL = (
-    f"mysql+aiomysql://"
+    "mysql+aiomysql://"
     f"{DB_USER}:{DB_PASSWORD}"
     f"@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 )

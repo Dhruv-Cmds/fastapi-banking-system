@@ -3,6 +3,7 @@ name: Run Tests
 on:
   push:
     branches: [main]
+
   pull_request:
     branches: [main]
 
@@ -13,38 +14,63 @@ jobs:
     services:
       mysql:
         image: mysql:8.0
+
         env:
           MYSQL_ROOT_PASSWORD: testpassword
           MYSQL_DATABASE: bankaccountsystem_test
+
         ports:
           - 3306:3306
+
         options: >-
-          --health-cmd="mysqladmin ping"
+          --health-cmd="mysqladmin ping -h localhost -ptestpassword"
           --health-interval=10s
           --health-timeout=5s
-          --health-retries=5
+          --health-retries=10
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: Set Up Python
         uses: actions/setup-python@v5
+
         with:
           python-version: "3.11"
 
-      - name: Install dependencies
-        run: pip install -r requirements.txt
+      - name: Install Dependencies
+        run: |
+          pip install -r requirements.txt
 
-      - name: Run tests
+      - name: Install MySQL Client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y default-mysql-client
+
+      - name: Wait for MySQL
+        run: |
+          for i in {1..30}; do
+            mysql -h 127.0.0.1 -uroot -ptestpassword -e "SELECT 1" && break
+            echo "Waiting for MySQL to fully initialize..."
+            sleep 2
+          done
+
+      - name: Run Tests
+
         env:
-          ENV: test
+          ENV: ci
+
           DB_USER: root
           DB_PASSWORD: testpassword
+
           DB_HOST: 127.0.0.1
           DB_PORT: 3306
+
           TEST_DB_NAME: bankaccountsystem_test
+
           SECRET_KEY: testsecretkey
           ALGORITHM: HS256
           ACCESS_TOKEN_EXPIRE_MINUTES: 30
-        run: | 
+
+        run: |
           python -m pytest -v
