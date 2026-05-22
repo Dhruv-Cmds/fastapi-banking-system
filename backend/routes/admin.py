@@ -1,10 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 from backend.models import User, Account
 from backend.dependencies.db import get_db
 from backend.dependencies.auth import get_admin_user
+from backend.core import AccountNotFoundError, AccountAlreadyClosedError
 
 router = APIRouter(prefix="/admin", tags=["Admin"])
 
@@ -50,10 +51,10 @@ async def close_account(
     account = result.scalar_one_or_none()
 
     if not account:
-        raise HTTPException(404, "Account not found")
+        raise AccountNotFoundError()
 
     if account.status == "CLOSED":
-        raise HTTPException (400, "Account already closed")
+        raise AccountAlreadyClosedError()
     
     # toggle closed
     account.status = "CLOSED"

@@ -17,7 +17,7 @@ from sqlalchemy import text, select
 
 from backend.db import engine, Base
 from backend.routes import auth, account, admin, health
-from backend.core import limiter
+from backend.core import limiter, BankingAPIException
 from backend.models import User
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -82,11 +82,24 @@ app.state.limiter = limiter
 app.add_middleware(SlowAPIMiddleware)
 
 
+@app.exception_handler(BankingAPIException)
+async def banking_exception_handler(request: Request, exc: BankingAPIException):
+    """Handle all custom banking API exceptions with unified format"""
+    return JSONResponse(
+        status_code=exc.status_code,
+        content=exc.detail
+    )
+
+
 @app.exception_handler(RateLimitExceeded)
 async def rate_limit_handler(request: Request, exc: RateLimitExceeded):
+    """Handle rate limit errors with unified format"""
     return JSONResponse(
         status_code=429,
-        content={"detail": "Too many requests, slow down"}
+        content={
+            "error": "RATE_LIMIT_EXCEEDED",
+            "message": "Too many requests. Please slow down."
+        }
     )
 
 
