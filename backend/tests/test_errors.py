@@ -142,7 +142,7 @@ async def test_account_not_found_format(client):
     headers = {"Authorization": f"Bearer {token}"}
     
     response = await client.get(
-        "/api/accounts/9999/transactions",
+        "/api/transactions/9999",
         headers=headers
     )
     
@@ -277,10 +277,10 @@ async def test_transfer_limit_exceeded_format(client):
     from_acc_id = accounts[0]["id"]
     to_acc_no = accounts[1]["acc_no"]
     
-    # Fund first account
+    # Fund first account within deposit limits
     await client.post(
         f"/api/accounts/{from_acc_id}/deposit",
-        json={"amount": 500000},
+        json={"amount": 50000},
         headers=headers
     )
     
@@ -429,7 +429,7 @@ async def test_404_for_not_found_errors(client):
     headers = {"Authorization": f"Bearer {token}"}
     
     response = await client.get(
-        "/api/accounts/99999/transactions",
+        "/api/transactions/99999",
         headers=headers
     )
     
