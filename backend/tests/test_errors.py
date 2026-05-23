@@ -9,11 +9,15 @@ Tests verify that all API errors follow the consistent JSON format:
 
 import pytest
 import asyncio
+import secrets
 
 
-async def create_test_user(client, username="testuser", password="password123"):
+async def create_test_user(client, username=None, password="password123"):
     """Helper to create a test user"""
-    await client.post(
+    if username is None:
+        username = f"testuser_{secrets.token_hex(4)}"
+
+    response = await client.post(
         "/api/signup",
         json={
             "username": username,
@@ -22,9 +26,20 @@ async def create_test_user(client, username="testuser", password="password123"):
         }
     )
 
+    if response.status_code == 200:
+        return username
 
-async def get_token(client, username="testuser", password="password123"):
+    data = response.json()
+    if response.status_code == 400 and data.get("error") == "USERNAME_ALREADY_EXISTS":
+        return username
+
+    pytest.fail(f"Signup failed for {username}: {response.status_code} {response.text}")
+
+
+async def get_token(client, username=None, password="password123"):
     """Helper to get auth token"""
+    username = await create_test_user(client, username=username, password=password)
+
     response = await client.post(
         "/api/login",
         json={
