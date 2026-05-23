@@ -54,8 +54,11 @@ async def get_token(client, username=None, password="password123"):
     return response.json()["access_token"]
 
 
-async def create_account(client, headers, account_number="111111"):
+async def create_account(client, headers, account_number=None):
     """Helper to create an account"""
+    if account_number is None:
+        account_number = 100000 + int(secrets.token_hex(2), 16)
+
     response = await client.post(
         "/api/accounts",
         json={"acc_no": account_number},
@@ -177,11 +180,12 @@ async def test_duplicate_account_number_format(client):
     headers = {"Authorization": f"Bearer {token}"}
     
     # Create first account
-    response1 = await create_account(client, headers, "ACC001")
+    acc_number = 200001
+    response1 = await create_account(client, headers, acc_number)
     assert response1.status_code == 200
     
     # Try to create account with same number
-    response2 = await create_account(client, headers, "ACC001")
+    response2 = await create_account(client, headers, acc_number)
     
     assert response2.status_code == 400
     data = response2.json()
@@ -201,7 +205,7 @@ async def test_insufficient_funds_format(client):
     headers = {"Authorization": f"Bearer {token}"}
     
     # Create account with zero balance
-    await create_account(client, headers, "ACC002")
+    await create_account(client, headers, 200002)
     acc_id = await get_first_account_id(client, headers)
     
     # Try to withdraw without funds
@@ -227,7 +231,7 @@ async def test_deposit_limit_exceeded_format(client):
     headers = {"Authorization": f"Bearer {token}"}
     
     # Create account
-    await create_account(client, headers, "ACC003")
+    await create_account(client, headers, 200003)
     acc_id = await get_first_account_id(client, headers)
     
     # Try to deposit more than limit (MAX_DEPOSIT = 50000)
@@ -253,7 +257,7 @@ async def test_withdraw_limit_exceeded_format(client):
     headers = {"Authorization": f"Bearer {token}"}
     
     # Create and fund account
-    await create_account(client, headers, "ACC004")
+    await create_account(client, headers, 200004)
     acc_id = await get_first_account_id(client, headers)
     
     await client.post(
@@ -285,8 +289,8 @@ async def test_transfer_limit_exceeded_format(client):
     headers = {"Authorization": f"Bearer {token}"}
     
     # Create two accounts
-    await create_account(client, headers, "ACC005")
-    await create_account(client, headers, "ACC006")
+    await create_account(client, headers, 200005)
+    await create_account(client, headers, 200006)
     
     accounts = (await client.get("/api/accounts", headers=headers)).json()
     from_acc_id = accounts[0]["id"]
@@ -328,7 +332,7 @@ async def test_account_closure_non_zero_balance_format(client):
     headers = {"Authorization": f"Bearer {token}"}
     
     # Create and fund account
-    await create_account(client, headers, "ACC007")
+    await create_account(client, headers, 200007)
     acc_id = await get_first_account_id(client, headers)
     
     await client.post(
@@ -360,7 +364,7 @@ async def test_unauthorized_account_access_format(client):
     token1 = await get_token(client, username="user1")
     headers1 = {"Authorization": f"Bearer {token1}"}
     
-    await create_account(client, headers1, "ACC008")
+    await create_account(client, headers1, 200008)
     
     # Create second user
     await create_test_user(client, username="user2")
@@ -458,8 +462,9 @@ async def test_400_for_validation_errors(client):
     headers = {"Authorization": f"Bearer {token}"}
     
     # Duplicate account
-    await create_account(client, headers, "ACC009")
-    response = await create_account(client, headers, "ACC009")
+    acc_number = 200009
+    await create_account(client, headers, acc_number)
+    response = await create_account(client, headers, acc_number)
     
     assert response.status_code == 400
 
