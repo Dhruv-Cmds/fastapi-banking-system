@@ -3,14 +3,23 @@ from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 
-from fastapi import HTTPException
-
 from backend.models import Account, Transaction
 
 from backend.core import (
     MAX_DEPOSIT, 
     MAX_WITHDRAW, 
-    MAX_TRANSFER
+    MAX_TRANSFER,
+    AccountAlreadyExistsError,
+    AccountNotFoundError,
+    AccountInactiveError,
+    DepositLimitExceededError,
+    WithdrawLimitExceededError,
+    TransferLimitExceededError,
+    InsufficientFundsError,
+    UnauthorizedAccessError,
+    AccountAlreadyClosedError,
+    NonZeroBalanceError,
+    DatabaseError,
 )
 
 
@@ -32,7 +41,7 @@ async def create_account(db: AsyncSession, account, current_user):
 
     except IntegrityError:
         await db.rollback()
-        raise HTTPException(status_code=400, detail="Account number already exists")
+        raise AccountAlreadyExistsError()
 
 
 # READ
@@ -51,7 +60,7 @@ async def deposit(db: AsyncSession, id, data, current_user):
     try:
 
         if data.amount > MAX_DEPOSIT:
-            raise HTTPException(400, "Deposit limit exceeded")
+            raise DepositLimitExceededError()
 
         result = await db.execute(
             update(Account)
@@ -65,7 +74,7 @@ async def deposit(db: AsyncSession, id, data, current_user):
         )
 
         if result.rowcount == 0:
-            raise HTTPException(404, "Account not found")
+            raise AccountNotFoundError()
 
         db.add(Transaction(
             from_account_id=None,
@@ -78,9 +87,12 @@ async def deposit(db: AsyncSession, id, data, current_user):
 
         return {"message": "Deposit successful"}
 
+    except (DepositLimitExceededError, AccountNotFoundError):
+        raise
+
     except SQLAlchemyError:
         await db.rollback()
-        raise HTTPException(500, "Deposit failed")
+        raise DatabaseError("Deposit operation")
 
 
 # WITHDRAW
@@ -89,7 +101,7 @@ async def withdraw(db: AsyncSession, id, data, current_user):
     try:
 
         if data.amount > MAX_WITHDRAW:
-            raise HTTPException(400, "Withdraw limit exceeded")
+            raise WithdrawLimitExceededError()
 
         result = await db.execute(
             update(Account)
@@ -104,7 +116,7 @@ async def withdraw(db: AsyncSession, id, data, current_user):
         )
 
         if result.rowcount == 0:
-            raise HTTPException(400, "Insufficient balance or account not found")
+            raise InsufficientFundsError("Insufficient balance or account not found")
 
         db.add(Transaction(
             from_account_id=id,
@@ -117,19 +129,21 @@ async def withdraw(db: AsyncSession, id, data, current_user):
 
         return {"message": "Withdraw successful"}
 
+    except (WithdrawLimitExceededError, InsufficientFundsError):
+        raise
+
     except SQLAlchemyError:
         await db.rollback()
-        raise HTTPException(500, "Withdraw failed")
+        raise DatabaseError("Withdrawal operation")
 
 
-# TRANSFER
 # TRANSFER
 async def transfer(db: AsyncSession, data, current_user):
 
     try:
 
         if data.amount > MAX_TRANSFER:
-            raise HTTPException(400, "Transfer limit exceeded")
+            raise TransferLimitExceededError()
 
         query_from = select(Account).where(
             Account.id == data.from_account_id,
@@ -149,10 +163,10 @@ async def transfer(db: AsyncSession, data, current_user):
         to_acc = result_to.scalar_one_or_none()
 
         if not from_acc or not to_acc:
-            raise HTTPException(404, "Account not found")
+            raise AccountNotFoundError()
 
         if from_acc.balance < data.amount:
-            raise HTTPException(400, "Insufficient balance")
+            raise InsufficientFundsError()
 
         # perform transfer safely
         from_acc.balance -= data.amount
@@ -169,12 +183,12 @@ async def transfer(db: AsyncSession, data, current_user):
 
         return {"message": "Transfer successful"}
 
-    except HTTPException:
+    except (TransferLimitExceededError, AccountNotFoundError, InsufficientFundsError):
         raise
 
     except SQLAlchemyError:
         await db.rollback()
-        raise HTTPException(500, "Transfer failed")
+        raise DatabaseError("Transfer operation")
     
 async def get_transactions(
         db: AsyncSession,
@@ -195,7 +209,7 @@ async def get_transactions(
     account = result.scalar_one_or_none()
 
     if not account:
-        raise HTTPException(404, "Account not found")
+        raise AccountNotFoundError()
 
     txn_query = (
         select(Transaction)
@@ -227,16 +241,16 @@ async def delete_account(db: AsyncSession, id, current_user):
         acc = result.scalar_one_or_none()
 
         if not acc:
-            raise HTTPException(404, "Account not found")
+            raise AccountNotFoundError()
 
         if acc.user_id != current_user.id:
-            raise HTTPException(403, "Not authorized")
+            raise UnauthorizedAccessError()
 
         if acc.status == "CLOSED":
-            raise HTTPException(400, "Account already closed")
+            raise AccountAlreadyClosedError()
 
         if acc.balance != 0:
-            raise HTTPException(400, "Balance must be zero")
+            raise NonZeroBalanceError()
 
         acc.status = "CLOSED"
 
@@ -244,9 +258,9 @@ async def delete_account(db: AsyncSession, id, current_user):
 
         return {"message": "Account closed successfully"}
 
-    except HTTPException:
+    except (AccountNotFoundError, UnauthorizedAccessError, AccountAlreadyClosedError, NonZeroBalanceError):
         raise
 
     except SQLAlchemyError:
         await db.rollback()
-        raise HTTPException(500, "Delete failed")
+        raise DatabaseError("Account deletion")

@@ -1,5 +1,4 @@
 from sqlalchemy import select, func
-from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
@@ -8,7 +7,10 @@ from backend.models import User
 from backend.core import (
     hash_password, 
     verify_password, 
-    create_access_token
+    create_access_token,
+    InvalidCredentialsError,
+    UsernameAlreadyExistsError,
+    DatabaseError
 )
 
 
@@ -30,7 +32,7 @@ async def signup_user(db: AsyncSession, user):
     
     except IntegrityError:
         await db.rollback()
-        raise HTTPException(400, "Username already exists")
+        raise UsernameAlreadyExistsError()
 
 
 async def login_user(db: AsyncSession, user):
@@ -42,7 +44,7 @@ async def login_user(db: AsyncSession, user):
     db_user = result.scalar_one_or_none()
 
     if not db_user or not verify_password(user.password, db_user.password):
-        raise HTTPException(400, "Invalid credentials")
+        raise InvalidCredentialsError()
 
     token = create_access_token({"sub": str(db_user.id)})
 
@@ -71,4 +73,4 @@ async def update_profile(db: AsyncSession, data, current_user):
     except SQLAlchemyError:
 
         await db.rollback()
-        raise HTTPException(status_code=500, detail="Update failed")
+        raise DatabaseError("Profile update")
