@@ -191,3 +191,6 @@ docker/databases/
 
 # misc
 *.sock
+
+
+docker-compose.override.yml
