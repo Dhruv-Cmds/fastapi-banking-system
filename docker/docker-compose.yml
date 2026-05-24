@@ -11,7 +11,7 @@ services:
       - "8000:8000"
 
     volumes:
-      - ..:/app
+      - ..:/app:Z
 
     depends_on:
       - banking-db
@@ -42,7 +42,7 @@ services:
       - "5173:5173"
 
     volumes:
-      - ../frontend:/app
+      - ../frontend:/app:Z
       - /app/node_modules
 
     depends_on:
@@ -71,4 +71,4 @@ services:
       - "3008:3306"
       
     volumes:
-      - ./databases/banking:/var/lib/mysql
+      - ./databases/banking:/var/lib/mysql:Z
