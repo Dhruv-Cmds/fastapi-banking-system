@@ -4,6 +4,8 @@ from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
 from backend.models import User
 
+from backend.schemas import UserCreate
+
 from backend.core import (
     hash_password, 
     verify_password, 
@@ -14,7 +16,7 @@ from backend.core import (
 )
 
 
-async def signup_user(db: AsyncSession, user):
+async def signup_user(db: AsyncSession, user: UserCreate):
 
     try:
 
@@ -35,7 +37,7 @@ async def signup_user(db: AsyncSession, user):
         raise UsernameAlreadyExistsError()
 
 
-async def login_user(db: AsyncSession, user):
+async def login_user(db: AsyncSession, user: UserCreate):
     
     result = await db.execute(
         select(User).where(func.lower(User.username) == user.username.lower())
@@ -54,7 +56,7 @@ async def login_user(db: AsyncSession, user):
     }
 
 
-async def update_profile(db: AsyncSession, data, current_user):
+async def update_profile(db: AsyncSession, data, current_user:User):
     
     try:
 
