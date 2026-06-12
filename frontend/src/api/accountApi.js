@@ -18,7 +18,7 @@ export const withdrawMoney = (id, data) =>
 
 
 export const transferMoney = (data) =>
-  API.post("/accounts/transfer", data);
+  API.post("/transfer", data);
 
 
 export const getTransactions = (id, skip = 0, limit = 20) =>
