@@ -28,7 +28,7 @@ async def _get_owned_account_for_update(db: AsyncSession, account_id: int, curre
     result = await db.execute(
         select(Account)
         .where(
-            Account.id == account_id.
+            Account.id == account_id,
             Account.user_id == current_user.id
         )
         .with_for_update()
