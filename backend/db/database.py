@@ -19,7 +19,7 @@ if ENV == "docker":
     
 else:
     DB_HOST = "127.0.0.1"
-    DB_PORT = "3008"
+    DB_PORT = "3306"
 
 
 DATABASE_URL = (

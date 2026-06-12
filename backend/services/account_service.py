@@ -5,7 +5,7 @@ from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 
 from backend.models import Account, Transaction, User
 
-from backend.schemas import AccountCreate
+from backend.schemas import AccountCreate,Transfer
 from backend.core import (
     MAX_DEPOSIT, 
     MAX_WITHDRAW, 
@@ -156,7 +156,7 @@ async def withdraw(db: AsyncSession, id, data, current_user):
 
 
 # TRANSFER
-async def transfer(db: AsyncSession, data, current_user):
+async def transfer(db: AsyncSession, data:Transfer, current_user):
 
     try:
 
