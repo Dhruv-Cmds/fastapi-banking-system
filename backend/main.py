@@ -58,9 +58,9 @@ app = FastAPI(
     ),
     version="1.0.0",
 
-    docs_url=None,
-    redoc_url=None,
-    openapi_url=None,
+    # docs_url=None,
+    # redoc_url=None,
+    # openapi_url=None,
 
     lifespan=lifespan,
     openapi_tags=[
@@ -111,7 +111,7 @@ async def rate_limit_handler(request: Request, exc: RateLimitExceeded):
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://vaultx.dhruvsystems.tech"],
+    allow_origins=["https://bank.dhruvcore.com/"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
