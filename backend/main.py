@@ -40,7 +40,6 @@ async def lifespan(app: FastAPI):
 
         except OperationalError as e:
             print(f"Waiting for DB... ({attempt + 1}/15)")
-            print("DB ERROR:", repr(e))
             await asyncio.sleep(2)
 
     else:
@@ -59,9 +58,9 @@ app = FastAPI(
     ),
     version="1.0.0",
 
-    # docs_url=None,
-    # redoc_url=None,
-    # openapi_url=None,
+    docs_url=None,
+    redoc_url=None,
+    openapi_url=None,
 
     lifespan=lifespan,
     openapi_tags=[
