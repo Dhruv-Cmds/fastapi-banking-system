@@ -2,7 +2,7 @@ import API from "./api";
 
 
 export const createAccount = (data) =>
-  API.post("/accounts", data);
+  API.post("accounts", data);
 
 
 export const getAccounts = () =>
