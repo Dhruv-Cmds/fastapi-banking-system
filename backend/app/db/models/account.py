@@ -1,17 +1,51 @@
-from sqlalchemy import Column, Integer, String, Numeric, ForeignKey
-from sqlalchemy.orm import relationship
+from sqlalchemy import Column, Enum, Numeric, ForeignKey, DateTime
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from datetime import datetime
+from app.core import UserStatus
 
 from app.db import Base 
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from user import User
 
 class Account (Base):
 
     __tablename__ = "accounts"
 
-    id = Column(Integer, primary_key=True, index=True)
-    acc_no = Column(Integer, unique=True, nullable=False)
+    id: Mapped[int] = mapped_column(primary_key=True)
+
+    acc_no: Mapped[int] = mapped_column(
+        unique=True, 
+        nullable=False,
+        index=True
+    )
+    
     balance = Column(Numeric(10,2), default=0)
-    user_id = Column(Integer, ForeignKey("users.id"))
-    owner = relationship("User", back_populates="accounts")
-    status = Column(String(50), default="ACTIVE")
+
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id"),
+        nullable=False,
+        index=True
+    )
+
+    status: Mapped[UserStatus] = mapped_column(
+        Enum(UserStatus),
+        default=UserStatus.ACTIVE,
+        nullable=False,
+        index=True
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, 
+        default=datetime.utcnow,
+        nullable=False
+    )
+
+    # RELATIONSHIPS
+
+    owner: Mapped["User"] = relationship(
+        "User", 
+        back_populates="accounts"
+    )
 
