@@ -5,13 +5,14 @@ from app.schemas import (
     UserCreate,
     UserLogin,
     UserUpdate,
-    MessageResponse,
+    UserResponse,
     TokenResponse,
 )
 from app.services import user_service
-from app.api import get_current_user
-from app.api import get_db
-from app.core.limiter import limiter
+from app.api import get_current_user, get_db
+from app.core import limiter
+from app.db.models import User
+from backend.app.services import auth_service
 
 router = APIRouter(tags=["Authentication"])
 
@@ -19,17 +20,18 @@ router = APIRouter(tags=["Authentication"])
 # SIGNUP
 @router.post(
     "/signup",
-    response_model=MessageResponse,
+    response_model=UserResponse,
     summary="Register a new user",
     description="Create a new application user. Passwords are hashed and username must be unique."
 )
 @limiter.limit("3/second")
 async def signup(
-    request: Request,
-    user: UserCreate,
-    db: AsyncSession = Depends(get_db)
-):
-    return await user_service.signup_user(db, user)
+        request: Request,
+        user: UserCreate,
+        db: AsyncSession = Depends(get_db),
+    ):
+
+    return await auth_service.signup(db, user)
 
 
 # LOGIN
@@ -45,16 +47,20 @@ async def signup(
 @limiter.limit("5/minute")
 async def login(
     request: Request,
-    user: UserLogin,
+    credentials: UserLogin,
     db: AsyncSession = Depends(get_db)
 ):
-    return await user_service.login_user(db, user)
+    return await auth_service.login(
+        db,
+        credentials.username,
+        credentials.password
+    )
 
 
 # UPDATE PROFILE
 @router.put(
     "/me",
-    response_model=MessageResponse,
+    response_model=UserResponse,
     summary="Update current user profile",
     description="Update name or password for the current user. Requires a valid JWT Bearer token."
 )
@@ -63,6 +69,7 @@ async def update_profile(
     request: Request,
     data: UserUpdate,
     db: AsyncSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user)
-):
+    current_user: User = Depends(get_current_user)
+    ):
+        
     return await user_service.update_profile(db, data, current_user)

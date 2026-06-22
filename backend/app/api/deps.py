@@ -8,8 +8,8 @@ from .dbcon import get_db
 
 from app.db.models import User
 from app.core import (
-    SECRET_KEY, 
-    ALGORITHM,
+    setting,
+    UserRole,
     TokenExpiredError,
     InvalidTokenError,
     UserNotFoundError,
@@ -31,27 +31,33 @@ async def get_current_user(
 
     try:
         # verifies token is valid / checks signature using SECRET_KEY / reads hidden data inside
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(
+            token, 
+            setting.SECRET_KEY, 
+            algorithms=[setting.ALGORITHM]
+        )
 
         #  Extract user ID
-        user_id = int(payload.get("sub"))
+        sub = payload.get("sub")
 
-        if user_id is None:
+        if sub is None:
             raise InvalidTokenError("Invalid token payload")
         
-    
+        user_id = int(sub)
+        
     except ExpiredSignatureError:
         raise TokenExpiredError()
 
-    except JWTError:
+    except (JWTError, TypeError, ValueError):
         # Invalid / expired / tampered token
-        raise InvalidTokenError()
+        raise InvalidTokenError("Invalid token payload")
     
     # Fetch user from DB
     user_result = await db.execute(
         select(User)
         .where(User.id == user_id)
     )
+
     user = user_result.scalar_one_or_none()
 
     if user is None:
@@ -60,8 +66,8 @@ async def get_current_user(
     return user
 
 
-async def get_admin_user(current_user = Depends(get_current_user)):
-    if current_user.role != "admin":
+async def get_admin_user(current_user: User = Depends(get_current_user)):
+    if current_user.role != UserRole.ADMIN:
         raise AdminAccessRequiredError()
 
     return current_user

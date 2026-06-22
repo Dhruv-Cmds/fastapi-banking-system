@@ -8,9 +8,16 @@ from app.db.models import Account, Transaction, User
 from app.schemas import AccountCreate,Transfer
 
 from app.core import (
+
     MAX_DEPOSIT, 
     MAX_WITHDRAW, 
     MAX_TRANSFER,
+
+    logger,
+
+    UserRole,
+    AccountStatus,
+
     AccountAlreadyExistsError,
     AccountNotFoundError,
     AccountInactiveError,
@@ -22,6 +29,7 @@ from app.core import (
     AccountAlreadyClosedError,
     NonZeroBalanceError,
     DatabaseError,
+    PermissionDeniedError,
 )
 
 
@@ -40,7 +48,7 @@ async def _get_owned_account_for_update(db: AsyncSession, account_id: int, curre
     if not account:
         raise AccountNotFoundError()
 
-    if account.status != "ACTIVE":
+    if account.status != UserStatus.ACTIVE:
         raise AccountInactiveError()
 
     return account
@@ -198,10 +206,10 @@ async def transfer(db: AsyncSession, data:Transfer, current_user):
         if not from_acc or not to_acc:
             raise AccountNotFoundError()
 
-        if from_acc.status != "ACTIVE":
+        if from_acc.status != AccountStatus.ACTIVE:
             raise AccountInactiveError()
 
-        if to_acc.status != "ACTIVE":
+        if to_acc.status != AccountStatus.ACTIVE:
             raise AccountInactiveError()
 
         if from_acc.id == to_acc.id:
@@ -241,7 +249,7 @@ async def transfer(db: AsyncSession, data:Transfer, current_user):
 async def get_transactions(
         db: AsyncSession,
         account_id: int,
-        current_user,
+        current_user: User,
         skip: int = 0,
         limit: int = 20
     ):
@@ -276,40 +284,60 @@ async def get_transactions(
 
 
 # DELETE ACCOUNT
-async def delete_account(db: AsyncSession, id, current_user):
-
+async def delete_account(
+    db: AsyncSession,
+    current_user: User,
+    account_id: int,
+):
     try:
-
         result = await db.execute(
             select(Account)
-            .where(Account.id == id)
+            .where(Account.id == account_id)
             .with_for_update()
         )
-
         acc = result.scalar_one_or_none()
 
         if not acc:
+            logger.info("Account not found (account_id=%s)", account_id)
             raise AccountNotFoundError()
 
-        if acc.user_id != current_user.id:
-            raise UnauthorizedAccessError()
+        # Check ownership AFTER loading the account
+        if current_user.role != UserRole.ADMIN and acc.user_id != current_user.id:
+            logger.warning(
+                "Account close failed: user %s is not allowed to close account %s",
+                current_user.id,
+                account_id,
+            )
+            raise PermissionDeniedError()
 
-        if acc.status == "CLOSED":
+        if acc.status == AccountStatus.CLOSED:
+            logger.warning("Account already closed (account_id=%s)", account_id)
             raise AccountAlreadyClosedError()
 
         if acc.balance != 0:
+            logger.warning(
+                "Account close failed: account_id=%s has non-zero balance (%s)",
+                account_id,
+                acc.balance,
+            )
             raise NonZeroBalanceError()
 
-        acc.status = "CLOSED"
-
+        acc.status = AccountStatus.CLOSED
         await db.commit()
+        await db.refresh(acc)
 
-        return {"message": "Account closed successfully"}
+        return acc
 
-    except (AccountNotFoundError, UnauthorizedAccessError, AccountAlreadyClosedError, NonZeroBalanceError):
+    except (
+        AccountNotFoundError,
+        PermissionDeniedError,
+        AccountAlreadyClosedError,
+        NonZeroBalanceError,
+    ):
         await db.rollback()
         raise
 
     except SQLAlchemyError:
         await db.rollback()
+        logger.exception("Database error while closing account_id=%s", account_id)
         raise DatabaseError("Account deletion")

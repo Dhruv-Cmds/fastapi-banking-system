@@ -9,3 +9,8 @@ class UserStatus(str, Enum):
 
     ACTIVE = "ACTIVE"
     CLOSE = "CLOSE"
+
+class AccountStatus(str, Enum):
+
+    ACTIVE = "ACTIVE"
+    CLOSE = "CLOSE"

@@ -217,6 +217,20 @@ class DatabaseError(BankingAPIException):
         )
 
 
+class PermissionDeniedError(BankingAPIException):
+    """Raised when permission denied"""
+    def __init__(        
+        self,
+        message: str = "You do not have permission to perform this action"
+    ):
+        super().__init__(
+
+            error_code="PERMISSION_DENIED",
+            message=message,
+            status_code=status.HTTP_403_FORBIDDEN
+        )
+
+
 class OperationFailedError(BankingAPIException):
     """Raised when an operation fails"""
     def __init__(self, operation: str = "Operation"):

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Request, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 
@@ -9,7 +9,7 @@ from app.schemas import (
     Amount,
     Transfer,
     AccountResponse,
-    MessageResponse,
+    UserResponse,
     TransactionListResponse,
 )
 
@@ -29,10 +29,10 @@ router = APIRouter(tags=["Accounts"])
 )
 @limiter.limit("5/second")
 async def create_account(
-    request: Request,
-    account: AccountCreate,
-    db: AsyncSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user)
+        request: Request,
+        account: AccountCreate,
+        db: AsyncSession = Depends(get_db),
+        current_user = Depends(get_current_user)
     ):
 
     return await account_service.create_account(db, account, current_user)
@@ -47,9 +47,9 @@ async def create_account(
 )
 @limiter.limit("20/second")
 async def get_accounts(
-    request: Request,
-    db: AsyncSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user)
+        request: Request,
+        db: AsyncSession = Depends(get_db),
+        current_user = Depends(get_current_user)
     ):
 
     return await account_service.get_accounts(db, current_user)
@@ -58,17 +58,17 @@ async def get_accounts(
 # DEPOSIT
 @router.post(
     "/accounts/{id}/deposit",
-    response_model=MessageResponse,
+    response_model=UserResponse,
     summary="Deposit funds to an account",
     description="Deposit money into an active account owned by the authenticated user."
 )
 @limiter.limit("10/second")
 async def deposit(
-    request: Request,
-    id: int,
-    data: Amount,
-    db: AsyncSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user)
+        request: Request,
+        id: int,
+        data: Amount,
+        db: AsyncSession = Depends(get_db),
+        current_user = Depends(get_current_user)
     ):
 
     return await account_service.deposit(db, id, data, current_user)
@@ -77,17 +77,17 @@ async def deposit(
 # WITHDRAW
 @router.post(
     "/accounts/{id}/withdraw",
-    response_model=MessageResponse,
+    response_model=UserResponse,
     summary="Withdraw funds from an account",
     description="Withdraw money from an active account owned by the authenticated user, if sufficient balance exists."
 )
 @limiter.limit("5/second")
 async def withdraw(
-    request: Request,
-    id: int,
-    data: Amount,
-    db: AsyncSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user)
+        request: Request,
+        id: int,
+        data: Amount,
+        db: AsyncSession = Depends(get_db),
+        current_user = Depends(get_current_user)
     ):
 
     return await account_service.withdraw(db, id, data, current_user)
@@ -96,7 +96,7 @@ async def withdraw(
 # TRANSFER
 @router.post(
     "/transfer",
-    response_model=MessageResponse,
+    response_model=UserResponse,
     summary="Transfer funds between accounts",
     description=(
         "Transfer funds from one owned account to another active account. "
@@ -105,10 +105,10 @@ async def withdraw(
 )
 @limiter.limit("3/second")
 async def transfer(
-    request: Request,
-    data: Transfer,
-    db: AsyncSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user)
+        request: Request,
+        data: Transfer,
+        db: AsyncSession = Depends(get_db),
+        current_user = Depends(get_current_user)
     ):
 
     return await account_service.transfer(db, data, current_user)
@@ -120,25 +120,35 @@ async def transfer(
     description="Return transaction history for a specific account owned by the authenticated user."
 )
 async def get_transactions(
-    request: Request,
-    account_id: int,
-    skip: int = 0,
-    limit: int = 20,
-    db: AsyncSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user)
-):
+        request: Request,
+        account_id: int,
+        skip: int = Query(0, ge=0),
+        limit: int = Query(20, ge=1, le=100),
+        db: AsyncSession = Depends(get_db),
+        current_user = Depends(get_current_user)
+    ):  
+    
+    transactions =  await account_service.get_transactions(
+            db, 
+            account_id, 
+            current_user, 
+            skip=skip, 
+            limit=limit
+        )
+
     return {
-        "data": await account_service.get_transactions(
-            db, account_id, current_user, skip=skip, limit=limit
-        ),
-        "skip": skip,
-        "limit": limit
+        "data":transactions,  
+        "pagination": {
+            "skip": skip,
+            "limit": limit
+        }
     }
+    
 
 # DELETE (CLOSE ACCOUNT)
 @router.delete(
-    "/accounts/{id}",
-    response_model=MessageResponse,
+    "/accounts/{account_id}",
+    response_model=AccountResponse,
     summary="Close an account",
     description=(
         "Soft-close an account owned by the authenticated user. "
@@ -147,10 +157,14 @@ async def get_transactions(
 )
 @limiter.limit("2/second")
 async def delete_account(
-    request: Request,
-    id: int,
-    db: AsyncSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user)
+        request: Request,
+        account_id: int,
+        db: AsyncSession = Depends(get_db),
+        current_user = Depends(get_current_user)
     ):
     
-    return await account_service.delete_account(db, id, current_user)
+    return await account_service.delete_account(
+        db, 
+        current_user,
+        account_id=account_id,
+    )

@@ -1,6 +1,6 @@
 from .limiter import limiter
 
-from .constants import UserRole, UserStatus
+from .constants import UserRole, UserStatus, AccountStatus
 
 from .logger import logger
 
@@ -40,5 +40,6 @@ from .exceptions import (
     TransferLimitExceededError,
     NonZeroBalanceError,
     DatabaseError,
+    PermissionDeniedError,
     OperationFailedError
 )
