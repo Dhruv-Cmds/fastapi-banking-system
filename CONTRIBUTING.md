@@ -27,17 +27,42 @@ If you're new to open source, start with issues labeled:
 # 🏗️ Project Structure
 
 ```text
-backend/
-├── routes/
-├── services/
-├── models/
-├── schemas/
-├── dependencies/
-├── core/
-└── tests/
-
-frontend/
-docker/
+.
+├── backend/
+│   ├── app/
+│   │   ├── api/
+│   │   │   └── routes/                     # FastAPI route modules
+│   │   ├── core/                           # Config, security, constants, logging, exceptions
+│   │   ├── db/                             # Async database session 
+│   │   │   └── models/                     # SQLAlchemy models
+│   │   ├── repositories/                   # Repository layer placeholders
+│   │   ├── schemas/                        # Pydantic request/response schemas
+│   │   ├── services/                       # Business logic modules
+│   │   ├── tasks/                          # Background task placeholders
+│   │   ├── tests/                          # Test placeholders
+│   │   ├── websocket/                      # Realtime event and handler placeholders
+│   │   │
+│   │   ├── docker-compose.dev.yml          # Api Container (for SELinux/Fedora etc...)
+│   │   ├── docker-compose.yml              # Api Container
+│   │   ├── lifespan.py
+│   │   └── main.py
+│   │
+│   ├──.env.example
+│   └── requirements.txt
+│
+├── db_quires/                              # Database setup tables creation and permissions 
+├── docker/                                 # Dockerfiles   
+├── frontend/                               # Frontend
+├── image/                                  # Image about project 
+├── k6/                                     # Load test
+├── nginx/                                  # Nginx placeholder
+├── scripts/                                # Utility script
+│
+├── docker-compose.dev.yml                  # Api Container (for SELinux/Fedora etc...)
+├── docker-compose.yml                      # Api Container
+├── LICENSE
+├── progress.md
+└── README.md
 ```
 
 ---
@@ -79,17 +104,31 @@ Then add your environment variables.
 Example:
 
 ```env
-ENV=dev
 
-DB_USER=root
-DB_PASSWORD=your_password
-DB_HOST=127.0.0.1
-DB_PORT=3008
+COMPOSE_PROJECT_NAME=banking-app
+
+ENV=docker
+
+DB_USER=banking_user
 DB_NAME=banking
+DB_PASSWORD=banking_password
+DB_PORT=3306
+DB_HOST=mysql-shared
+TEST_DB_NAME=banking_test
 
-SECRET_KEY=your_secret_key
+MYSQL_ROOT_PASSWORD=CHANGE_ME
+
+REDIS_HOST=redis-shared
+REDIS_PORT=6379
+REDIS_DB=0
+
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=adminpassword88367
+
+SECRET_KEY=mysecretkey
 ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=30
+
 ```
 
 ---
@@ -113,8 +152,28 @@ Add your frontend environment variables if required.
 
 ## 4. Run with Docker (Recommended)
 
+## Build shared containers
 ```bash
-docker-compose up --build
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+```
+OR
+
+```bash
+docker compose up --build (if not on SELinux or Fedora)
+```
+
+### Build api containers
+
+````bash
+cd backend/app
+
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+````
+
+OR
+
+```bash
+docker compose up --build (if not on SELinux or Fedora)
 ```
 
 ---
