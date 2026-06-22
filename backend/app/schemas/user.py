@@ -1,77 +1,25 @@
-# BaseModel = helps you to define structure how data will store.
-# StringConstraints = Set rules for string such as minimum or maximum length of string.
-from pydantic import BaseModel, Field, StringConstraints
+from app.schemas.common import UsernameStr, NameStr, passwordStr
 
-# Annotated = Gives you extra conditions check the length of data
-from typing import Annotated, Optional
+from pydantic import BaseModel, Field
 
-UsernameStr = Annotated[
-    str,
-    StringConstraints(
-        min_length=3, 
-        max_length=30
-    )
-]
+from app.core import UserRole, UserStatus
 
-NameStr = Annotated[
-    str,
-    StringConstraints(
-        min_length=1, 
-        max_length=50
-    )
-]
-
-PasswordStr = Annotated[
-    str,
-    StringConstraints(
-        min_length=4, 
-        max_length=72
-    )
-]
-
-passwordStr = Annotated[str,
-                         StringConstraints(
-                             min_length=4, 
-                             max_length=72
-                             )
-                        ]
-
-class UserCreate(BaseModel):
+class UserBase(BaseModel):
 
     username: UsernameStr = Field(..., example="jdoe")
-
     name: NameStr = Field(..., example="John Doe")
 
-    password: passwordStr = Field(..., example="strongPass123")
-
-class UserLogin(BaseModel):
-    username: UsernameStr = Field(..., example="jdoe")
+class UserCreate(UserBase):
 
     password: passwordStr = Field(..., example="strongPass123")
 
-
-class UserUpdate(BaseModel):
-    name: Optional[NameStr] = Field(None, example="Jane Doe")
-
-    password: Optional[passwordStr] = Field(None, example="newSecurePass456")
-
-
-class MessageResponse(BaseModel):
+class UserResponse(UserBase):
+    
+    id: int = Field(..., examples=[1])
+    role: UserRole = Field(..., examples=[UserRole.USER])
+    status: UserStatus = Field(..., examples=[UserStatus.ACTIVE])
     message: str
 
-    class Config:
-        schema_extra = {
-            "example": {"message": "User created"}
-        }
-
-
-class TokenResponse(BaseModel):
-    access_token: str = Field(
-        ..., 
-        example="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-    )
-    
-    token_type: str = Field(
-        "bearer", 
-        example="bearer"
-    )
+    model_config = {
+        "from_attributes": True
+    }
