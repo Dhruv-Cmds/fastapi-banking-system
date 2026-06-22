@@ -24,8 +24,6 @@ The project includes a **React + Vite frontend dashboard** for testing and inter
 * 🚦 Rate Limiting using SlowAPI
 * 🚀 GitHub Actions CI/CD
 
-> Demo deployment currently offline.
-
 ---
 
 # 🌐 Live Demo
@@ -141,70 +139,6 @@ Implements soft-close account behavior similar to real banking systems.
 
 ---
 
-# 📡 API Endpoints
-
-## Admin — `/api/admin`
-
-| Method | Endpoint                         | Auth | Description        |
-| ------ | -------------------------------- | ---- | ------------------ |
-| GET    | `/api/admin/users`               | ✅    | View all users     |
-| GET    | `/api/admin/accounts`            | ✅    | View all accounts  |
-| PUT    | `/api/admin/accounts/{account_id}/close` | ✅ | Close account |
-
-## Authentication — `/api`
-
-| Method | Endpoint      | Auth | Description           |
-| ------ | ------------- | ---- | --------------------- |
-| POST   | `/api/signup` | ❌    | Register user         |
-| POST   | `/api/login`  | ❌    | Login and receive JWT |
-| PUT    | `/api/me`     | ✅    | Update user profile   |
-
-## Accounts — `/api/accounts`
-
-| Method | Endpoint                     | Auth | Description      |
-| ------ | ---------------------------- | ---- | ---------------- |
-| POST   | `/api/accounts`              | ✅    | Create account   |
-| GET    | `/api/accounts`              | ✅    | List accounts    |
-| DELETE | `/api/accounts/{id}`         | ✅    | Delete account   |
-| POST   | `/api/accounts/{id}/deposit` | ✅    | Deposit money    |
-| POST   | `/api/accounts/{id}/withdraw` | ✅   | Withdraw money   |
-
-## Transfers & Transactions — `/api`
-
-| Method | Endpoint                         | Auth | Description              |
-| ------ | -------------------------------- | ---- | ------------------------ |
-| POST   | `/api/transfer`                  | ✅    | Transfer money           |
-| GET    | `/api/transactions/{account_id}` | ✅    | View transaction history |
-
-## Health — `/health`
-
-| Method | Endpoint  | Auth | Description                   |
-| ------ | --------- | ---- | ----------------------------- |
-| GET    | `/health` | ❌    | Check API and database health |
-
-The API includes a health monitoring endpoint for deployment and infrastructure checks.
-
-```http
-GET /health
-```
-
-### Purpose
-
-* Verify API availability
-* Check database connectivity
-* Support Docker/container health monitoring
-
-### Example Healthy Response
-
-```json
-{
-  "status": "healthy",
-  "database": "connected",
-  "message": "Application is running and database is accessible"
-}
-```
-
----
 
 # 🛡️ Safety & Integrity
 
@@ -239,39 +173,42 @@ Every transaction is recorded for:
 # 📁 Project Structure
 
 ```text
-fastapi-banking-system/
-│
+.
 ├── backend/
-│   ├── routes/
-│   ├── models/
-│   ├── schemas/
-│   ├── services/
-│   ├── db/
-│   ├── core/
-│   ├── dependencies/
-│   ├── tests/
-│   └── main.py
+│   ├── app/
+│   │   ├── api/
+│   │   │   └── routes/                     # FastAPI route modules
+│   │   ├── core/                           # Config, security, constants, logging, exceptions
+│   │   ├── db/                             # Async database session 
+│   │   │   └── models/                     # SQLAlchemy models
+│   │   ├── repositories/                   # Repository layer placeholders
+│   │   ├── schemas/                        # Pydantic request/response schemas
+│   │   ├── services/                       # Business logic modules
+│   │   ├── tasks/                          # Background task placeholders
+│   │   ├── tests/                          # Test placeholders
+│   │   ├── websocket/                      # Realtime event and handler placeholders
+│   │   │
+│   │   ├── docker-compose.dev.yml          # Api Container (for SELinux/Fedora etc...)
+│   │   ├── docker-compose.yml              # Api Container
+│   │   ├── lifespan.py
+│   │   └── main.py
+│   │
+│   ├──.env.example
+│   └── requirements.txt
 │
-├── docker/
-│   ├── .env
-│   ├── docker-compose.yml
-│   └── Dockerfile
+├── db_quires/                              # Database setup tables creation and permissions 
+├── docker/                                 # Dockerfiles   
+├── frontend/                               # Frontend
+├── image/                                  # Image about project 
+├── k6/                                     # Load test
+├── nginx/                                  # Nginx placeholder
+├── scripts/                                # Utility script
 │
-├── frontend/
-│   ├── src/
-│   ├── public/
-│   ├── Dockerfile
-│   ├── package.json
-│   └── vite.config.js
-│
-├── screenshots/
-├── .github/
-├── .dockerignore
-├── .gitignore
+├── docker-compose.dev.yml                  # Api Container (for SELinux/Fedora etc...)
+├── docker-compose.yml                      # Api Container
 ├── LICENSE
-├── load_test.js
-├── README.md
-└── requirements.txt
+├── progress.md
+└── README.md
 ```
 
 ---
@@ -286,22 +223,25 @@ COMPOSE_PROJECT_NAME=banking-app
 ENV=docker
 
 DB_USER=banking_user
-DB_PASSWORD=your_password_here
-
-MYSQL_ROOT_PASSWORD=your_root_password_here
-
 DB_NAME=banking
+DB_PASSWORD=banking_password
+DB_PORT=3306
+DB_HOST=mysql-shared
 TEST_DB_NAME=banking_test
 
-ADMIN_USERNAME=your_name
-ADMIN_PASSWORD=your_password
+MYSQL_ROOT_PASSWORD=CHANGE_ME
 
-SECRET_KEY=your_secret_key_here
+REDIS_HOST=redis-shared
+REDIS_PORT=6379
+REDIS_DB=0
+
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=adminpassword88367
+
+SECRET_KEY=mysecretkey
 ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=30
 ```
-
-> `DB_HOST` and `DB_PORT` are internally handled by Docker using `banking-db:3306`.
 
 ## 💻 Local Development
 
@@ -497,11 +437,28 @@ docker compose up --build -d
 
 # 🐳 Docker Setup
 
-## Run Application
+## Build shared containers
+```bash
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+```
+OR
 
 ```bash
-docker-compose up --build
+docker compose up --build (if not on SELinux or Fedora)
 ```
+
+### Build api containers
+
+````bash
+cd backend/app
+
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+````
+
+OR
+```bash
+docker compose up --build (if not on SELinux or Fedora)
+````
 
 ## Reset Database
 
@@ -598,7 +555,7 @@ The API was stress-tested using **k6** against production-style environments:
 ## Run Load Test
 
 ```bash
-k6 run load_test.js
+k6 / load_test.js
 ```
 
 ---
