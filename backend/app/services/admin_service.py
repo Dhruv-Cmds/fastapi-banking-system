@@ -1,6 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from app.db.models import User
+from app.db.models import User, Account
+from app.core import UserRole
 
 import os 
 
@@ -11,6 +12,35 @@ load_dotenv()
 from app.core import (
     hash_password, 
 )
+
+async def get_all_users(
+        db: AsyncSession ,
+    ):
+    
+    result = await db.execute(
+        select(User)
+    )
+
+    return result.scalars().all()
+
+
+async def get_all_accounts(
+        db: AsyncSession,
+        skip: int = 0,
+        limit: int = 100,
+    ):
+
+    result = await db.execute(
+        select(Account)
+        .order_by(Account.created_at.desc())
+        .offset(skip)
+        .limit(limit)
+    )
+
+    accounts = result.scalars().all()
+
+    return accounts
+
 
 async def create_admin (
         db: AsyncSession,
@@ -36,7 +66,7 @@ async def create_admin (
         username=ADMIN_USERNAME,
         name="Admin",
         password=hash_password(ADMIN_PASSWORD),
-        role="admin"
+        role=UserRole.ADMIN
     )
     try:
 
