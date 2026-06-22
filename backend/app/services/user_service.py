@@ -1,22 +1,20 @@
-from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
+from sqlalchemy import select
 
 from app.db.models import User
 
-from app.schemas import UserCreate
+from app.schemas import UserCreate, UserUpdate
 
 from app.core import (
+    logger,
     hash_password, 
-    verify_password, 
-    create_access_token,
-    InvalidCredentialsError,
     UsernameAlreadyExistsError,
     DatabaseError
 )
 
 
-async def signup_user(db: AsyncSession, user: UserCreate):
+async def create_user(db: AsyncSession, user: UserCreate):
 
     try:
 
@@ -28,35 +26,31 @@ async def signup_user(db: AsyncSession, user: UserCreate):
 
         db.add(new_user)
         await db.commit()
-        await db.refresh(new_user)
+        await db.flush()
 
-        return {"message": "User created"}
+        logger.info(
+            "User created successfully (user_id=%s)",
+            new_user.id
+        )
+
+        return new_user
     
     except IntegrityError:
+
         await db.rollback()
+
+        logger.exception(
+            "Database integrity error while creating user"
+        )
+
         raise UsernameAlreadyExistsError()
 
-
-async def login_user(db: AsyncSession, user: UserCreate):
     
-    result = await db.execute(
-        select(User).where(func.lower(User.username) == user.username.lower())
-    )
-
-    db_user = result.scalar_one_or_none()
-
-    if not db_user or not verify_password(user.password, db_user.password):
-        raise InvalidCredentialsError()
-
-    token = create_access_token({"sub": str(db_user.id)})
-
-    return {
-        "access_token": token,
-        "token_type": "bearer"
-    }
-
-
-async def update_profile(db: AsyncSession, data, current_user:User):
+async def update_profile(
+        db: AsyncSession, 
+        data: UserUpdate, 
+        current_user:User
+    ):
     
     try:
 
@@ -70,9 +64,10 @@ async def update_profile(db: AsyncSession, data, current_user:User):
 
         await db.commit()
 
-        return {"message": "Profile updated"}
+        return current_user
 
     except SQLAlchemyError:
 
         await db.rollback()
-        raise DatabaseError("Profile update")
+
+        raise DatabaseError()
