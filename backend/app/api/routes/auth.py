@@ -12,7 +12,7 @@ from app.services import user_service
 from app.api import get_current_user, get_db
 from app.core import limiter
 from app.db.models import User
-from backend.app.services import auth_service
+from app.services import auth_service
 
 router = APIRouter(tags=["Authentication"])
 
