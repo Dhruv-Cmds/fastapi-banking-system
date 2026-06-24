@@ -18,7 +18,7 @@ class UserResponse(UserBase):
     id: int = Field(..., examples=[1])
     role: UserRole = Field(..., examples=[UserRole.USER])
     status: UserStatus = Field(..., examples=[UserStatus.ACTIVE])
-    
+     
     model_config = {
         "from_attributes": True
     }

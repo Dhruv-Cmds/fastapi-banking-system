@@ -14,3 +14,7 @@ class AccountStatus(str, Enum):
 
     ACTIVE = "ACTIVE"
     CLOSE = "CLOSE"
+
+class PaymentStatus(str, Enum):
+
+    SUCCESS = "SUCCESS"

@@ -58,7 +58,7 @@ async def get_accounts(
 # DEPOSIT
 @router.post(
     "/accounts/{id}/deposit",
-    response_model=UserResponse,
+    response_model=AccountResponse,
     summary="Deposit funds to an account",
     description="Deposit money into an active account owned by the authenticated user."
 )
@@ -77,7 +77,7 @@ async def deposit(
 # WITHDRAW
 @router.post(
     "/accounts/{id}/withdraw",
-    response_model=UserResponse,
+    response_model=AccountResponse,
     summary="Withdraw funds from an account",
     description="Withdraw money from an active account owned by the authenticated user, if sufficient balance exists."
 )
@@ -95,8 +95,8 @@ async def withdraw(
 
 # TRANSFER
 @router.post(
-    "/transfer",
-    response_model=UserResponse,
+    "/transfer/{acc_no}",
+    response_model=Transfer,
     summary="Transfer funds between accounts",
     description=(
         "Transfer funds from one owned account to another active account. "
