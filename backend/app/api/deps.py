@@ -34,14 +34,15 @@ async def get_current_user(
         payload = jwt.decode(
             token, 
             setting.SECRET_KEY, 
-            algorithms=[setting.ALGORITHM]
+            algorithms=[setting.ALGORITHM],
+            issuer="banking_api"
         )
 
         #  Extract user ID
         sub = payload.get("sub")
 
         if sub is None:
-            raise InvalidTokenError("Invalid token payload")
+            raise InvalidTokenError()
         
         user_id = int(sub)
         
@@ -50,9 +51,8 @@ async def get_current_user(
 
     except (JWTError, TypeError, ValueError):
         # Invalid / expired / tampered token
-        raise InvalidTokenError("Invalid token payload")
-    
-    # Fetch user from DB
+        raise InvalidTokenError()
+
     user_result = await db.execute(
         select(User)
         .where(User.id == user_id)

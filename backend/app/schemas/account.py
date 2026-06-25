@@ -4,7 +4,7 @@ from decimal import Decimal
 
 from typing import Optional, List
 
-from app.core import UserStatus
+from app.core import AccountStatus
 
 class PaginationMeta(BaseModel):
     skip: int
@@ -24,16 +24,6 @@ class AccountCreate(BaseModel):
     )
 
 
-# DEPOSIT / WITHDRAW
-class Amount(BaseModel):
-    amount: Decimal = Field(
-        ..., 
-        gt=0, 
-        max_digits=12, 
-        decimal_places=2, 
-        example=[150.00]
-    )
-
 class Transfer(BaseModel):
     from_account_id: int = Field(..., gt=0, example=1)
     to_account_no: int = Field(..., gt=0, example=[2002])
@@ -48,8 +38,8 @@ class Transfer(BaseModel):
 class AccountResponse(BaseModel):
     id: int = Field(..., examples=[1])
     acc_no: int = Field(..., gt=0, example=[1001])
-    balance: Decimal = Field(..., gt=0, examples=[6999.34])
-    status: UserStatus = Field(..., examples=[UserStatus.ACTIVE])
+    balance: Decimal = Field(..., examples=[6999.34])
+    status: AccountStatus = Field(..., examples=[AccountStatus.ACTIVE])
     user_id: int = Field(..., examples=[1])
 
     model_config = {

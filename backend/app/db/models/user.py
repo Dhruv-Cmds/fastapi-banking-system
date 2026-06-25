@@ -1,7 +1,7 @@
 from sqlalchemy import String, Enum, DateTime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import datetime
-from app.core import UserRole
+from app.core import UserRole, UserStatus
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -37,6 +37,12 @@ class User (Base):
         default=UserRole.USER,
         nullable=False ,
         index=True
+    )
+
+    status: Mapped[UserStatus] = mapped_column(
+        Enum(UserStatus),
+        default=UserStatus.ACTIVE,
+        nullable=False
     )
 
     created_at: Mapped[datetime] = mapped_column(

@@ -24,7 +24,7 @@ router = APIRouter(tags=["Authentication"])
     summary="Register a new user",
     description="Create a new application user. Passwords are hashed and username must be unique."
 )
-@limiter.limit("3/second")
+@limiter.limit("5/minute")
 async def signup(
         request: Request,
         user: UserCreate,
@@ -64,7 +64,7 @@ async def login(
     summary="Update current user profile",
     description="Update name or password for the current user. Requires a valid JWT Bearer token."
 )
-@limiter.limit("5/second")
+@limiter.limit("10/minute")
 async def update_profile(
     request: Request,
     data: UserUpdate,

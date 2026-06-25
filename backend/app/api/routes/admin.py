@@ -23,24 +23,30 @@ router = APIRouter(prefix="/admin", tags=["Admin"])
 async def get_all_users(
         request: Request,
         db: AsyncSession = Depends(get_db),
+        skip:int = Query(0, ge=0),
+        limit:int = Query(100, ge=0, le=100),
         admin = Depends(get_admin_user)
     ):
     
-        return admin_service.get_all_users(db)
+        return await admin_service.get_all_users(
+            db,
+            skip=skip,
+            limit=limit
+        )
 
 
 # View all accounts
 @router.get(
         "/accounts",
-        response_model=List[AccountListResponse],
+        response_model=AccountListResponse,
         summary="Get all users accounts",
         description="Retrive all registered users accounts. Only admin can access"
     )
-@limiter.limit("30/minute")
+@limiter.limit("120/minute")
 async def get_all_accounts(
         request: Request,
         db: AsyncSession = Depends(get_db),
-        skip: int = Query(0, ge=0),
+        skip: int = Query(0),
         limit: int = Query(100, ge=0, le=100),
         admin = Depends(get_admin_user),
     ):

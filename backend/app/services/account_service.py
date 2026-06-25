@@ -1,12 +1,9 @@
-from sqlalchemy import or_, select, and_
-
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 
 from app.db.models import Account, Transaction, User
-
-from app.schemas import AccountCreate,Transfer, Amount
-
+from app.schemas import AccountCreate,Transfer
+from app.repository import account_repository
 from app.core import (
 
     MAX_DEPOSIT, 
@@ -33,28 +30,6 @@ from app.core import (
     DatabaseError,
     PermissionDeniedError,
 )
-
-
-async def _get_owned_account_for_update(db: AsyncSession, account_id: int, current_user: User):
-    result = await db.execute(
-        select(Account)
-        .where(
-            Account.id == account_id,
-            Account.user_id == current_user.id
-        )
-        .with_for_update()
-    )
-
-    account = result.scalar_one_or_none()
-
-    if not account:
-        raise AccountNotFoundError()
-
-    if account.status != UserStatus.ACTIVE:
-        raise AccountInactiveError()
-
-    return account
-
 
 # CREATE
 async def create_account(
@@ -87,24 +62,23 @@ async def create_account(
 
     except SQLAlchemyError:
         await db.rollback()
-        raise DatabaseError("Account creation")
+        raise DatabaseError()
 
 
-async def get_accounts(db: AsyncSession, current_user):
-
-    result = await db.execute(
-        select(Account)
-        .where(Account.user_id == current_user.id)
-    )
+async def get_accounts(db: AsyncSession, current_user: User):
+    return await account_repository.get_accounts_by_user_id(db, current_user.id)
     
-    return result.scalars().all()
 
-
-async def deposit(db: AsyncSession, id, data: Amount, current_user):
+async def deposit(
+        db: AsyncSession, 
+        account_id, 
+        amount, 
+        current_user: User
+    ):
 
     try:
 
-        if data.amount > MAX_DEPOSIT:
+        if amount > MAX_DEPOSIT:
 
             logger.warning(
                 "Amount limit exicuted: cannot DEPOSIT money more %s",
@@ -113,21 +87,47 @@ async def deposit(db: AsyncSession, id, data: Amount, current_user):
 
             raise DepositLimitExceededError()
 
-        account = await _get_owned_account_for_update(db, id, current_user)
-        account.balance += data.amount
+        account = await account_repository.get_owned_account(
+            db, 
+            account_id, 
+            current_user
+        )
+
+        if not account:
+
+            logger.warning(
+                "Deposite failed: account not found (account_id=%s), (user_id=%s)",
+                account_id,
+                current_user.id
+            )
+            raise AccountNotFoundError()
+
+        if account.status != AccountStatus.ACTIVE:
+
+            logger.warning(
+                "Deposite failed: user status is not active (account_id=%s), (user_id=%s), (account_status=%s)",
+                account_id,
+                current_user.id,
+                account.status
+            )
+            raise AccountInactiveError()
+
+
+        account.balance += amount
 
         db.add(Transaction(
             from_account_id=None,
-            to_account_id=id,
-            amount=data.amount,
+            to_account_id=account_id,
+            amount=amount,
             status=PaymentStatus.SUCCESS
         ))
 
         await db.commit()
+        await db.flush()
 
         logger.warning(
             "Amount=%s deposit successfully",
-            data.amount,
+            amount,
         )
 
         return account
@@ -147,11 +147,16 @@ async def deposit(db: AsyncSession, id, data: Amount, current_user):
 
 
 # WITHDRAW
-async def withdraw(db: AsyncSession, id, data: Amount, current_user):
+async def withdraw(
+        db: AsyncSession, 
+        account_id, 
+        amount, 
+        current_user: User
+    ):
 
     try:
 
-        if data.amount > MAX_WITHDRAW:
+        if amount > MAX_WITHDRAW:
 
             logger.warning(
                 "Amount limit exicuted: cannot WITHDRAW money more %s",
@@ -160,33 +165,56 @@ async def withdraw(db: AsyncSession, id, data: Amount, current_user):
 
             raise WithdrawLimitExceededError()
 
-        account = await _get_owned_account_for_update(db, id, current_user)
+        account = await account_repository.get_owned_account(
+            db, 
+            account_id, 
+            current_user
+        )
 
-        if account.balance < data.amount:
+        if not account:
+
+            logger.warning(
+                "Withdraw failed: account not found (account_id=%s), (user_id=%s)",
+                account_id,
+                current_user.id
+            )
+            raise AccountNotFoundError()
+
+        if account.status != AccountStatus.ACTIVE:
+
+            logger.warning(
+                "Withdraw failed: user status is not active (account_id=%s), (user_id=%s), (account_status=%s)",
+                account_id,
+                current_user.id,
+                account.status
+            )
+            raise AccountInactiveError()
+        
+        if account.balance < amount:
 
             logger.warning(
                 "Insufficient balance: Withdraw amount=%s is grater then current balance=%s",
-                data.amount,
+                amount,
                 account.balance
             )
-
             raise InsufficientFundsError()
 
-        account.balance -= data.amount
+        account.balance -= amount
 
         db.add(Transaction
             (
-                from_account_id=id,
+                from_account_id=account_id,
                 to_account_id=None,
-                amount=data.amount,
+                amount=amount,
                 status=PaymentStatus.SUCCESS
         )   )  
 
         await db.commit()
+        await db.refresh(account)
 
         logger.info(
             "(Amount=%s) withdraw successfully by (user_id=%s)",
-            data.amount,
+            amount,
             account.user_id
         )
         return account
@@ -198,7 +226,7 @@ async def withdraw(db: AsyncSession, id, data: Amount, current_user):
         InsufficientFundsError
     ):
         await db.rollback()
-        raise
+        raise 
 
     except SQLAlchemyError:
         await db.rollback()
@@ -206,7 +234,11 @@ async def withdraw(db: AsyncSession, id, data: Amount, current_user):
 
 
 # TRANSFER
-async def transfer(db: AsyncSession, data:Transfer, current_user):
+async def transfer(
+        db: AsyncSession, 
+        data:Transfer, 
+        current_user: User
+    ):
 
     try:
 
@@ -216,21 +248,10 @@ async def transfer(db: AsyncSession, data:Transfer, current_user):
                 "Transfer amount limit exicuted: cannot transfer money more then %s",
                 MAX_TRANSFER
             )
-
             raise TransferLimitExceededError()
 
-        result = await db.execute(
-            select(Account)
-            .where(
-                or_(
-                    Account.id == data.from_account_id,
-                    Account.acc_no == data.to_account_no
-                )
-            )
-            .order_by(Account.id)
-            .with_for_update()
-        )
-        accounts = result.scalars().all()
+
+        accounts = await account_repository.get_accounts_for_transfer(db, data)
 
         from_acc = next(
             (
@@ -242,6 +263,7 @@ async def transfer(db: AsyncSession, data:Transfer, current_user):
             ),
             None
         )
+
         to_acc = next(
             (
                 account for account in accounts
@@ -342,70 +364,55 @@ async def get_transactions(
         limit: int = 20
     ):
 
-    # make sure account belongs to current user
-    account_query = await db.execute(
-        select(Account)
-        .where(
-            and_(
-                (Account.id == account_id),
-                (Account.user_id == current_user.id)
-            )
-        )
+    account = await account_repository.get_owned_account(
+        db,
+        account_id,
+        current_user
     )
-
-    account = account_query.scalar_one_or_none()
 
     if not account:
 
         logger.warning(
-            "Account not found for transactions (account_id=%s), (user_id=%s)",
-            account.id,
+            "Withdraw failed: account not found (account_id=%s), (user_id=%s)",
+            account_id,
             current_user.id
         )
         raise AccountNotFoundError()
-
-    txn_query = await db.execute(
-        select(Transaction)
-        .where(
-            or_(
-                (Transaction.from_account_id == account_id),
-                (Transaction.to_account_id == account_id)
-            )
-        )
-        .order_by(Transaction.created_at.desc())
-        .offset(skip)
-        .limit(limit)
+    
+    return await account_repository.get_transactions(
+        db,
+        account_id,
+        skip=skip,
+        limit=limit
     )
-
-    return txn_query.scalars().all()
 
 
 # DELETE ACCOUNT
 async def delete_account(
-    db: AsyncSession,
-    current_user: User,
-    account_id: int,
-):
-    try:
-        result = await db.execute(
-            select(Account)
-            .where(Account.id == account_id)
-            .with_for_update()
-        )
-        acc = result.scalar_one_or_none()
+        db: AsyncSession,
+        current_user: User,
+        account_id: int,
+    ):
 
-        if not acc:
+    try:
+
+        account = await account_repository.get_account(
+            db,
+            account_id,
+        )
+
+        if not account:
 
             logger.info(
                 "Account not found (account_id=%s)", 
-                account_id
+                account_id,
             )
             raise AccountNotFoundError()
 
         # Check ownership AFTER loading the account
         if (
             current_user.role != UserRole.ADMIN 
-            and acc.user_id != current_user.id
+            and account.user_id != current_user.id
         ):
             logger.warning(
                 "Account close failed: user %s is not allowed to close account %s",
@@ -414,7 +421,7 @@ async def delete_account(
             )
             raise PermissionDeniedError()
 
-        if acc.status == AccountStatus.CLOSED:
+        if account.status == AccountStatus.CLOSED:
 
             logger.warning(
                 "Account already closed (account_id=%s)", 
@@ -422,25 +429,27 @@ async def delete_account(
             )
             raise AccountAlreadyClosedError()
 
-        if acc.balance != 0:
+        if account.balance != 0:
 
             logger.warning(
                 "Account close failed: account_id=%s has non-zero balance (%s)",
                 account_id,
-                acc.balance,
+                account.balance,
             )
             raise NonZeroBalanceError()
 
-        acc.status = AccountStatus.CLOSED
+        account.status = AccountStatus.CLOSED
+
         await db.commit()
-        await db.refresh(acc)
+        await db.refresh(account)
 
         logger.info(
             "Account Close successfully (acc_id=%s)",
-            acc.id
+            account.id
         )
-        return acc
 
+        return account
+    
     except (
         AccountNotFoundError,
         PermissionDeniedError,

@@ -13,7 +13,7 @@ class UserStatus(str, Enum):
 class AccountStatus(str, Enum):
 
     ACTIVE = "ACTIVE"
-    CLOSE = "CLOSE"
+    CLOSED = "CLOSED"
 
 class PaymentStatus(str, Enum):
 

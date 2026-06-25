@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Enum, Numeric, ForeignKey, DateTime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import datetime
-from app.core import UserStatus
+from app.core import AccountStatus
 
 from app.db import Base 
 
@@ -30,12 +30,13 @@ class Account (Base):
         index=True
     )
 
-    status: Mapped[UserStatus] = mapped_column(
-        Enum(UserStatus),
-        default=UserStatus.ACTIVE,
+    status: Mapped[AccountStatus] = mapped_column(
+        Enum(AccountStatus),
+        default=AccountStatus.ACTIVE,
         nullable=False,
         index=True
     )
+
     created_at: Mapped[datetime] = mapped_column(
         DateTime, 
         default=datetime.utcnow,

@@ -1,28 +1,26 @@
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
-from app.db.models import User, Account
-from app.core import UserRole
+import os
 
-import os 
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.core import UserRole, hash_password
+from app.db.models import User
+from app.repository import admin_repository
 
 from dotenv import load_dotenv
 
 load_dotenv()
 
-from app.core import (
-    hash_password, 
-)
-
 async def get_all_users(
-        db: AsyncSession ,
+        db: AsyncSession,
+        skip:int,
+        limit: int
     ):
-    
-    result = await db.execute(
-        select(User)
+
+    return await admin_repository.get_all_users(
+        db,
+        skip=skip,
+        limit=limit
     )
-
-    return result.scalars().all()
-
 
 async def get_all_accounts(
         db: AsyncSession,
@@ -30,34 +28,26 @@ async def get_all_accounts(
         limit: int = 100,
     ):
 
-    result = await db.execute(
-        select(Account)
-        .order_by(Account.created_at.desc())
-        .offset(skip)
-        .limit(limit)
+    accounts = await admin_repository.get_all_accounts(
+        db,
+        skip=skip,
+        limit=limit
     )
 
-    accounts = result.scalars().all()
+    return {
+        "data": accounts,
+        "pagination": {
+            "skip": skip,
+            "limit": limit
+        }
+    }
 
-    return accounts
-
-
-async def create_admin (
-        db: AsyncSession,
-    ):
+async def create_admin (db: AsyncSession,):
 
     ADMIN_USERNAME = os.getenv("ADMIN_USERNAME")
     ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
 
-    if not ADMIN_USERNAME or not ADMIN_PASSWORD:
-        return 
-    
-    result = await db.execute(
-        select(User)
-        .where(User.username == ADMIN_USERNAME)
-    )
-
-    existing_admin = result.scalar_one_or_none()
+    existing_admin = await admin_repository.create_admin(db)
 
     if existing_admin:
         return

@@ -3,7 +3,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from datetime import datetime
 
-from app.core import UserStatus
+from app.core import PaymentStatus
 from app.db import Base
 
 class Transaction(Base):
@@ -24,9 +24,8 @@ class Transaction(Base):
         index=True
     )
 
-    status: Mapped[UserStatus] = mapped_column(
-        Enum(UserStatus), 
-        default=UserStatus.ACTIVE,
+    status: Mapped[PaymentStatus] = mapped_column(
+        Enum(PaymentStatus),
         nullable=False,
     )
 
