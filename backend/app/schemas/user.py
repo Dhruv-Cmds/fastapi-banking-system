@@ -6,12 +6,12 @@ from app.core import UserRole, UserStatus
 
 class UserBase(BaseModel):
 
-    username: UsernameStr = Field(..., example="jdoe")
-    name: NameStr = Field(..., example="John Doe")
+    username: UsernameStr = Field(..., examples=["jdoe"])
+    name: NameStr = Field(..., examples=["John Doe"])
 
 class UserCreate(UserBase):
 
-    password: passwordStr = Field(..., example="strongPass123")
+    password: passwordStr = Field(..., examples=["strongPass123"])
 
 class UserResponse(UserBase):
     

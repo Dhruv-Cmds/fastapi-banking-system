@@ -64,8 +64,6 @@ async def create_admin (db: AsyncSession,):
 
         await db.commit()
 
-        print(f"✅ Admin user created: {ADMIN_USERNAME}")
-
     except Exception:
         await db.rollback()
         raise

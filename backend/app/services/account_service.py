@@ -13,7 +13,6 @@ from app.core import (
     logger,
 
     UserRole,
-    UserStatus,
     AccountStatus,
     PaymentStatus,
 
@@ -230,7 +229,7 @@ async def withdraw(
 
     except SQLAlchemyError:
         await db.rollback()
-        raise DatabaseError("Withdrawal operation")
+        raise DatabaseError()
 
 
 # TRANSFER
@@ -267,7 +266,7 @@ async def transfer(
         to_acc = next(
             (
                 account for account in accounts
-                if account.acc_no == data.to_account_no
+                if account.id == data.to_account_id
             ),
             None
         )
@@ -336,11 +335,12 @@ async def transfer(
 
         await db.commit()
 
-        return (
-            from_acc.id,
-            to_acc.acc_no,
-            data.amount
-        )
+        return {
+            "from_account_id": from_acc.id,
+            "to_account_id": to_acc.id,
+            "amount": data.amount,
+            "message": "Transfer successful"
+        }
 
     except (
         TransferLimitExceededError,
@@ -462,4 +462,4 @@ async def delete_account(
     except SQLAlchemyError:
         await db.rollback()
         logger.exception("Database error while closing account_id=%s", account_id)
-        raise DatabaseError("Account deletion")
+        raise DatabaseError()

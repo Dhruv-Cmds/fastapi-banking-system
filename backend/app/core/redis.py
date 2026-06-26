@@ -1,7 +1,5 @@
 import redis.asyncio as redis
-
 import os 
-
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -12,4 +10,3 @@ redis_client = redis.Redis(
     db=os.getenv("REDIS_DB") or 0,
     decode_responses=True
 )
-    

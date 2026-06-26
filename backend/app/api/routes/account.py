@@ -8,6 +8,7 @@ from app.api import get_db, get_current_user
 from app.schemas import (
     AccountCreate,
     Transfer,
+    TransferRequest,
     AccountResponse,
     TransactionListResponse,
 )
@@ -95,7 +96,7 @@ async def withdraw(
 # TRANSFER
 @router.post(
     "/transfer/{acc_no}",
-    response_model=Transfer,
+    response_model=TransferRequest,
     summary="Transfer funds between accounts",
     description=(
         "Transfer funds from one owned account to another active account. "
