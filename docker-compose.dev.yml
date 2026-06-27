@@ -1,8 +1,0 @@
-services:
-  mysql:
-    volumes:
-      - mysql-data:/var/lib/mysql
-      - ./mysql/init:/docker-entrypoint-initdb.d:Z
-
-volumes:
-  mysql-data:

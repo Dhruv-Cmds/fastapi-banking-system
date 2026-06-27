@@ -14,7 +14,7 @@ services:
       - "host.docker.internal:host-gateway"
     restart: always
     networks:
-      - shared-net
+      - shared-network
 
   banking-frontend:
     container_name: banking-frontend
@@ -30,9 +30,8 @@ services:
       - banking-api
     restart: always
     networks:
-      - shared-net
+      - shared-network
 
 networks:
-  shared-net:
+  shared-network:
     external: true
-    name: shared-net
