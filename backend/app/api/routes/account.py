@@ -7,6 +7,7 @@ from app.api import get_db, get_current_user
 
 from app.schemas import (
     AccountCreate,
+    MoneyRequest,
     Transfer,
     TransferRequest,
     AccountResponse,
@@ -66,12 +67,12 @@ async def get_accounts(
 async def deposit(
         request: Request,
         account_id: int,
-        amount: Decimal,
+        deposite: MoneyRequest,
         db: AsyncSession=Depends(get_db),
         current_user=Depends(get_current_user)
     ):
 
-    return await account_service.deposit(db, account_id, amount, current_user)
+    return await account_service.deposit(db, account_id, deposite.amount, current_user)
 
 
 # WITHDRAW
@@ -85,12 +86,12 @@ async def deposit(
 async def withdraw(
         request: Request,
         account_id: int,
-        amount: Decimal,
+        withdraw: MoneyRequest,
         db: AsyncSession=Depends(get_db),
         current_user=Depends(get_current_user)
     ):
 
-    return await account_service.withdraw(db, account_id, amount, current_user)
+    return await account_service.withdraw(db, account_id, withdraw.amount, current_user)
 
 
 # TRANSFER

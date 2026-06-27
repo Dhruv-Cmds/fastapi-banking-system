@@ -66,6 +66,10 @@ class AccountResponse(BaseModel):
         "from_attributes":True,
     }
 
+#  common for withdraw and deposit
+class MoneyRequest(BaseModel):
+    amount: Decimal
+
 class AccountListResponse(BaseModel):
     data: List[AccountResponse]
     pagination: PaginationMeta
