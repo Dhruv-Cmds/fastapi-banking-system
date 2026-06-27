@@ -96,7 +96,7 @@ async def withdraw(
 
 # TRANSFER
 @router.post(
-    "/transfer/{acc_no}",
+    "/transfer",
     response_model=TransferRequest,
     summary="Transfer funds between accounts",
     description=(

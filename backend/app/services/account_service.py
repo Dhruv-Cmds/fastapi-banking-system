@@ -121,8 +121,8 @@ async def deposit(
             status=PaymentStatus.SUCCESS
         ))
 
-        await db.commit()
         await db.flush()
+        await db.commit()
 
         logger.warning(
             "Amount=%s deposit successfully",
@@ -266,7 +266,7 @@ async def transfer(
         to_acc = next(
             (
                 account for account in accounts
-                if account.id == data.to_account_id
+                if account.id == data.to_account_no
             ),
             None
         )
@@ -337,7 +337,7 @@ async def transfer(
 
         return {
             "from_account_id": from_acc.id,
-            "to_account_id": to_acc.id,
+            "to_account_no": to_acc.acc_no,
             "amount": data.amount,
             "message": "Transfer successful"
         }

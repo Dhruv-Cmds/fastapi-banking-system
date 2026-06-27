@@ -24,7 +24,7 @@ class AccountCreate(BaseModel):
 
 class Transfer(BaseModel):
     from_account_id: int = Field(..., gt=0, examples=[1])
-    to_account_id: int = Field(..., gt=0, examples=[2])
+    to_account_no: int = Field(..., gt=0, examples=[2])
     amount: Decimal = Field(
         ..., 
         gt=0, 
@@ -40,7 +40,7 @@ class Transfer(BaseModel):
 
 class TransferRequest(BaseModel):
     from_account_id: int = Field(..., gt=0, examples=[1])
-    to_account_id: int = Field(..., gt=0, examples=[2])
+    to_account_no: int = Field(..., gt=0, examples=[2])
     amount: Decimal = Field(
         ..., 
         gt=0, 
