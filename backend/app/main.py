@@ -42,10 +42,12 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="FastAPI Banking System",
     description=(
-        "Secure banking API for user signup/login, account management, "
-        "deposits, withdrawals, transfers, and transaction history. "
-        "Use the /api/login endpoint to obtain a JWT access token and "
-        "authorize protected endpoints with the Bearer token."
+        "A secure RESTful banking API for managing users and financial accounts. "
+        "Features include user registration and authentication, account creation, "
+        "deposits, withdrawals, fund transfers, and transaction history. "
+        "Protected endpoints require JWT authentication. Obtain an access token "
+        "from the `/api/login` endpoint and include it in the `Authorization` "
+        "header using the Bearer authentication scheme."
     ),
     version="1.0.0",
 
@@ -54,22 +56,22 @@ app = FastAPI(
     # openapi_url=None,
 
     lifespan=lifespan,
-    openapi_tags=[
+    openapi_tags = [
         {
-            "name": "Authentication", 
-            "description": "Signup, login, and profile management."
+            "name": "Authentication",
+            "description": "User authentication, registration, profile management, and access control."
         },
         {
-            "name": "Accounts", 
-            "description": "Create accounts, deposit, withdraw, transfer, and view transactions."
+            "name": "Accounts",
+            "description": "Manage bank accounts, including creation, deposits, withdrawals, fund transfers, and transaction history."
         },
         {
-            "name": "Admin", 
-            "description": "Administrative endpoints for admin users."
+            "name": "Admin",
+            "description": "Administrative operations for managing users, accounts, and system resources."
         },
         {
-            "name": "Health", 
-            "description": "Service health checks and diagnostics."
+            "name": "Health",
+            "description": "Health checks, service status, and diagnostic endpoints for monitoring system availability."
         }
     ]
 )

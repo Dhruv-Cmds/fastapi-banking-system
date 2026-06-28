@@ -8,21 +8,23 @@ The project includes a **React + Vite frontend dashboard** for testing and inter
 
 # 🚀 Features
 
-* 🔐 JWT Authentication
-* 🛡️ Role-Based Access Control
-* ⚡ Async FastAPI + Async SQLAlchemy
-* 🐳 Dockerized Backend, Frontend & Database
-* 🏦 Account Management
-* 💸 Deposit, Withdraw & Transfer System
-* 🧾 Transaction Ledger
-* 👑 Admin Management
-* ❤️ Health Monitoring Endpoint
-* 🧪 Full Async Pytest Suite
-* 📈 k6 Load Testing & Benchmarking
-* 🌐 VPS Production Deployment
-* 🔒 HTTPS + Nginx Reverse Proxy
-* 🚦 Rate Limiting using SlowAPI
-* 🚀 GitHub Actions CI/CD
+*  JWT Authentication
+*  Role-Based Access Control
+*  Async FastAPI + Async SQLAlchemy
+*  Dockerized Backend & Frontend
+*  Shared MySQL & Redis Infrastructure
+*  Redis Caching
+*  Account Management
+*  Deposit, Withdraw & Transfer System
+*  Transaction Ledger
+*  Admin Management
+*  Health Monitoring Endpoint
+*  Full Async Pytest Suite
+*  k6 Load Testing & Benchmarking
+*  VPS Production Deployment
+*  HTTPS + Nginx Reverse Proxy
+*  Rate Limiting using SlowAPI
+*  GitHub Actions CI/CD
 
 ---
 
@@ -40,6 +42,8 @@ https://bank.dhruvcore.com/
 
 ![Login Preview](screenshots/login.gif)
 
+![Swagger UI](screenshots/swagger_ui.png)
+
 ---
 
 # 🏗️ Tech Stack
@@ -48,6 +52,7 @@ https://bank.dhruvcore.com/
 | ---------------- | ----------------------- |
 | Backend          | FastAPI                 |
 | Database         | MySQL                   |
+| Cache            | Redis                   |
 | ORM              | SQLAlchemy 2.x Async    |
 | Async Driver     | aiomysql                |
 | Frontend         | React + Vite            |
@@ -91,13 +96,29 @@ A frontend dashboard is included using:
 * Layered service architecture
 * Async-first backend design
 * Config-driven business rules
-* Dockerized multi-service environment
+* Shared Docker infrastructure
+* Redis-backed caching layer
 * CI tested with GitHub Actions
 * Nginx reverse proxy deployment
 * Production-ready VPS infrastructure
 * JWT + RBAC secured architecture
 
 ---
+
+# 🏗️ Development Modes
+
+This project supports two Docker workflows.
+
+### Shared Infrastructure (Recommended)
+
+Uses the separate `docker-infra` repository to provide shared MySQL and Redis services for multiple projects.
+
+### Standalone Docker
+
+Uses `docker-compose.oss.yml` to run MySQL, Redis, the API, and the frontend from this repository only.
+
+---
+
 
 # 🧠 Core Modules
 
@@ -188,12 +209,9 @@ Every transaction is recorded for:
 │   │   ├── tests/                          # Test placeholders
 │   │   ├── websocket/                      # Realtime event and handler placeholders
 │   │   │
-│   │   ├── docker-compose.dev.yml          # Api Container (for SELinux/Fedora etc...)
-│   │   ├── docker-compose.yml              # Api Container
 │   │   ├── lifespan.py
 │   │   └── main.py
 │   │
-│   ├──.env.example
 │   └── requirements.txt
 │
 ├── db_quires/                              # Database setup tables creation and permissions 
@@ -204,7 +222,8 @@ Every transaction is recorded for:
 ├── nginx/                                  # Nginx placeholder
 ├── scripts/                                # Utility script
 │
-├── docker-compose.dev.yml                  # Api Container (for SELinux/Fedora etc...)
+├──.env.example
+├── docker-compose.oss.yml                  # Whole project Container
 ├── docker-compose.yml                      # Api Container
 ├── LICENSE
 ├── progress.md
@@ -215,66 +234,102 @@ Every transaction is recorded for:
 
 # ⚙️ Environment Variables
 
-## 🐳 Docker Environment
+## 🏗️ Shared Infrastructure (Recommended)
+
+Use this configuration if you're running the separate `docker-infra` repository.
 
 ```env
-COMPOSE_PROJECT_NAME=banking-app
-
 ENV=docker
 
-DB_USER=banking_user
-DB_NAME=banking
-DB_PASSWORD=banking_password
+DB_HOST=shared-mysql
 DB_PORT=3306
-DB_HOST=mysql-shared
-TEST_DB_NAME=banking_test
+DB_NAME=banking
+DB_USER=banking_user
+DB_PASSWORD=banking_password
 
-MYSQL_ROOT_PASSWORD=CHANGE_ME
-
-REDIS_HOST=redis-shared
+REDIS_HOST=shared-redis
 REDIS_PORT=6379
 REDIS_DB=0
 
 ADMIN_USERNAME=admin
-ADMIN_PASSWORD=adminpassword88367
+ADMIN_PASSWORD=change_me
 
-SECRET_KEY=mysecretkey
+SECRET_KEY=change_me
 ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=30
 ```
 
-## 💻 Local Development
+> Requires the `docker-infra` repository to be running.
+
+---
+
+## 🐳 Standalone Docker (Open Source)
+
+Use this configuration when running the project with `docker-compose.oss.yml`.
+
+```env
+ENV=docker
+
+DB_HOST=mysql
+DB_PORT=3306
+DB_NAME=banking
+DB_USER=banking_user
+DB_PASSWORD=banking_password
+
+REDIS_HOST=redis
+REDIS_PORT=6379
+REDIS_DB=0
+
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=change_me
+
+SECRET_KEY=change_me
+ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+```
+
+> Works without the `docker-infra` repository.
+
+## 💻 Local Development (Without Docker)
 
 ```env
 ENV=dev
 
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_NAME=banking
 DB_USER=banking_user
 DB_PASSWORD=your_password
 
-DB_HOST=127.0.0.1
-DB_PORT=3008
-
-DB_NAME=banking
+REDIS_HOST=127.0.0.1
+REDIS_PORT=6379
+REDIS_DB=0
 
 SECRET_KEY=your_secret_key
 ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=30
 ```
 
-## 🧪 Testing Environment
+---
+
+## 🧪 Testing
 
 ```env
 ENV=test
 
+DB_HOST=127.0.0.1
+DB_PORT=3306
+
+DB_NAME=banking_test
 DB_USER=banking_user
 DB_PASSWORD=your_password
 
-DB_HOST=127.0.0.1
-DB_PORT=3008
-
-TEST_DB_NAME=banking_test
+REDIS_HOST=127.0.0.1
+REDIS_PORT=6379
+REDIS_DB=1
 
 SECRET_KEY=your_secret_key
+ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=30
 ```
 
@@ -309,7 +364,7 @@ pip install -r requirements.txt
 ## Run Backend
 
 ```bash
-uvicorn backend.main:app --reload --port 8000
+uvicorn app.main:app --reload --port 8000
 ```
 
 Swagger Docs:
@@ -378,7 +433,8 @@ This project is deployed on a Linux VPS using Docker, Nginx, HTTPS, GitHub Actio
 * Ubuntu 24.04
 * Dockerized FastAPI backend
 * Dockerized React frontend
-* Dockerized MySQL database
+* Shared Docker MySQL
+* Shared Docker Redis
 * Nginx reverse proxy
 * HTTPS enabled with Certbot + Let's Encrypt
 * GitHub Actions CI/CD
@@ -401,8 +457,11 @@ This project is deployed on a Linux VPS using Docker, Nginx, HTTPS, GitHub Actio
 
 ### Database
 
+* Database & Cache
+
 * MySQL 8
-* Dedicated Docker container
+* Redis 7
+* Shared infrastructure
 * Persistent Docker volumes
 
 ## Production Security
@@ -437,55 +496,87 @@ docker compose up --build -d
 
 # 🐳 Docker Setup
 
-## Build shared containers
+## Option 1: Shared Infrastructure (Recommended)
+
+Start the shared services first:
+
 ```bash
-docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+cd docker-infra
+docker compose up -d
 ```
-OR
+
+Then start the application:
 
 ```bash
-docker compose up --build (if not on SELinux or Fedora)
+cd fastapi-banking-system
+docker compose up --build
 ```
 
-### Build api containers
+This setup uses the shared MySQL and Redis containers.
 
-````bash
-cd backend/app
+---
 
-docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
-````
+## Option 2: Standalone Docker (Open Source)
 
-OR
+If you don't want to use the shared infrastructure repository, run:
+
 ```bash
-docker compose up --build (if not on SELinux or Fedora)
-````
+docker compose -f docker-compose.oss.yml up --build
+```
+
+This starts:
+
+* MySQL
+* Redis
+* Banking API
+* Banking Frontend
+
+Everything runs from a single repository.
+
+---
 
 ## Reset Database
 
+### Shared Infrastructure
+
 ```bash
-docker-compose down -v
+cd docker-infra
+docker compose down -v
 ```
 
-## Running Tests Inside Docker
+> This removes **all shared MySQL and Redis data** used by every project.
 
-When running tests inside the `banking-api` container, Docker networking is used automatically.
+### Standalone Docker
 
-The test suite switches to:
+```bash
+docker compose -f docker-compose.oss.yml down -v
+```
+
+> This removes only this project's database and Redis data.
+
+---
+
+## Running Tests
+
+### Shared Infrastructure
+
+Tests connect to:
 
 ```text
-banking-db:3306
+shared-mysql:3306
+shared-redis:6379
 ```
 
-instead of:
+### Standalone Docker
+
+Tests connect to:
 
 ```text
-127.0.0.1:3008
+mysql:3306
+redis:6379
 ```
 
-This allows the same test suite to work both:
-
-* locally on the host machine
-* inside Docker containers
+The application selects the correct host based on the environment configuration.
 
 ---
 
@@ -493,16 +584,19 @@ This allows the same test suite to work both:
 
 ## Run Tests
 
-### Local Machine
+### Local Development
+
+Run the test suite from the project root:
 
 ```bash
-$env:PYTHONPATH="."
-$env:ENV="test"
+export ENV=test
 
 python -m pytest -v
 ```
 
-### Inside Docker Container
+---
+
+### Inside Docker (Shared Infrastructure)
 
 ```bash
 docker exec -it banking-api bash
@@ -510,6 +604,30 @@ docker exec -it banking-api bash
 export ENV=docker
 
 python -m pytest -v
+```
+
+The tests will connect to:
+
+```text
+shared-mysql:3306
+```
+
+---
+
+### Inside Docker (Standalone)
+
+```bash
+docker compose -f docker-compose.oss.yml exec banking-api bash
+
+export ENV=docker
+
+python -m pytest -v
+```
+
+The tests will connect to:
+
+```text
+mysql:3306
 ```
 
 ## Test Coverage Includes
@@ -556,6 +674,12 @@ The API was stress-tested using **k6** against production-style environments:
 
 ```bash
 k6 / load_test.js
+```
+
+## Run Full Test
+
+```bash
+k6/ full_test.js
 ```
 
 ---
@@ -649,6 +773,7 @@ At aggressive loads beyond 500 concurrent VUs:
 * Docker networking fixes
 * Removed SQLite fallback
 * MySQL-only architecture
+* Redis caching enabled
 * HTTPS production deployment
 * Nginx reverse proxy
 * JWT authentication
@@ -691,7 +816,6 @@ Stable behavior observed around ~300 concurrent users.
 
 # 🚀 Future Improvements
 
-* Add Redis caching
 * Increase worker processes
 * Add background task queues
 * Implement load balancing
@@ -722,7 +846,8 @@ Stable behavior observed around ~300 concurrent users.
 # ⚠️ Limitations
 
 * Single instance deployment
-* No Redis caching layer
+* Single Redis instance
+* No Redis Sentinel/Cluster
 * Performance constrained by MySQL connection pool
 * No horizontal scaling yet
 

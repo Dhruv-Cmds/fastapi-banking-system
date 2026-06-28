@@ -266,7 +266,7 @@ async def transfer(
         to_acc = next(
             (
                 account for account in accounts
-                if account.id == data.to_account_no
+                if account.acc_no == data.to_account_no
             ),
             None
         )

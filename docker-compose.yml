@@ -2,14 +2,14 @@ services:
   banking-api:
     container_name: banking-api
     build:
-      context: ../..
+      context: .
       dockerfile: docker/backend.Dockerfile
     ports:
       - "8000:8000"
     volumes:
-      - ../..:/app
+      - .:/app:Z
     env_file:
-      - ../.env
+      - ./.env
     extra_hosts:
       - "host.docker.internal:host-gateway"
     restart: always
@@ -19,12 +19,12 @@ services:
   banking-frontend:
     container_name: banking-frontend
     build:
-      context: ../../frontend
+      context: ./frontend
       dockerfile: Dockerfile
     ports:
       - "5173:5173"
     volumes:
-      - ../../frontend:/app:Z
+      - ./frontend:/app:Z
       - /app/node_modules
     depends_on:
       - banking-api
