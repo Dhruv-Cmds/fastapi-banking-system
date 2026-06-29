@@ -8,6 +8,7 @@ from .account import (
     AccountResponse, 
     AccountListResponse,
     TransactionResponse, 
-    TransactionListResponse
+    TransactionListResponse,
+    Balance
 )
 from .common import UsernameStr, NameStr, passwordStr   

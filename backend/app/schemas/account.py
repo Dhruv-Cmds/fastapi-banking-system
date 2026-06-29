@@ -20,6 +20,11 @@ class AccountCreate(BaseModel):
         default=0, 
         examples=[0], 
     )
+    pin: str = Field(
+        ...,
+        min_length=4,
+        max_length=4
+    )
 
 
 class Transfer(BaseModel):
@@ -90,3 +95,13 @@ class TransactionResponse(BaseModel):
 class TransactionListResponse(BaseModel):
     data: List[TransactionResponse]
     pagination: PaginationMeta
+
+
+class Balance(BaseModel):
+    acc_no: int = Field(..., gt=0, examples=[1001])
+    balance: Decimal = Field(..., examples=[6999.34])
+    user_id: int = Field(..., examples=[1])
+
+    model_config = {
+        "from_attributes":True
+    }

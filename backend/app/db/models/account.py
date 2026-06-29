@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Enum, Numeric, ForeignKey, DateTime
+from sqlalchemy import Column, Enum, String, Numeric, ForeignKey, DateTime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import datetime
 from app.core import AccountStatus
@@ -20,6 +20,11 @@ class Account (Base):
         unique=True, 
         nullable=False,
         index=True
+    )
+    
+    pin: Mapped[str] = mapped_column(
+        String(60),
+        nullable=False
     )
     
     balance = Column(Numeric(10,2), default=0)

@@ -1,44 +1,36 @@
-import sys
-from pathlib import Path
-
-sys.path.append(
-    str(Path(__file__).resolve().parent.parent)
-)
-
-from dotenv import load_dotenv
 import os
 import asyncio
-from urllib.parse import quote_plus
+from pathlib import Path
 import platform
-
-from sqlalchemy.ext.asyncio import (
-    create_async_engine,
-    AsyncSession
-)
-
-from sqlalchemy.orm import sessionmaker
-
-from backend.app.db import Base
-from backend.app.api import get_db
-from backend.app.main import app
+import sys
+from urllib.parse import quote_plus
 
 import pytest_asyncio
+from dotenv import load_dotenv
+from httpx import AsyncClient, ASGITransport
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.orm import sessionmaker
 
-from httpx import (
-    AsyncClient,
-    ASGITransport
-)
+
+TESTS_DIR = Path(__file__).resolve().parent
+BACKEND_DIR = TESTS_DIR.parent.parent
+PROJECT_ROOT = BACKEND_DIR.parent
+
+sys.path.insert(0, str(BACKEND_DIR))
 
 
 # ===== LOAD ENV =====
-env_path = (
-    Path(__file__).resolve().parent.parent.parent
-    / "docker"
-    / ".env"
-)
+env_path = PROJECT_ROOT / ".env"
+
+os.environ.setdefault("ENV", "test")
 
 if os.getenv("GITHUB_ACTIONS") != "true":
     load_dotenv(env_path)
+
+
+from app.db import Base
+from app.api import get_db
+from app.main import app
 
 
 # ⚠️ keep this for Windows stability
@@ -60,7 +52,7 @@ ENV = os.getenv("ENV")
 
 if ENV == "docker":
 
-    DB_HOST = "banking-db"
+    DB_HOST = "shared-mysql"
     DB_PORT = "3306"
 
 else:

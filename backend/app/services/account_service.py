@@ -1,14 +1,22 @@
+import json
+
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 
 from app.db.models import Account, Transaction, User
-from app.schemas import AccountCreate,Transfer
+from app.schemas import AccountCreate,Transfer, Balance
 from app.repository import account_repository
 from app.core import (
 
     MAX_DEPOSIT, 
     MAX_WITHDRAW, 
     MAX_TRANSFER,
+
+    hash_password,
+
+    verify_pin,
+    
+    redis_client,
 
     logger,
 
@@ -28,6 +36,7 @@ from app.core import (
     NonZeroBalanceError,
     DatabaseError,
     PermissionDeniedError,
+    InvalidAccountCredentialsError,
 )
 
 # CREATE
@@ -40,7 +49,8 @@ async def create_account(
     new_acc = Account(
         acc_no=account.acc_no,
         balance=0,
-        user_id=current_user.id
+        user_id=current_user.id,
+        pin=hash_password(account.pin)
     )
 
     try:
@@ -59,8 +69,9 @@ async def create_account(
         await db.rollback()
         raise AccountAlreadyExistsError()
 
-    except SQLAlchemyError:
+    except SQLAlchemyError as e:
         await db.rollback()
+        logger.error("SQLAlchemy error during create_account: %s", str(e)) 
         raise DatabaseError()
 
 
@@ -463,3 +474,70 @@ async def delete_account(
         await db.rollback()
         logger.exception("Database error while closing account_id=%s", account_id)
         raise DatabaseError()
+
+async def get_account_balance(
+        db: AsyncSession, 
+        account_number:int, 
+        pin:str, 
+        current_user:User
+    ):
+
+    cache_key = f"get_balance_by_acc_num:{account_number}"
+
+    cached = await redis_client.get(cache_key)
+
+    if cached:
+
+        logger.info(
+            "Balance retrieved from Redis (account_number=%s)", 
+            account_number
+        )
+        return Balance.model_validate_json(cached)
+
+    account = await account_repository.get_account_by_acc_no(db, account_number)
+
+    if not account:
+
+        logger.warning(
+            "invalid account number or pin (account_number=%s)", 
+            account_number
+        )
+        raise InvalidAccountCredentialsError()
+
+    if (
+        current_user.role != UserRole.ADMIN
+        and account.user_id != current_user.id
+    ):
+        logger.warning(
+            "Permission denied (user_id=%s) (acc_no=%s)",
+            current_user.id,
+            account_number
+        )
+        raise PermissionDeniedError()
+
+    if not verify_pin(pin, account.pin):
+
+        logger.warning(
+            "Invalid pin (account_number=%s)", 
+            account_number
+        )
+        raise InvalidAccountCredentialsError()
+
+    response = Balance.model_validate(
+        account, 
+        from_attributes=True # no need if you have this in schema
+    )
+
+    try:
+        await redis_client.set(
+            cache_key, 
+            response.model_dump_json(), 
+            ex=900 # 15 min
+        )
+    except Exception as e:
+
+        logger.warning(
+            "Redis cache set failed, continuing without cache: %s", 
+            str(e)
+        )
+    return response

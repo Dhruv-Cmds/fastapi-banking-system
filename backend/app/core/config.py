@@ -4,9 +4,8 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-BASE_DIR = Path(__file__).resolve().parent.parent.parent
-
-load_dotenv(BASE_DIR / "docker" / ".env")
+ROOT_DIR = Path(__file__).resolve().parent.parent.parent.parent
+load_dotenv(ROOT_DIR / ".env")
 
 ENV = os.getenv("ENV", "dev")
 

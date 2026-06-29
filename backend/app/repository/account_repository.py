@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import Account, Transaction, User
 from app.schemas import Transfer
-
+from app.core import verify_password
 async def get_accounts_by_user_id(
         db: AsyncSession, 
         user_id: int
@@ -47,6 +47,17 @@ async def get_account(
     )
     return result.scalar_one_or_none()
 
+async def get_account_by_acc_no(
+        db: AsyncSession, 
+        account_number: int, 
+    ):
+    
+    result = await db.execute(
+        select(Account)
+        .where(Account.acc_no == account_number)
+        .with_for_update()
+    )
+    return result.scalar_one_or_none()
 
 async def get_accounts_for_transfer(
         db: AsyncSession, 

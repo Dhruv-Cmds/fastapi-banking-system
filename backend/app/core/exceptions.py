@@ -49,6 +49,16 @@ class InvalidCredentialsError(BankingAPIException):
         )
 
 
+class InvalidAccountCredentialsError(BankingAPIException):
+    """Raised when login credentials are invalid"""
+    def __init__(self, message: str = "Invalid account number or pin"):
+        super().__init__(
+            error_code="INVALID_CREDENTIALS",
+            message=message,
+            status_code=status.HTTP_401_UNAUTHORIZED
+        )
+
+
 class TokenExpiredError(BankingAPIException):
     """Raised when JWT token has expired"""
     def __init__(self, message: str = "Token has expired"):

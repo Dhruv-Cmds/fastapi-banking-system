@@ -13,8 +13,14 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 def hash_password(password: str):
     return pwd_context.hash(password)
 
-
 def verify_password(plain, hashed):
+    return pwd_context.verify(plain, hashed)
+
+
+def hash_pin(pin: str):
+    return pwd_context.hash(pin)
+
+def verify_pin(plain, hashed):
     return pwd_context.verify(plain, hashed)
 
 

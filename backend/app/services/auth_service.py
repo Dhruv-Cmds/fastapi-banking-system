@@ -40,6 +40,8 @@ async def login(
                 username
             )
 
+            raise InvalidCredentialsError()
+
         if not verify_password(password, user.password):
 
             logger.warning(

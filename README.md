@@ -260,7 +260,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES=30
 ```
 
 > Requires the `docker-infra` repository to be running.
-
+**repo**: https://github.com/Dhruv-Cmds/docker-infra
 ---
 
 ## 🐳 Standalone Docker (Open Source)
@@ -289,6 +289,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES=30
 ```
 
 > Works without the `docker-infra` repository.
+**repo**: https://github.com/Dhruv-Cmds/docker-infra
 
 ## 💻 Local Development (Without Docker)
 

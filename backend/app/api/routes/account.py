@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends, Request, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
-from decimal import Decimal
 
 from app.api import get_db, get_current_user
 
@@ -11,6 +10,7 @@ from app.schemas import (
     Transfer,
     TransferRequest,
     AccountResponse,
+    Balance,
     TransactionListResponse,
 )
 
@@ -146,6 +146,31 @@ async def get_transactions(
         }
     }
     
+
+# SHOW ACCOUNT BALANCE
+@router.post(
+    "/accounts/{account_number}",
+    response_model=Balance,
+    summary="Check Account balance",
+    description=(
+        "Only authenticated user can see only their account(s) balance"
+    )
+)
+@limiter.limit("1/10second")
+async def get_account_balance(
+        request: Request,
+        account_number: int, 
+        pin: str,  
+        db: AsyncSession=Depends(get_db),
+        current_user=Depends(get_current_user)
+    ):
+
+    return await account_service.get_account_balance(
+        db,
+        account_number,
+        pin,
+        current_user
+    )
 
 # DELETE (CLOSE ACCOUNT)
 @router.delete(
