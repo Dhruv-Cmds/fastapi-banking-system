@@ -330,6 +330,35 @@ Examples include:
 
 ---
 
+# Caching Strategy
+
+The application implements the Cache-Aside pattern.
+
+```text
+                Client
+                   │
+                   ▼
+                FastAPI
+                   │
+                   ▼
+            Check Redis Cache
+             │            │
+         Cache Hit    Cache Miss
+             │            │
+             ▼            ▼
+        Return Data    Query MySQL
+                           │
+                           ▼
+                    Store in Redis
+                           │
+                           ▼
+                      Return Data
+```
+
+After updates or deletions, cached entries are refreshed or invalidated to ensure consistency.
+
+---
+
 # Future Improvements
 
 The architecture is designed to support future enhancements, including:

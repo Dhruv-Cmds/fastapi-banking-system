@@ -126,11 +126,11 @@ MySQL + Redis)
 │   │
 │   └── requirements.txt
 │
-├── db_queries/                              # Database setup tables creation and permissions 
+├── db_queries/                             # Database setup tables creation and permissions 
 ├── docker/                                 # Dockerfiles   
 ├── docs/                                   # Documentaion about project   
 ├── frontend/                               # Frontend
-├── images/                                  # Image about project 
+├── images/                                 # Image about project 
 ├── k6/                                     # Load test
 ├── nginx/                                  # Nginx placeholder
 ├── scripts/                                # Utility script
@@ -159,7 +159,7 @@ Installation
 ## Clone repository
 
 ```bash
-git clone https://github.com/yourname/fastapi-banking-system.git
+git clone https://github.com/Dhruv-Cmds/fastapi-banking-system.git
 
 cd fastapi-banking-system
 ```
@@ -302,3 +302,5 @@ Detailed documentation is available in the `docs/` directory.
 # 📌 License
 
 This project is intended for educational and portfolio purposes.
+
+See LICENSE for details.the [LICENSE](LICENSE) file for details.

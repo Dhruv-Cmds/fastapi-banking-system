@@ -37,30 +37,36 @@ Every protected request passes through authentication, authorization, and busine
 
 ---
 
-# Authentication
+## Authentication Flow
 
 The API uses **JSON Web Tokens (JWT)** for stateless authentication.
 
-Features include:
+```text
+Client
+   │
+   ▼
+Login Request
+   │
+   ▼
+Verify Credentials
+   │
+   ▼
+Generate JWT
+   │
+   ▼
+Return Access Token
+   │
+   ▼
+Authenticated Requests
+```
 
-- User registration
-- User login
-- JWT access tokens
-- Protected API endpoints
-- Stateless authentication
-
-Protected routes require the following header:
+Clients must include the access token in the `Authorization` header.
 
 ```http
 Authorization: Bearer <ACCESS_TOKEN>
 ```
 
-Public endpoints include:
-
-- `/api/signup`
-- `/api/login`
-
-All other protected endpoints require a valid JWT.
+Only authenticated users can access protected endpoints.
 
 ---
 
@@ -94,6 +100,20 @@ Examples include:
 - View all accounts
 - Close accounts
 - Administrative management endpoints
+
+---
+
+## Supported Roles
+
+| Role             | Description                             |
+| ---------------- | --------------------------------------- |
+| Admin            | Full system access                      |
+| User             | Create account                          |
+
+Examples of authorization checks include:
+
+* Administrative endpoints require administrator privileges.
+* User can access only their own accounts.
 
 ---
 
@@ -142,6 +162,38 @@ Business rules are configuration-driven, making them easy to modify without chan
 
 ---
 
+# Request Validation
+
+All incoming requests are validated using Pydantic schemas before reaching the service layer.
+
+Validation includes:
+
+* Required fields
+* Data types
+* Length constraints
+* Numeric validation
+* Enum validation
+* Optional field handling
+
+Invalid requests are rejected before any database operation is performed.
+
+---
+
+# API Protection
+
+The API includes multiple layers of protection.
+
+| Protection          | Purpose                                             |
+| ------------------- | --------------------------------------------------- |
+| JWT Authentication  | Verify user identity                                |
+| RBAC                | Restrict access by role                             |
+| Rate Limiting       | Reduce abuse and excessive requests                 |
+| Pydantic Validation | Reject malformed input                              |
+| SQLAlchemy ORM      | Prevent SQL injection through parameterized queries |
+| Exception Handling  | Return consistent error responses                   |
+
+---
+
 # Data Integrity
 
 The application uses SQLAlchemy transactions to maintain consistency during financial operations.
@@ -155,18 +207,6 @@ Features include:
 - Consistent account balances
 
 These mechanisms help prevent partial updates and inconsistent financial records.
-
----
-
-# API Protection
-
-Protected endpoints require:
-
-- Valid JWT token
-- Authenticated user
-- Authorized role (when applicable)
-
-Invalid or expired tokens are rejected before business logic is executed.
 
 ---
 

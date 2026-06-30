@@ -55,6 +55,25 @@ This setup allows multiple projects to share the same infrastructure while keepi
 +------------------------------+
 ```
 
+Recommended for open source users or isolated development environments.
+
+Services started:
+
+* FastAPI
+* MySQL
+* Redis
+
+Everything runs inside Docker Compose.
+
+```text
+           Docker Compose
+                  │
+     ┌────────────┼────────────┐
+     │            │            │
+ FastAPI       MySQL        Redis
+```
+
+
 Everything runs from a single repository using Docker Compose.
 
 ---
@@ -70,6 +89,21 @@ This workflow uses the separate **docker-infra** repository to provide common in
 - Reduced resource usage
 - Easier management across projects
 - Cleaner separation between infrastructure and application code
+
+Services are provided externally:
+
+* MySQL
+* Redis
+
+Only the application container is started by this repository.
+
+```text
+Application Container
+        │
+        ├──────────────► Shared MySQL
+        │
+        └──────────────► Shared Redis
+```
 
 ## Start Infrastructure
 
@@ -147,6 +181,18 @@ Suitable for:
 - Open-source users
 - Local development
 - Portfolio demonstrations
+
+---
+
+# Project Structure
+
+
+| File                   | Purpose                        |
+| ---------------------- | ------------------------------ |
+| docker-compose.yml     | Uses shared infrastructure     |
+| docker-compose.oss.yml | Complete standalone deployment |
+| docker/                | Dockerfiles                    |
+| backend/               | Backend source code            |
 
 ---
 
@@ -354,6 +400,64 @@ Application Ready
 
 ---
 
+# Networking
+
+Docker Compose creates an isolated bridge network for service communication.
+
+```text
+                 Docker Network
+                       │
+       ┌───────────────┼───────────────┐
+       │               │               │
+   FastAPI          MySQL          Redis
+```
+
+Container communication uses service names instead of IP addresses.
+
+Example:
+
+```env
+DB_HOST=mysql
+
+REDIS_HOST=redis
+```
+
+---
+
+# Volumes
+
+Persistent Docker volumes are used to retain database data.
+
+Example:
+
+```text
+mysql_data
+```
+
+Benefits:
+
+* Data survives container recreation
+* Easy backups
+* Improved reliability
+
+---
+
+# Common Docker Commands
+
+| Command                  | Description                |
+| ------------------------ | -------------------------- |
+| `docker compose up`      | Start services             |
+| `docker compose up -d`   | Start in background        |
+| `docker compose down`    | Stop and remove containers |
+| `docker compose restart` | Restart services           |
+| `docker compose logs`    | View logs                  |
+| `docker compose logs -f` | Follow logs                |
+| `docker compose ps`      | Show service status        |
+| `docker compose build`   | Build images               |
+| `docker image ls`        | List images                |
+| `docker volume ls`       | List volumes               |
+| `docker network ls`      | List networks              |
+
 # Best Practices
 
 - Use the shared infrastructure for active development.
@@ -364,6 +468,7 @@ Application Ready
 - Use Docker volumes to persist MySQL data.
 
 ---
+
 
 # Related Documentation
 
