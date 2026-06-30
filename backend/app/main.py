@@ -51,9 +51,9 @@ app = FastAPI(
     ),
     version="1.0.0",
 
-    # docs_url=None,
-    # redoc_url=None,
-    # openapi_url=None,
+    docs_url=None,
+    redoc_url=None,
+    openapi_url=None,
 
     lifespan=lifespan,
     openapi_tags = [

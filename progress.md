@@ -1,222 +1,188 @@
 # Project Progress
 
-Last Updated: 2026-06-20
+Last Updated: 2026-06-30
 
-## Project Overview
-
-A full-stack **Bank Account Management API** built with **FastAPI**, **MySQL**, and **Docker**, featuring JWT authentication, role-based access control, async database operations, transaction safety, load testing, GitHub Actions CI/CD, and VPS production deployment.
-
-The project now includes complete CRUD and workflow support for users, restaurants, menus, orders, payments, delivery partners, notifications, and order tracking.
+This document tracks the major milestones reached during development. It serves as a high-level development journal rather than full project documentation.
 
 ---
 
-# Completed Features
+# Project Timeline
 
-## Project Infrastructure
+## Phase 1 – Project Setup
 
-* Backend project structure established
-* Frontend project structure established
-* Docker and Docker Compose configured
-* MySQL containerized development environment
-* Redis containerized development environment
-* Nginx placeholder structure added
-* k6 load testing structure established
-* MIT License added
-* OpenAPI / Swagger documentation configured
+- Initialized FastAPI project
+- Created project structure
+- Configured Docker and Docker Compose
+- Added MySQL and Redis containers
+- Configured environment management
+- Added OpenAPI documentation
 
 ---
 
-## Core Backend
+## Phase 2 – Authentication & Security
 
-### Configuration
+Completed:
 
-* Environment-based configuration
-* Docker and local development support
-* Database host auto-selection
-* Redis configuration
-* Application-wide constants and limits
-* Centralized logging configuration
-
-### Security
-
-* JWT access token generation
-* Password hashing using bcrypt
-* Password verification
-* Role-based authorization helpers
-* Current user dependency injection
-* Admin-only access guards
-
-### Exception Handling
-
-Custom exception hierarchy implemented for:
-
-* Authentication
-* Users
-* Permissions
-* Database failures
-
-### Rate Limiting
-
-Implemented using SlowAPI.
-
-Protected endpoints include:
-
-* Authentication endpoints
-* Public retrieval endpoints
-* Business operations
----
-
-## Database Layer
-
-Implemented SQLAlchemy Async ORM models for:
-
-* Accounts
-* Transactions
-* Users
-
-### Relationships Implemented
-
-* Users own accounts
-* Users create account
+- JWT authentication
+- Password hashing (bcrypt)
+- User registration
+- User login
+- RBAC authorization
+- Protected routes
+- Admin authorization
+- SlowAPI rate limiting
 
 ---
 
-## Pydantic Schemas
-
-Implemented schemas for:
-
-### Authentication
-
-* Login requests
-* Token responses
-
-### User Management
-
-* User creation
-* User responses
-* User update
-
----
-
-# Service Layer
-
-## Authentication Service
+## Phase 3 – Banking System
 
 Implemented:
 
-* Signup
-* Login
-* JWT generation
-* Credential validation
+- Account creation
+- Multiple accounts per user
+- Deposits
+- Withdrawals
+- Transfers
+- Transaction history
+- Account lifecycle management
 
 ---
 
-## User Service
+## Phase 4 – Database Layer
 
 Implemented:
 
-* Signup
-* Login
-* Update_profile
-* Get account
-* Deposite
-* Withdraw
-* Transfer
-* Get transactions
-* Close account
+- SQLAlchemy 2.x Async ORM
+- MySQL integration
+- Repository pattern
+- Database relationships
+- Transaction safety
+- Async session management
 
 ---
 
-## Admin Service
+## Phase 5 – API Development
 
-Implemented:
+Completed:
 
-* Get all users
-* Get all accounts
-* Close account
-* Get user by email
-* Get user by username
-
----
-
-## API Endpoints
-
-## Admin — `/api/admin`
-
-| Method | Endpoint                         | Auth | Description        |
-| ------ | -------------------------------- | ---- | ------------------ |
-| GET    | `/api/admin/users`               | ✅    | View all users     |
-| GET    | `/api/admin/accounts`            | ✅    | View all accounts  |
-| PUT    | `/api/admin/accounts/{account_id}/close` | ✅ | Close account |
-
-## Authentication — `/api`
-
-| Method | Endpoint      | Auth | Description           |
-| ------ | ------------- | ---- | --------------------- |
-| POST   | `/api/signup` | ❌    | Register user         |
-| POST   | `/api/login`  | ❌    | Login and receive JWT |
-| PUT    | `/api/me`     | ✅    | Update user profile   |
-
-## Accounts — `/api/accounts`
-
-| Method | Endpoint                     | Auth | Description      |
-| ------ | ---------------------------- | ---- | ---------------- |
-| POST   | `/api/accounts`              | ✅    | Create account   |
-| GET    | `/api/accounts`              | ✅    | List accounts    |
-| DELETE | `/api/accounts/{id}`         | ✅    | Delete account   |
-| POST   | `/api/accounts/{id}/deposit` | ✅    | Deposit money    |
-| POST   | `/api/accounts/{id}/withdraw` | ✅   | Withdraw money   |
-
-## Transfers & Transactions — `/api`
-
-| Method | Endpoint                         | Auth | Description              |
-| ------ | -------------------------------- | ---- | ------------------------ |
-| POST   | `/api/transfer`                  | ✅    | Transfer money           |
-| GET    | `/api/transactions/{account_id}` | ✅    | View transaction history |
-
-## Health — `/health`
-
-| Method | Endpoint  | Auth | Description                   |
-| ------ | --------- | ---- | ----------------------------- |
-| GET    | `/health` | ❌    | Check API and database health |
-
-The API includes a health monitoring endpoint for deployment and infrastructure checks.
-
-```http
-GET /health
-```
-
-### Purpose
-
-* Verify API availability
-* Check database connectivity
-* Support Docker/container health monitoring
-
-### Example Healthy Response
-
-```json
-{
-  "status": "healthy",
-  "database": "connected",
-  "message": "Application is running and database is accessible"
-}
-```
+- Authentication endpoints
+- Account endpoints
+- Transfer endpoints
+- Transaction endpoints
+- Admin endpoints
+- Health endpoint
 
 ---
 
-# Remaining Work
+## Phase 6 – Frontend
 
-## Testing
+Completed:
 
-* Database testing
-* Redis cache testing
+- React + Vite dashboard
+- Login
+- Signup
+- Account management
+- Deposit
+- Withdraw
+- Transfer
+- Transaction history
+
+---
+
+## Phase 7 – DevOps
+
+Completed:
+
+- Dockerized backend
+- Dockerized frontend
+- Shared infrastructure support
+- Nginx reverse proxy
+- HTTPS
+- GitHub Actions CI/CD
+- VPS deployment
 
 ---
 
-## Performance Testing
+## Phase 8 – Testing
 
-Planned:
+Completed:
 
-* Redis performance benchmarking
+- Async pytest suite
+- Database testing
+- Authentication testing
+- RBAC testing
+- Transaction testing
+- Docker testing
 
 ---
+
+## Phase 9 – Performance
+
+Completed:
+
+- k6 load testing
+- Benchmarking
+- Performance analysis
+- Bottleneck identification
+- Stability testing
+- Capacity evaluation
+
+---
+
+# Major Technical Challenges
+
+Some notable problems solved during development:
+
+- Windows async event loop compatibility
+- SQLAlchemy async session management
+- Database connection pool exhaustion
+- Docker networking configuration
+- JWT authentication flow
+- Transaction consistency
+- Redis integration
+- Production deployment
+- HTTPS configuration
+
+---
+
+# Lessons Learned
+
+Throughout development, the project provided experience with:
+
+- FastAPI
+- Async programming
+- SQLAlchemy Async
+- Docker
+- Redis
+- MySQL
+- CI/CD
+- Linux VPS deployment
+- Load testing with k6
+- Production hardening
+
+---
+
+# Current Status
+
+- ✅ Backend complete
+- ✅ Frontend complete
+- ✅ Dockerized
+- ✅ Authentication complete
+- ✅ RBAC complete
+- ✅ Testing complete
+- ✅ Documentation complete
+- ✅ Production deployment complete
+- ✅ Performance benchmarking complete
+
+---
+
+# Future Ideas
+
+Potential future enhancements:
+
+- Background task queues
+- Horizontal scaling
+- Database replication
+- Observability with Prometheus and Grafana
+- Kubernetes deployment
+- WebSocket notifications
