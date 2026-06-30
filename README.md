@@ -42,7 +42,13 @@ https://bank.dhruvcore.com/
 
 ![Login Preview](screenshots/login.gif)
 
-![Swagger UI](screenshots/swagger_ui.png)
+![Swagger UI](screenshots/endpoints_1.png)
+
+![Swagger UI](screenshots/endpoints_2.png)
+
+### Database Diagram
+
+![Schema](images/erd_diagram.png)
 
 ---
 
@@ -239,6 +245,8 @@ Every transaction is recorded for:
 Use this configuration if you're running the separate `docker-infra` repository.
 
 ```env
+COMPOSE_PROJECT_NAME=banking-app
+
 ENV=docker
 
 DB_HOST=shared-mysql
@@ -268,6 +276,8 @@ ACCESS_TOKEN_EXPIRE_MINUTES=30
 Use this configuration when running the project with `docker-compose.oss.yml`.
 
 ```env
+COMPOSE_PROJECT_NAME=banking-app
+
 ENV=docker
 
 DB_HOST=mysql
@@ -279,6 +289,7 @@ DB_PASSWORD=banking_password
 REDIS_HOST=redis
 REDIS_PORT=6379
 REDIS_DB=0
+REDIS_PASSWORD = changeme
 
 ADMIN_USERNAME=admin
 ADMIN_PASSWORD=change_me
@@ -289,11 +300,12 @@ ACCESS_TOKEN_EXPIRE_MINUTES=30
 ```
 
 > Works without the `docker-infra` repository.
-**repo**: https://github.com/Dhruv-Cmds/docker-infra
 
 ## 💻 Local Development (Without Docker)
 
 ```env
+COMPOSE_PROJECT_NAME=banking-app
+
 ENV=dev
 
 DB_HOST=127.0.0.1
@@ -328,6 +340,7 @@ DB_PASSWORD=your_password
 REDIS_HOST=127.0.0.1
 REDIS_PORT=6379
 REDIS_DB=1
+REDIS_PASSWORD = changeme
 
 SECRET_KEY=your_secret_key
 ALGORITHM=HS256
