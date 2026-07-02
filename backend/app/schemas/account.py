@@ -73,7 +73,13 @@ class AccountResponse(BaseModel):
 
 #  common for withdraw and deposit
 class MoneyRequest(BaseModel):
-    amount: Decimal
+    amount: Decimal = Field(
+        ...,
+        gt=0,
+        max_digits=12,
+        decimal_places=2,
+        examples=[50.00],
+    )
 
 class AccountListResponse(BaseModel):
     data: List[AccountResponse]
